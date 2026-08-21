@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useAuth } from "@/hooks/useAuth";
 import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
 
 export const Route = createFileRoute("/")({
@@ -23,17 +22,49 @@ export const Route = createFileRoute("/")({
 });
 
 const DEMOS = [
-  { name: "Atlas AI", note: "Ask-anything tax research assistant" },
-  { name: "TaxCompPro", note: "Compliance workflow and client tracking" },
-  { name: "Atlas Academy", note: "CE-ready training library" },
-  { name: "30 Day Launch", note: "Start-a-practice sprint" },
-  { name: "Schedule C Recon", note: "Reconstruct records that survive audit" },
-  { name: "ProConnect Card", note: "Member benefits and referral network" },
+  {
+    name: "Atlas AI",
+    note: "Real-time tax guidance — ask it anything live, on the spot.",
+    href: "https://www.alwaysaskatlas.com",
+  },
+  {
+    name: "TaxCompPro",
+    note: "The main platform — marketplace, communities, and membership tiers.",
+    href: "https://www.taxcomppro.com",
+  },
+  {
+    name: "ProConnect Card",
+    note: "The $29 tap-to-share digital business card and profile.",
+    href: "https://connect.taxcomppro.com",
+  },
+  {
+    name: "Atlas Academy",
+    note: "Courses, toolkits, and staff training, all under one profile.",
+    href: "https://academy.taxcomppro.com",
+  },
+  {
+    name: "30 Day Tax Office Launch",
+    note: "Build the systems, compliance, and client plan for a new office.",
+    href: "https://30daylaunch.taxcomppro.com",
+  },
+  {
+    name: "Schedule C Reconstruction",
+    note: "A structured approach to reconstructing business records.",
+    href: "https://schedulecrecon.taxcomppro.com",
+  },
+  {
+    name: "IRS Fine Defense",
+    note: "Procedures and documentation for penalty and fine defense.",
+    href: "https://irsfinedefense.taxcomppro.com",
+  },
+  {
+    name: "Audit Ready Playbook",
+    note: "Repeatable workpaper and review practices for defensible files.",
+    href: "https://auditready.taxcomppro.com",
+  },
 ];
 
 function Hub() {
-  const { session } = useAuth();
-
   return (
     <FieldShell eyebrowRight="IRS Nationwide Tax Forum · Orlando">
       <PageTitle
@@ -72,28 +103,31 @@ function Hub() {
       <SectionLabel>Trip briefing</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-3">
         <Brief label="Booth" value="540" />
-        <Brief label="Show" value="IRS Nationwide Tax Forum" />
-        <Brief label="City" value="Orlando, FL" />
+        <Brief label="Tuesday" value="Show Floor 11:00 AM – 6:00 PM" />
+        <Brief label="Wednesday" value="Show Floor 10:00 AM – 2:30 PM" />
       </div>
 
       <SectionLabel>Product demos</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {DEMOS.map((demo) => (
-          <div key={demo.name} className="rounded-xl border border-border bg-panel p-4">
+          <a
+            key={demo.name}
+            href={demo.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl border border-border bg-panel p-4 transition-colors hover:bg-panel-hover"
+          >
             <div className="font-display text-lg">{demo.name}</div>
             <p className="mt-1 text-sm text-muted-foreground">{demo.note}</p>
-          </div>
+            <div className="mt-3 text-sm text-signal">Open demo ↗</div>
+          </a>
         ))}
       </div>
 
       <div className="mt-10 text-center">
-        {session ? (
-          <span className="eyebrow">Signed in · scans are attributed to you</span>
-        ) : (
-          <Link to="/auth" className="eyebrow hover:text-foreground">
-            Booth staff sign in →
-          </Link>
-        )}
+        <Link to="/auth" className="eyebrow hover:text-foreground">
+          Booth staff sign in →
+        </Link>
       </div>
     </FieldShell>
   );

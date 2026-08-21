@@ -128,9 +128,7 @@ function ScanPage() {
       }
 
       const draft =
-        result.status === "found"
-          ? badgeToDraft(result.record)
-          : pendingDraft(rawId.replace(/\D/g, "") || rawId.trim());
+        result.status === "found" ? badgeToDraft(result.record) : pendingDraft(rawId.trim());
 
       if (result.status === "pending" || result.status === "error") {
         toast.warning(result.message);

@@ -3,7 +3,7 @@
  * Docs: POST https://retrievemyleads.com/api/meta/1.1/read/ with sid, key, aid.
  */
 
-const READ_ENDPOINT = "https://retrievemyleads.com/api/meta/1.1/read/";
+const DEFAULT_READ_ENDPOINT = "https://retrievemyleads.com/api/meta/1.1/read/";
 
 export type BadgeRecord = {
   attendeeId: string;
@@ -43,11 +43,9 @@ export type BadgeLookupResult =
   | { status: "unauthorized"; message: string }
   | { status: "error"; message: string };
 
-/** Badge QR payloads look like `A1234567`; the API wants digits only. */
+/** Preserve the exact badge identifier EDC encoded, e.g. `A1234567`. */
 export function normalizeAttendeeId(raw: string): string {
-  const trimmed = raw.trim();
-  const digits = trimmed.replace(/\D/g, "");
-  return digits.length > 0 ? digits : trimmed;
+  return raw.trim();
 }
 
 function str(value: unknown): string {
@@ -88,15 +86,16 @@ function toRecord(payload: Record<string, unknown>, attendeeId: string): BadgeRe
 
 export async function readBadge(
   showId: string | undefined,
-  appKey: string | undefined,
+  apiKey: string | undefined,
   rawAttendeeId: string,
+  apiUrl: string | undefined = DEFAULT_READ_ENDPOINT,
 ): Promise<BadgeLookupResult> {
   const attendeeId = normalizeAttendeeId(rawAttendeeId);
 
   if (!attendeeId) {
     return { status: "bad_request", message: "No badge ID was provided." };
   }
-  if (!showId || !appKey) {
+  if (!showId || !apiKey) {
     return {
       status: "not_configured",
       message: "Show ID and application key are not configured yet.",
@@ -105,10 +104,10 @@ export async function readBadge(
 
   let response: Response;
   try {
-    response = await fetch(READ_ENDPOINT, {
+    response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ sid: showId, key: appKey, aid: attendeeId }).toString(),
+      body: new URLSearchParams({ sid: showId, key: apiKey, aid: attendeeId }).toString(),
     });
   } catch {
     return {
