@@ -14,16 +14,236 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      join_submissions: {
+        Row: {
+          attendee_id: string
+          company: string | null
+          consent_marketing: boolean
+          email: string
+          full_name: string
+          id: string
+          interest: string | null
+          lead_id: string | null
+          phone: string | null
+          submitted_at: string
+          submitted_by: string
+          title: string | null
+        }
+        Insert: {
+          attendee_id: string
+          company?: string | null
+          consent_marketing?: boolean
+          email: string
+          full_name: string
+          id?: string
+          interest?: string | null
+          lead_id?: string | null
+          phone?: string | null
+          submitted_at?: string
+          submitted_by: string
+          title?: string | null
+        }
+        Update: {
+          attendee_id?: string
+          company?: string | null
+          consent_marketing?: boolean
+          email?: string
+          full_name?: string
+          id?: string
+          interest?: string | null
+          lead_id?: string | null
+          phone?: string | null
+          submitted_at?: string
+          submitted_by?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "join_submissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          address1: string | null
+          address2: string | null
+          address3: string | null
+          association: string | null
+          attendee_id: string
+          city: string | null
+          company: string | null
+          country: string | null
+          country_code: string | null
+          credential: string | null
+          demographics: string | null
+          department: string | null
+          email: string | null
+          event_name: string | null
+          fax: string | null
+          first_name: string | null
+          id: string
+          interests: string[]
+          joined_tcpc: boolean
+          last_name: string | null
+          lookup_status: string
+          middle_name: string | null
+          nickname: string | null
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          prefix: string | null
+          qualifiers: string | null
+          rating: string
+          scanned_at: string
+          scanned_by: string
+          state: string | null
+          suffix: string | null
+          title: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address1?: string | null
+          address2?: string | null
+          address3?: string | null
+          association?: string | null
+          attendee_id: string
+          city?: string | null
+          company?: string | null
+          country?: string | null
+          country_code?: string | null
+          credential?: string | null
+          demographics?: string | null
+          department?: string | null
+          email?: string | null
+          event_name?: string | null
+          fax?: string | null
+          first_name?: string | null
+          id?: string
+          interests?: string[]
+          joined_tcpc?: boolean
+          last_name?: string | null
+          lookup_status?: string
+          middle_name?: string | null
+          nickname?: string | null
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          prefix?: string | null
+          qualifiers?: string | null
+          rating?: string
+          scanned_at?: string
+          scanned_by: string
+          state?: string | null
+          suffix?: string | null
+          title?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address1?: string | null
+          address2?: string | null
+          address3?: string | null
+          association?: string | null
+          attendee_id?: string
+          city?: string | null
+          company?: string | null
+          country?: string | null
+          country_code?: string | null
+          credential?: string | null
+          demographics?: string | null
+          department?: string | null
+          email?: string | null
+          event_name?: string | null
+          fax?: string | null
+          first_name?: string | null
+          id?: string
+          interests?: string[]
+          joined_tcpc?: boolean
+          last_name?: string | null
+          lookup_status?: string
+          middle_name?: string | null
+          nickname?: string | null
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          prefix?: string | null
+          qualifiers?: string | null
+          rating?: string
+          scanned_at?: string
+          scanned_by?: string
+          state?: string | null
+          suffix?: string | null
+          title?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      staff_profiles: {
+        Row: {
+          booth_role: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          booth_role?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          booth_role?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +370,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "staff"],
+    },
   },
 } as const
