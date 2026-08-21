@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
+import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,16 +34,24 @@ const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLeadAttendeeIdRoute =
+  AuthenticatedLeadAttendeeIdRouteImport.update({
+    id: '/lead/$attendeeId',
+    path: '/lead/$attendeeId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +59,20 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
+  '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/scan'
+  fullPaths: '/' | '/auth' | '/scan' | '/lead/$attendeeId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/scan'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/scan'
+  to: '/' | '/auth' | '/scan' | '/lead/$attendeeId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/scan'
+    | '/_authenticated/lead/$attendeeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,15 +111,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lead/$attendeeId': {
+      id: '/_authenticated/lead/$attendeeId'
+      path: '/lead/$attendeeId'
+      fullPath: '/lead/$attendeeId'
+      preLoaderRoute: typeof AuthenticatedLeadAttendeeIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
+  AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScanRoute: AuthenticatedScanRoute,
+  AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
