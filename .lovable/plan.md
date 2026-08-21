@@ -1,98 +1,79 @@
-# IRS Forum Orlando – TCPC Booth Promotion Plan
+# TCPC Scan-to-Lead App — IRS Nationwide Tax Forum, Orlando (Booth 540)
 
-## Goal
-Drive qualified tax professional sign-ups to Join TCPC (Tax Compliance Pro) at the IRS Forum in Orlando next week, using the 10x10 booth and 12 staff members to create a high-energy, memorable stop on the exhibit floor.
+Build a badge-scanning lead capture app for the booth, with a TCPC join flow, styled and linked as part of the existing Tax Compliance Pro Field Hub.
 
-## Core Offer
-Join TCPC makes tax professionals a member of Tax Compliance Pro at **www.taxcomppro.com**. The booth CTA is simple: **"Join TCPC – membership for tax pros."**
+## What the team gets
 
-## Booth Strategy
+1. **Scan** — a staff member opens the app on a booth tablet or phone, points the camera at the attendee's badge QR (badges encode an ID like `A1234567`), and the attendee's full record appears in about a second: name, title, company, address, email, phone, credentials.
+2. **Qualify** — staff tag the lead (Hot / Warm / Cold), check off interests (Atlas AI, ProConnect Card, Academy, toolkits), note whether they joined TCPC, and dictate or type a quick note. Scanner's name is attached automatically.
+3. **Join TCPC** — one tap opens a join screen pre-filled with the scanned badge data. The attendee confirms their info and submits; they land in the lead list flagged as a member sign-up and get sent to taxcomppro.com to finish.
+4. **Track** — a live booth dashboard shows scans today, sign-ups, leads per staffer, and a running feed. Any lead can be exported to CSV for follow-up after the show.
+5. **Field Hub tile** — a new card on the Field Hub home grid ("Lead Scanner — Booth 540") so it sits alongside the product demos the team already taps into.
 
-### 1. Booth Layout & First Impression
-- Keep the 10x10 open on at least one side. Put the tallest visible element (banner, retractable, or branded tablecloth) at the aisle so the booth name is readable from 20+ feet away.
-- Use a clear headline: **"Join TCPC – Tax Compliance Pro"** and the URL in large type.
-- Place a demo/sign-up station on the aisle edge so staff can step out, engage, and hand off to a tablet for signup.
-- Avoid a table across the front acting as a barrier. Put swag and literature on one side so the aisle side stays open.
+## How the badge lookup works
 
-### 2. Staff Roles (12 people)
-Rotate 4–6 people on the booth at any time in clear roles:
-- **Greeters/Aisle Pullers (2):** Make eye contact, ask the opener, direct traffic in.
-- **Demo Runners (2):** Show the tablet, walk through the member value in 60 seconds.
-- **Sign-Up Closers (2):** Stand at the tablet, help visitors complete the join form on the spot.
-- **Swag & Literature (1–2):** Hand out bags/cups/pens/pamphlets and re-stock.
-- **Floaters (2–3):** Cover breaks, pull people back from the aisles, spot hot leads.
+The purchased kit is the **EDC RetrieveMyLeads Metadata API v1.1**:
 
-### 3. Opening Lines
-Use short, conference-friendly openers that start conversations, not sales pitches:
-- "Are you a tax pro? We built a membership just for you."
-- "Want a free resource? Scan here and join TCPC."
-- "What’s your biggest compliance headache this season?"
-- "Grab a bag – we’ve got a quick demo if you want to see what membership gives you."
+- Endpoint: `POST https://retrievemyleads.com/api/meta/1.1/read/` with form fields `sid` (show ID), `key` (application GUID), `aid` (attendee badge ID).
+- Returns JSON with `good=1` plus fields `pre, first, mid, last, suf, titl, com, dept, add1-3, city, st, zip, coun, cc, pho, fax, email, url, evnt, demo, qual, asso, cred, nick`.
+- `good=0` with a message means the record is in a pending batch update — the app keeps the scan and lets staff fill in details manually, then retry the lookup later.
+- Errors: `400` missing parameter, `410` bad credentials. Each maps to a clear on-screen message rather than a silent failure.
+- Badge QR payload is the attendee ID with a letter prefix (`A1234567`); the app strips non-digits before calling the API.
+- There is also a `write` endpoint (same auth, full field list) if you ever need to push corrected records back. Not used in v1.
 
-### 4. Swag & Giveaway Flow
-- **Swag as bait, not the prize.** Give pens/cups/bags to anyone who walks by, but gate shirts/books to people who join or leave a business card.
-- **Tiered giveaway:**
-  - Everyone: branded pen + pamphlet + bag (if they stop).
-  - Joins TCPC on tablet: shirt + entry into a daily drawing.
-  - High-value leads (bookkeepers, firm owners, EAs/CPAs): book + personal demo.
-- Run a daily raffle for a desirable prize (gift card, premium book, free membership tier). Entry = join TCPC on the spot or scan a QR code. Announce winners at a set time to create a crowd.
+The show key is a credential and never ships to the browser. All API calls go through a server function; the `sid` and `key` are stored as project secrets.
 
-### 5. Tablet Demo & Sign-Up
-- Set up 2–3 tablets on stands or clipboards. The goal is to get the visitor to **www.taxcomppro.com/join** (or the main site if that is the join path) in under 2 minutes.
-- Train staff to demo in 60 seconds: "Here’s what you get as a member, here’s how it saves you time, and it takes 30 seconds to join."
-- Capture emails/phone numbers even if they don’t join: use a simple lead form or QR code to a landing page.
-- Test the Wi-Fi/cellular at the booth before the show opens. Have a backup paper sign-up sheet or a staff member with a hotspot.
+## Sandbox first, live key at swap time
 
-### 6. QR Code Everywhere
-- Put a large QR code on the banner, the tablecloth, and the pamphlet. The code goes to the join page or a landing page optimized for mobile.
-- Add a short call-to-action under the QR: **"Scan to join TCPC."**
-- Track the QR with a URL parameter like `?utm_source=irs-forum-orlando&utm_medium=booth-qr` so you can measure booth-driven sign-ups.
+Until the production Show ID and Application Key for the Orlando forum are in hand, the app runs against the documented sandbox (`sid=sandbox`, attendee IDs 65610972–65610992, matching the CSV in the kit). Swapping to live is a secrets change only — no code edits. If EDC's sandbox key has rotated since the kit was issued, the app still runs end to end using the kit's CSV as a local fixture so the flow can be rehearsed before the show.
 
-### 7. Pamphlet / One-Pager
-Make it a leave-behind, not a read-now. Include:
-- What TCPC is in one sentence.
-- 3–5 member benefits.
-- The QR code and URL.
-- A clear CTA: **"Join today at taxcomppro.com."**
+## Design
 
-### 8. Book & Shirt Strategy
-- Use books as authority builders. If you have an author/expert on staff, offer a quick signed copy for qualified leads.
-- Shirts are walking billboards. Give them to members who join, and ask staff to wear them so they act as mobile ads on the exhibit floor.
+Matches the Field Hub exactly: black background with blue/green radial washes, `#37A6FF` blue and `#86D93C` green accents, gold `#E8BE55` detail, Fraunces headlines, Inter body, IBM Plex Mono eyebrows. Big touch targets, one-handed layout, works in booth lighting. Add-to-home-screen ready like the hub.
 
-### 9. Pre-Show & Live Promotion
-- Before the show: post on LinkedIn, email any existing Florida-area prospects, and announce booth number.
-- During the show: post 1–2 short LinkedIn updates/Twitter threads with booth photos, staff, and the QR code. Tag IRS Forum and relevant tax hashtags.
-- If allowed, bring one person to walk the floor wearing the branded shirt and direct traffic to the booth.
+## Offline resilience
 
-### 10. Lead Follow-Up
-- Within 48 hours of the show: send a thank-you email to everyone who joined or left contact info, with a quick recap of the TCPC value and the next step.
-- Segment leads: hot (joined), warm (scanned QR but didn’t join), cold (took swag only). Customize the follow-up for each.
+Booth Wi-Fi at convention centers is unreliable. Every scan is written locally first and syncs when the connection returns, so no lead is ever lost. A visible indicator shows pending-sync count. Manual ID entry is always available as a fallback if the camera struggles with a laminated badge.
 
-## Daily Execution Checklist
+---
 
-### Before doors open
-- [ ] Banner, tablecloth, swag, tablets, and pamphlets set up.
-- [ ] QR code and join page tested on mobile.
-- [ ] Staff huddle: assign roles, practice the 60-second demo, and set a lead/sign-up goal for the day.
-- [ ] Confirm raffle prize and time.
+## Technical section
 
-### During the show
-- [ ] Keep the aisle side open; no staff behind the table.
-- [ ] Rotate staff every 60–90 minutes so energy stays high.
-- [ ] Track sign-ups and lead quality on a shared sheet or tablet.
-- [ ] Post at least one social update per day.
+**Backend:** Lovable Cloud (Postgres + auth + storage).
 
-### End of day
-- [ ] Count sign-ups, scans, and swag distributed.
-- [ ] Debrief: what worked, what to adjust tomorrow.
-- [ ] Follow up on hot leads before the end of the day.
+Tables:
+- `leads` — attendee id, all EDC metadata fields, rating, interests (array), joined_tcpc flag, notes, scanned_by (user id), scanned_at, sync/lookup status.
+- `staff_profiles` — display name per authenticated staff user, for attribution and leaderboard.
+- `join_submissions` — TCPC join confirmations linked to a lead.
 
-## Success Metrics
-- TCPC sign-ups (primary).
-- Email/lead captures (secondary).
-- QR code scans / booth traffic.
-- Social engagement (booth posts).
-- Daily raffle entries.
+RLS: staff-only. Authenticated users read all booth leads (team visibility) and insert/update their own scans; a `user_roles` table with a `has_role` security-definer function gates admin actions (export, delete). Explicit `GRANT`s to `authenticated` and `service_role` on every table.
 
-## Optional Digital Add-On
-If you want a single landing page for the booth QR code, it can be built as a lightweight, mobile-first page: headline, 3 benefits, QR-friendly join link, and a lead form. This is not required for the above plan but can improve conversion and tracking.
+**Auth:** email/password sign-in for the 12 staff. Simple, no email confirmation friction — team accounts created ahead of the show.
+
+**API integration:** `src/lib/edc.functions.ts` exposes `lookupBadge` via `createServerFn` with `requireSupabaseAuth` middleware; the handler reads `EDC_SHOW_ID` and `EDC_APP_KEY` from `process.env` inside the handler, POSTs form-encoded to the v1.1 read endpoint, normalizes the response into a typed lead record, and maps `good=0` / 400 / 410 into distinct results. HTTP work lives in `edc.server.ts`; the functions file stays a thin wrapper.
+
+**Scanning:** `html5-qrcode` (or `@zxing/browser`) for camera decode in the browser, plus a keyboard-wedge input path so a handheld scanner works, plus manual entry.
+
+**Offline:** IndexedDB queue (idb-keyval) holding unsynced scans; a sync effect flushes to Cloud on reconnect, with dedupe on `(attendee_id, scanned_by)`.
+
+**Routes:**
+```text
+/                      Field Hub styled launcher + tile grid (mirrors existing hub)
+/scan                  camera scan + manual entry
+/lead/$attendeeId      lead detail, qualify, notes
+/join/$attendeeId      TCPC join flow, pre-filled
+/leads                 list, filter, search, CSV export
+/dashboard             live booth stats
+/auth                  staff sign-in
+```
+Every content route gets its own `head()` with unique title/description/og tags.
+
+**Field Hub integration:** the uploaded `fieldhub-site` is a static two-page site (index + itinerary, images inlined as data URIs). Rather than rewrite it, the scanner is a standalone app that carries the hub's design language; you add one tile to the hub's `products` array pointing at the deployed scanner URL. If you'd prefer the hub itself rebuilt inside this project (hub home, itinerary, and scanner all one app with shared nav), say so and it becomes part of the build.
+
+**Secrets:** `EDC_SHOW_ID`, `EDC_APP_KEY`.
+
+## What I need from you
+
+- Production Show ID (`sid`) and Application Key (GUID) for the Orlando forum when available.
+- The TCPC join destination URL (e.g. `https://www.taxcomppro.com/join`) so the join flow hands off correctly.
+- The list of staff emails to pre-create accounts for.
