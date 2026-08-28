@@ -60,7 +60,7 @@ const DEMOS = [
   {
     name: "Audit Ready Playbook",
     note: "Repeatable workpaper and review practices for defensible files.",
-    href: "https://staff-audit-ready.safeguardpro-9185.chatgpt.site/",
+    href: "https://auditplaybook.taxcomppro.com/",
   },
 ];
 
