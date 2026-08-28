@@ -115,6 +115,19 @@ function Hub() {
         <Brief label="Wednesday" value="Show Floor 10:00 AM – 2:30 PM" />
       </div>
 
+      <Link
+        to="/briefing"
+        className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-gold/40 bg-gold/10 p-4 transition-colors hover:bg-gold/15"
+      >
+        <div>
+          <div className="font-display text-lg">Team Orlando Trip Briefing</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Full schedule, lodging, daily wardrobe and evening plans.
+          </p>
+        </div>
+        <span className="shrink-0 text-sm text-gold">Staff access →</span>
+      </Link>
+
       <SectionLabel>Sites</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {SITES.map((site) => (
