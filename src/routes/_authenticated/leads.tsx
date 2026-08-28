@@ -91,9 +91,14 @@ function LeadsPage() {
   return (
     <FieldShell
       eyebrowRight={
-        <Link to="/scan" className="transition-colors hover:text-foreground">
-          Scan a badge →
-        </Link>
+        <div className="flex gap-4">
+          <Link to="/signups" className="transition-colors hover:text-foreground">
+            Signups
+          </Link>
+          <Link to="/scan" className="transition-colors hover:text-foreground">
+            Scan a badge →
+          </Link>
+        </div>
       }
       back={{ to: "/", label: "Field Hub" }}
     >

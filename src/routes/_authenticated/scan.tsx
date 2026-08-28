@@ -164,9 +164,14 @@ function ScanPage() {
   return (
     <FieldShell
       eyebrowRight={
-        <Link to="/leads" className="transition-colors hover:text-foreground">
-          My leads →
-        </Link>
+        <div className="flex gap-4">
+          <Link to="/leads" className="transition-colors hover:text-foreground">
+            My leads
+          </Link>
+          <Link to="/signups" className="transition-colors hover:text-foreground">
+            Signups →
+          </Link>
+        </div>
       }
       back={{ to: "/", label: "Field Hub" }}
     >

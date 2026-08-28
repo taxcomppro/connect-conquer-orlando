@@ -1,16 +1,24 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { INTEREST_OPTIONS, RATINGS, leadName, type Lead, type Rating } from "@/lib/leads";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import {
+  PRODUCT_REVIEW_LINKS,
+  STATUS_LABELS,
+  buildMembershipJoinUrl,
+  currentEventId,
+  getStaffDeviceId,
+  getStaffSessionId,
+  newSignupPublicId,
+  type SignupSession,
+} from "@/lib/signup-sessions";
 
 export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   head: () => ({
@@ -43,14 +51,9 @@ function LeadPage() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [showJoin, setShowJoin] = useState(false);
-  const [joinName, setJoinName] = useState("");
-  const [joinEmail, setJoinEmail] = useState("");
-  const [joinPhone, setJoinPhone] = useState("");
-  const [joinCompany, setJoinCompany] = useState("");
-  const [joinTitle, setJoinTitle] = useState("");
-  const [consent, setConsent] = useState(true);
-  const [joining, setJoining] = useState(false);
+  const [signup, setSignup] = useState<SignupSession | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [creatingSignup, setCreatingSignup] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -60,21 +63,27 @@ function LeadPage() {
         .from("leads")
         .select("*")
         .eq("attendee_id", attendeeId)
-        .eq("scanned_by", user.id)
+        .order("scanned_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (!active) return;
       if (error) toast.error("Couldn't load that lead.");
       if (data) {
         setLead(data);
-        setRating((RATINGS as readonly string[]).includes(data.rating) ? (data.rating as Rating) : "warm");
+        setRating(
+          (RATINGS as readonly string[]).includes(data.rating) ? (data.rating as Rating) : "warm",
+        );
         setInterests(data.interests ?? []);
         setNotes(data.notes ?? "");
-        setJoinName([data.first_name, data.last_name].filter(Boolean).join(" "));
-        setJoinEmail(data.email ?? "");
-        setJoinPhone(data.phone ?? "");
-        setJoinCompany(data.company ?? "");
-        setJoinTitle(data.title ?? "");
+        const { data: existingSignup } = await supabase
+          .from("signup_sessions")
+          .select("*")
+          .eq("lead_id", data.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setSignup(existingSignup);
       }
       setLoading(false);
     })();
@@ -82,6 +91,14 @@ function LeadPage() {
       active = false;
     };
   }, [attendeeId, user]);
+
+  useEffect(() => {
+    if (!signup?.join_url) {
+      setQrDataUrl("");
+      return;
+    }
+    void QRCode.toDataURL(signup.join_url, { width: 320, margin: 2 }).then(setQrDataUrl);
+  }, [signup?.join_url]);
 
   const location = useMemo(() => {
     if (!lead) return "";
@@ -111,36 +128,41 @@ function LeadPage() {
     if (options.thenScan) navigate({ to: "/scan" });
   }
 
-  async function submitJoin(event: React.FormEvent) {
-    event.preventDefault();
+  async function createSignupSession() {
     if (!user || !lead) return;
-    setJoining(true);
-
-    const { error } = await supabase.from("join_submissions").insert({
-      attendee_id: lead.attendee_id,
-      lead_id: lead.id,
-      full_name: joinName.trim(),
-      email: joinEmail.trim(),
-      phone: joinPhone.trim() || null,
-      company: joinCompany.trim() || null,
-      title: joinTitle.trim() || null,
-      interest: interests[0] ?? null,
-      consent_marketing: consent,
-      submitted_by: user.id,
-    });
+    setCreatingSignup(true);
+    const publicId = newSignupPublicId();
+    const joinUrl = buildMembershipJoinUrl(publicId);
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const { data, error } = await supabase
+      .from("signup_sessions")
+      .insert({
+        public_id: publicId,
+        lead_id: lead.id,
+        badge_lead_id: lead.attendee_id,
+        event_id: currentEventId(lead.event_name),
+        scanned_by_staff_id: lead.scanned_by,
+        attributed_to_staff_id: lead.scanned_by,
+        created_by_staff_id: user.id,
+        staff_device_id: getStaffDeviceId(),
+        staff_session_id: getStaffSessionId(),
+        dub_partner_id:
+          typeof metadata["dub_partner_id"] === "string" ? metadata["dub_partner_id"] : null,
+        dub_link_id: typeof metadata["dub_link_id"] === "string" ? metadata["dub_link_id"] : null,
+        join_url: joinUrl,
+        metadata: { leadEmail: lead.email, leadCompany: lead.company },
+      })
+      .select("*")
+      .single();
+    setCreatingSignup(false);
 
     if (error) {
-      setJoining(false);
-      toast.error("Couldn't submit the join. Try once more.");
+      toast.error(`Couldn't create the signup QR: ${error.message}`);
       return;
     }
 
-    await supabase.from("leads").update({ joined_tcpc: true, rating: "hot" }).eq("id", lead.id);
-    setJoining(false);
-    setShowJoin(false);
-    setLead({ ...lead, joined_tcpc: true });
-    setRating("hot");
-    toast.success(`${joinName || "Attendee"} is in. Hand them the welcome kit.`);
+    setSignup(data);
+    toast.success("Membership QR is ready. Original sales attribution is locked in.");
   }
 
   if (loading) {
@@ -240,86 +262,83 @@ function LeadPage() {
         placeholder="Runs a 3-person shop, filing 400 returns, hates their current software…"
       />
 
-      {!lead.joined_tcpc ? (
-        <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
-          <div className="eyebrow">Close the loop</div>
-          <h2 className="mt-2 font-display text-xl">Join Tax Compliance Pro Connect</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Badge data is already filled in — confirm the email and they're a member before they
-            leave the booth.
-          </p>
-          {!showJoin ? (
-            <Button onClick={() => setShowJoin(true)} className="mt-4 h-12 w-full text-base">
-              Start join flow
+      <SectionLabel>Review products</SectionLabel>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {PRODUCT_REVIEW_LINKS.map((product) => (
+          <a
+            key={product.name}
+            href={product.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl border border-border bg-panel p-4 transition-colors hover:bg-panel-hover"
+          >
+            <div className="font-display text-lg">{product.name}</div>
+            <p className="mt-1 text-sm text-muted-foreground">{product.note}</p>
+            <div className="mt-3 text-sm text-signal">Open product ↗</div>
+          </a>
+        ))}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
+        <div className="eyebrow">Membership handoff</div>
+        {!signup ? (
+          <>
+            <h2 className="mt-2 font-display text-xl">Ready to join Tax Compliance Pro?</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Create a tracked QR after reviewing products. The attendee completes account setup and
+              payment on their own phone.
+            </p>
+            <Button
+              onClick={createSignupSession}
+              disabled={creatingSignup}
+              className="mt-4 h-12 w-full text-base"
+            >
+              {creatingSignup ? "Creating QR…" : "Create membership QR"}
             </Button>
-          ) : (
-            <form onSubmit={submitJoin} className="mt-4 space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="jname">Full name</Label>
-                <Input
-                  id="jname"
-                  required
-                  value={joinName}
-                  onChange={(e) => setJoinName(e.target.value)}
+          </>
+        ) : (
+          <div className="mt-2 grid items-center gap-5 sm:grid-cols-[220px_1fr]">
+            <div className="rounded-xl bg-white p-3">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt={`Membership signup QR for ${signup.public_id}`}
+                  className="aspect-square w-full"
                 />
+              ) : (
+                <div className="aspect-square animate-pulse rounded-lg bg-muted" />
+              )}
+            </div>
+            <div>
+              <div className="font-display text-xl">{STATUS_LABELS[signup.status]}</div>
+              <div className="mt-1 font-mono text-sm text-signal">{signup.public_id}</div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Scan with the attendee's phone. The main site owns checkout and sends the verified
+                member ID and plan back to this session.
+              </p>
+              {signup.membership_plan ? (
+                <p className="mt-2 text-sm">Plan: {signup.membership_plan}</p>
+              ) : null}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a
+                  href={signup.join_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+                >
+                  Open join page ↗
+                </a>
+                <Link
+                  to="/signups"
+                  className="inline-flex h-10 items-center rounded-lg border border-border px-4 text-sm"
+                >
+                  View signup queue →
+                </Link>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="jemail">Email</Label>
-                <Input
-                  id="jemail"
-                  type="email"
-                  required
-                  value={joinEmail}
-                  onChange={(e) => setJoinEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="jphone">Phone</Label>
-                  <Input
-                    id="jphone"
-                    value={joinPhone}
-                    onChange={(e) => setJoinPhone(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jcompany">Firm</Label>
-                  <Input
-                    id="jcompany"
-                    value={joinCompany}
-                    onChange={(e) => setJoinCompany(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="jtitle">Title</Label>
-                <Input
-                  id="jtitle"
-                  value={joinTitle}
-                  onChange={(e) => setJoinTitle(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-panel px-4 py-3">
-                <Label htmlFor="consent" className="text-sm font-normal">
-                  Okay to send updates and offers
-                </Label>
-                <Switch id="consent" checked={consent} onCheckedChange={setConsent} />
-              </div>
-              <Button type="submit" disabled={joining} className="h-12 w-full text-base">
-                {joining ? "Submitting…" : "Complete TCPC join"}
-              </Button>
-            </form>
-          )}
-        </div>
-      ) : (
-        <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
-          <div className="eyebrow">Member</div>
-          <p className="mt-1 text-sm">
-            This attendee joined TCPC at the booth. Give them the welcome kit and the Atlas AI demo
-            link.
-          </p>
-        </div>
-      )}
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="mt-8 flex flex-col gap-2 sm:flex-row">
         <Button

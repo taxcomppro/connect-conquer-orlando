@@ -82,7 +82,7 @@ function Hub() {
       />
 
       <SectionLabel>Lead capture</SectionLabel>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Link
           to="/scan"
           className="group rounded-2xl border border-signal-line bg-signal-soft p-5 transition-transform hover:-translate-y-0.5"
@@ -105,6 +105,18 @@ function Hub() {
             Review the day's scans, track TCPC joins and export a CSV for follow-up.
           </p>
           <div className="mt-4 text-sm text-go">View leads →</div>
+        </Link>
+
+        <Link
+          to="/signups"
+          className="group rounded-2xl border border-gold/40 bg-gold/10 p-5 transition-transform hover:-translate-y-0.5"
+        >
+          <div className="text-2xl">◎</div>
+          <div className="mt-3 font-display text-xl">Event Signups</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Track pending checkouts, active members, and cards ready to issue.
+          </p>
+          <div className="mt-4 text-sm text-gold">Open signup queue →</div>
         </Link>
       </div>
 

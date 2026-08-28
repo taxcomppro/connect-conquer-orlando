@@ -32,6 +32,8 @@ This repository is the single staff-facing application and backend:
 3. The browser sends badge lookups to the same TanStack Start deployment.
 4. The server-only lookup calls EDC; the EDC key is never shipped to the browser.
 5. Both the UI and server use one Supabase project for authentication and lead data.
+6. PostgreSQL `signup_sessions` records own the event-floor handoff, attribution, and card queue.
+7. The Tax Comp Pro site remains the authority for account creation, checkout, and membership.
 
 Do not deploy a separate static Field Hub in front of this application. Vercel should build this repository from `main`, with the project root set to the repository root.
 
@@ -42,3 +44,22 @@ The Vercel project uses the `Other` framework preset and `bun run build`. The Ni
 Copy `.env.example` for local development. Configure the same variable names in Vercel for Production and Preview as appropriate. `EDC_SHOW_ID`, `EDC_API_KEY`, and `EDC_API_URL` are server-only and must never use a `VITE_` prefix.
 
 `EDC_APP_KEY` is accepted temporarily as a backwards-compatible alias, but new deployments should use `EDC_API_KEY`.
+
+### Event signup architecture
+
+Run the Supabase migration in `supabase/migrations/20260828190000_signup_sessions.sql` before
+deploying this phase. The matching Prisma model lives in `prisma/schema.prisma`; configure
+`DATABASE_URL` and `DIRECT_DATABASE_URL` for server-side integration handlers.
+
+The booth flow is:
+
+```text
+badge scan → lead → product review → tracked membership QR
+→ pending/completed signup queue → active membership verification → ProConnect card
+```
+
+Field Hub passes only the public `signupSession` ID to the main site's join URL. It stores the
+permanent Tax Comp Pro user ID, membership ID, plan, and status returned by the main site. Payment
+data and the member account remain outside Field Hub.
+
+See `docs/main-site-integration.md` for the webhook/polling contract and Vercel environment values.

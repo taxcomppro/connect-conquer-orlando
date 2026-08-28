@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+  schemas   = ["public"]
+}
+
+enum SignupSessionStatus {
+  CREATED
+  QR_SCANNED
+  CHECKOUT_STARTED
+  MEMBERSHIP_ACTIVE
+  CARD_ISSUED
+  EXPIRED
+  CANCELLED
+
+  @@schema("public")
+  @@map("signup_session_status")
+}
+
+model SignupSession {
+  id                       String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicId                 String              @unique @map("public_id")
+  leadId                   String              @map("lead_id") @db.Uuid
+  badgeLeadId              String              @map("badge_lead_id")
+  eventId                  String              @map("event_id")
+  scannedByStaffId         String              @map("scanned_by_staff_id") @db.Uuid
+  attributedToStaffId      String              @map("attributed_to_staff_id") @db.Uuid
+  createdByStaffId         String              @map("created_by_staff_id") @db.Uuid
+  cardIssuedByStaffId      String?             @map("card_issued_by_staff_id") @db.Uuid
+  staffDeviceId            String              @map("staff_device_id")
+  staffSessionId           String              @map("staff_session_id")
+  dubPartnerId             String?             @map("dub_partner_id")
+  dubLinkId                String?             @map("dub_link_id")
+  status                   SignupSessionStatus @default(CREATED)
+  joinUrl                  String              @map("join_url")
+  taxCompProUserId         String?             @map("tax_comp_pro_user_id")
+  membershipId             String?             @map("membership_id")
+  membershipPlan           String?             @map("membership_plan")
+  membershipStatus         String?             @map("membership_status")
+  integrationReference     String?             @map("integration_reference")
+  metadata                 Json                @default("{}")
+  createdAt                DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  qrScannedAt              DateTime?           @map("qr_scanned_at") @db.Timestamptz(6)
+  checkoutStartedAt        DateTime?           @map("checkout_started_at") @db.Timestamptz(6)
+  completedAt              DateTime?           @map("completed_at") @db.Timestamptz(6)
+  lastMembershipCheckAt    DateTime?           @map("last_membership_check_at") @db.Timestamptz(6)
+  cardIssuedAt             DateTime?           @map("card_issued_at") @db.Timestamptz(6)
+  events                   SignupSessionEvent[]
+
+  @@index([eventId, createdAt(sort: Desc)])
+  @@index([scannedByStaffId, createdAt(sort: Desc)])
+  @@index([attributedToStaffId, createdAt(sort: Desc)])
+  @@index([status, eventId])
+  @@map("signup_sessions")
+  @@schema("public")
+}
+
+model SignupSessionEvent {
+  id              BigInt               @id @default(autoincrement())
+  signupSessionId String               @map("signup_session_id") @db.Uuid
+  fromStatus      SignupSessionStatus? @map("from_status")
+  toStatus        SignupSessionStatus  @map("to_status")
+  actorStaffId    String?              @map("actor_staff_id") @db.Uuid
+  source          String
+  payload         Json                 @default("{}")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  signupSession   SignupSession        @relation(fields: [signupSessionId], references: [id], onDelete: Cascade)
+
+  @@index([signupSessionId, createdAt(sort: Desc)])
+  @@map("signup_session_events")
+  @@schema("public")
+}

@@ -15,7 +15,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
+import { Route as AuthenticatedSignupsRouteImport } from './routes/_authenticated/signups'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
+import { Route as ApiSignupSessionsSignupSessionIdMembershipRouteImport } from './routes/api.signup-sessions.$signupSessionId.membership'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,11 +48,22 @@ const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSignupsRoute = AuthenticatedSignupsRouteImport.update({
+  id: '/signups',
+  path: '/signups',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLeadAttendeeIdRoute =
   AuthenticatedLeadAttendeeIdRouteImport.update({
     id: '/lead/$attendeeId',
     path: '/lead/$attendeeId',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiSignupSessionsSignupSessionIdMembershipRoute =
+  ApiSignupSessionsSignupSessionIdMembershipRouteImport.update({
+    id: '/api/signup-sessions/$signupSessionId/membership',
+    path: '/api/signup-sessions/$signupSessionId/membership',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -59,7 +72,9 @@ export interface FileRoutesByFullPath {
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/signups': typeof AuthenticatedSignupsRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/api/signup-sessions/$signupSessionId/membership': typeof ApiSignupSessionsSignupSessionIdMembershipRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,7 +82,9 @@ export interface FileRoutesByTo {
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/signups': typeof AuthenticatedSignupsRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/api/signup-sessions/$signupSessionId/membership': typeof ApiSignupSessionsSignupSessionIdMembershipRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,14 +94,31 @@ export interface FileRoutesById {
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
+  '/_authenticated/signups': typeof AuthenticatedSignupsRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/api/signup-sessions/$signupSessionId/membership': typeof ApiSignupSessionsSignupSessionIdMembershipRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/briefing' | '/leads' | '/scan' | '/lead/$attendeeId'
+    | '/'
+    | '/auth'
+    | '/briefing'
+    | '/leads'
+    | '/scan'
+    | '/signups'
+    | '/lead/$attendeeId'
+    | '/api/signup-sessions/$signupSessionId/membership'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/briefing' | '/leads' | '/scan' | '/lead/$attendeeId'
+  to:
+    | '/'
+    | '/auth'
+    | '/briefing'
+    | '/leads'
+    | '/scan'
+    | '/signups'
+    | '/lead/$attendeeId'
+    | '/api/signup-sessions/$signupSessionId/membership'
   id:
     | '__root__'
     | '/'
@@ -93,13 +127,16 @@ export interface FileRouteTypes {
     | '/_authenticated/briefing'
     | '/_authenticated/leads'
     | '/_authenticated/scan'
+    | '/_authenticated/signups'
     | '/_authenticated/lead/$attendeeId'
+    | '/api/signup-sessions/$signupSessionId/membership'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiSignupSessionsSignupSessionIdMembershipRoute: typeof ApiSignupSessionsSignupSessionIdMembershipRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,12 +183,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/signups': {
+      id: '/_authenticated/signups'
+      path: '/signups'
+      fullPath: '/signups'
+      preLoaderRoute: typeof AuthenticatedSignupsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/lead/$attendeeId': {
       id: '/_authenticated/lead/$attendeeId'
       path: '/lead/$attendeeId'
       fullPath: '/lead/$attendeeId'
       preLoaderRoute: typeof AuthenticatedLeadAttendeeIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/signup-sessions/$signupSessionId/membership': {
+      id: '/api/signup-sessions/$signupSessionId/membership'
+      path: '/api/signup-sessions/$signupSessionId/membership'
+      fullPath: '/api/signup-sessions/$signupSessionId/membership'
+      preLoaderRoute: typeof ApiSignupSessionsSignupSessionIdMembershipRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -160,6 +211,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
+  AuthenticatedSignupsRoute: typeof AuthenticatedSignupsRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
 }
 
@@ -167,6 +219,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
+  AuthenticatedSignupsRoute: AuthenticatedSignupsRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
 }
 
@@ -177,6 +230,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiSignupSessionsSignupSessionIdMembershipRoute:
+    ApiSignupSessionsSignupSessionIdMembershipRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
