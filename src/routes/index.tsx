@@ -21,46 +21,54 @@ export const Route = createFileRoute("/")({
   component: Hub,
 });
 
-const DEMOS = [
-  {
-    name: "Atlas AI",
-    note: "Real-time tax guidance — ask it anything live, on the spot.",
-    href: "https://www.alwaysaskatlas.com",
-  },
+const SITES = [
   {
     name: "TaxCompPro",
     note: "The main platform — marketplace, communities, and membership tiers.",
     href: "https://www.taxcomppro.com",
   },
   {
+    name: "Atlas AI",
+    note: "Real-time tax guidance — ask it anything live, on the spot.",
+    href: "https://www.alwaysaskatlas.com",
+  },
+  {
     name: "ProConnect Card",
     note: "The $29 tap-to-share digital business card and profile.",
     href: "https://connect.taxcomppro.com",
   },
-  {
-    name: "Atlas Academy",
-    note: "Courses, toolkits, and staff training, all under one profile.",
-    href: "https://academy.taxcomppro.com",
-  },
+];
+
+const TOOLKITS_AND_COURSES = [
   {
     name: "30 Day Tax Office Launch",
     note: "Build the systems, compliance, and client plan for a new office.",
-    href: "https://30daylaunch.taxcomppro.com",
+    href: "https://30daylaunch.taxcomppro.com/",
   },
   {
-    name: "Schedule C Reconstruction",
-    note: "A structured approach to reconstructing business records.",
-    href: "https://schedulecrecon.taxcomppro.com",
+    name: "Staff Audit Ready Due Diligence",
+    note: "Train staff and keep every ERO compliance file organized and examination-ready.",
+    href: "https://staff-audit-ready.safeguardpro-9185.chatgpt.site/",
   },
   {
-    name: "IRS Fine Defense",
+    name: "IRS Fine Defense Toolkit",
     note: "Procedures and documentation for penalty and fine defense.",
-    href: "https://irsfinedefense.taxcomppro.com",
+    href: "https://irsfinedefense.taxcomppro.com/",
+  },
+  {
+    name: "Schedule C Reconstruction Toolkit",
+    note: "A structured approach to reconstructing business records.",
+    href: "https://schedulecrecon.taxcomppro.com/",
   },
   {
     name: "Audit Ready Playbook",
     note: "Repeatable workpaper and review practices for defensible files.",
     href: "https://auditplaybook.taxcomppro.com/",
+  },
+  {
+    name: "Credits & Filing Status Explained",
+    note: "Practical guidance for documenting credits, dependents, and filing-status decisions.",
+    href: "https://credits.taxcomppro.com/",
   },
 ];
 
@@ -107,19 +115,46 @@ function Hub() {
         <Brief label="Wednesday" value="Show Floor 10:00 AM – 2:30 PM" />
       </div>
 
-      <SectionLabel>Product demos</SectionLabel>
+      <SectionLabel>Sites</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {DEMOS.map((demo) => (
+        {SITES.map((site) => (
           <a
-            key={demo.name}
-            href={demo.href}
+            key={site.name}
+            href={site.href}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-xl border border-border bg-panel p-4 transition-colors hover:bg-panel-hover"
           >
-            <div className="font-display text-lg">{demo.name}</div>
-            <p className="mt-1 text-sm text-muted-foreground">{demo.note}</p>
-            <div className="mt-3 text-sm text-signal">Open demo ↗</div>
+            <div className="font-display text-lg">{site.name}</div>
+            <p className="mt-1 text-sm text-muted-foreground">{site.note}</p>
+            <div className="mt-3 text-sm text-signal">Open site ↗</div>
+          </a>
+        ))}
+      </div>
+
+      <div className="mt-8 mb-3 flex items-center justify-between gap-4">
+        <span className="eyebrow">Toolkits &amp; courses</span>
+        <a
+          href="https://www.taxcomppro.com/toolkits"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-signal hover:underline"
+        >
+          View full catalog ↗
+        </a>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {TOOLKITS_AND_COURSES.map((product) => (
+          <a
+            key={product.name}
+            href={product.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl border border-border bg-panel p-4 transition-colors hover:bg-panel-hover"
+          >
+            <div className="font-display text-lg">{product.name}</div>
+            <p className="mt-1 text-sm text-muted-foreground">{product.note}</p>
+            <div className="mt-3 text-sm text-signal">Open resource ↗</div>
           </a>
         ))}
       </div>
