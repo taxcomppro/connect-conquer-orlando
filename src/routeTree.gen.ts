@@ -15,10 +15,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
+import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as CTokenRouteImport } from './routes/c.$token'
 import { Route as JoinSessionIdRouteImport } from './routes/join.$sessionId'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
+import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 
@@ -51,6 +53,11 @@ const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -71,6 +78,12 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedActivateSessionIdRoute =
+  AuthenticatedActivateSessionIdRouteImport.update({
+    id: '/activate/$sessionId',
+    path: '/activate/$sessionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLeadAttendeeIdRoute =
   AuthenticatedLeadAttendeeIdRouteImport.update({
     id: '/lead/$attendeeId',
@@ -90,10 +103,12 @@ export interface FileRoutesByFullPath {
   '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
+  '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
@@ -103,10 +118,12 @@ export interface FileRoutesByTo {
   '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
+  '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
@@ -118,10 +135,12 @@ export interface FileRoutesById {
   '/card-not-found': typeof CardNotFoundRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
+  '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
+  '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
@@ -133,10 +152,12 @@ export interface FileRouteTypes {
     | '/card-not-found'
     | '/briefing'
     | '/leads'
+    | '/pipeline'
     | '/scan'
     | '/c/$token'
     | '/join/$sessionId'
     | '/p/$slug'
+    | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
   fileRoutesByTo: FileRoutesByTo
@@ -146,10 +167,12 @@ export interface FileRouteTypes {
     | '/card-not-found'
     | '/briefing'
     | '/leads'
+    | '/pipeline'
     | '/scan'
     | '/c/$token'
     | '/join/$sessionId'
     | '/p/$slug'
+    | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
   id:
@@ -160,10 +183,12 @@ export interface FileRouteTypes {
     | '/card-not-found'
     | '/_authenticated/briefing'
     | '/_authenticated/leads'
+    | '/_authenticated/pipeline'
     | '/_authenticated/scan'
     | '/c/$token'
     | '/join/$sessionId'
     | '/p/$slug'
+    | '/_authenticated/activate/$sessionId'
     | '/_authenticated/lead/$attendeeId'
     | '/_authenticated/signup/$sessionId'
   fileRoutesById: FileRoutesById
@@ -222,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pipeline': {
+      id: '/_authenticated/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof AuthenticatedPipelineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/scan': {
       id: '/_authenticated/scan'
       path: '/scan'
@@ -250,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/activate/$sessionId': {
+      id: '/_authenticated/activate/$sessionId'
+      path: '/activate/$sessionId'
+      fullPath: '/activate/$sessionId'
+      preLoaderRoute: typeof AuthenticatedActivateSessionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/lead/$attendeeId': {
       id: '/_authenticated/lead/$attendeeId'
       path: '/lead/$attendeeId'
@@ -270,7 +309,9 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
+  AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
+  AuthenticatedActivateSessionIdRoute: typeof AuthenticatedActivateSessionIdRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
   AuthenticatedSignupSessionIdRoute: typeof AuthenticatedSignupSessionIdRoute
 }
@@ -278,7 +319,9 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
+  AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
+  AuthenticatedActivateSessionIdRoute: AuthenticatedActivateSessionIdRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
   AuthenticatedSignupSessionIdRoute: AuthenticatedSignupSessionIdRoute,
 }
