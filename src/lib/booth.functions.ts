@@ -169,10 +169,30 @@ export const getPublicProfile = createServerFn({ method: "POST" })
     return { slug };
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profile } = await supabaseAdmin
+    const { createClient } = await import("@supabase/supabase-js");
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const supabasePublic = createClient<import("@/integrations/supabase/types").Database>(
+      process.env["SUPABASE_URL"]!,
+      key,
+      {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: {
+          fetch: (input, init) => {
+            const h = new Headers(init?.headers);
+            if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
+              h.delete("Authorization");
+            }
+            h.set("apikey", key);
+            return fetch(input, { ...init, headers: h });
+          },
+        },
+      },
+    );
+    const { data: profile } = await supabasePublic
       .from("connect_profiles")
-      .select("*")
+      .select(
+        "slug, display_name, credential, title, company, city, state, email, phone, website, bio, services, show_email, show_phone, show_location",
+      )
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
