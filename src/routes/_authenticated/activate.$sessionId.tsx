@@ -303,7 +303,11 @@ function ActivatePage() {
                 placeholder={link}
               />
             </div>
-            <Button onClick={confirmWritten} disabled={busy} className="h-12 w-full text-base">
+            <Button
+              onClick={confirmWritten}
+              disabled={busy || !baseIsValid}
+              className="h-12 w-full text-base"
+            >
               {busy ? "Saving…" : "Confirm written & issue card"}
             </Button>
           </Panel>
