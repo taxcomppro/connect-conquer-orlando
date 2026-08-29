@@ -97,13 +97,13 @@ function ActivatePage() {
   }, [load]);
 
   async function issueCard() {
-    if (!session || !profile || !user) return;
-    setBusy(true);
-    // Independent re-verification: the profile must exist and the session must
-    // have reached membership confirmation before a card can be minted.
+    if (!session || !user) return;
+    // Independent re-verification: the session must have reached membership
+    // confirmation, and there must be a profile to land on — either a Field Hub
+    // profile or one the main site built and sent over.
     const { data: fresh } = await supabase
       .from("signup_sessions")
-      .select("stage, membership_confirmed_at")
+      .select("stage, membership_confirmed_at, external_profile_url")
       .eq("id", session.id)
       .maybeSingle();
 
@@ -114,20 +114,29 @@ function ActivatePage() {
         fresh.stage === "card_issued");
 
     if (!ok) {
-      setBusy(false);
       toast.error("Membership isn't confirmed yet — finish the signup first.");
       return;
     }
 
+    const externalUrl = fresh.external_profile_url ?? null;
+    if (!profile && !externalUrl) {
+      toast.error("No profile yet — the customer's profile link hasn't arrived.");
+      return;
+    }
+
+    setBusy(true);
     const token = makeToken();
     const { data, error } = await supabase
       .from("card_tokens")
       .insert({
         token,
-        profile_id: profile.id,
+        profile_id: profile?.id ?? null,
         signup_session_id: session.id,
         issued_by: user.id,
         status: "pending",
+        // Card still carries a Field Hub /c/ address so it stays re-pointable,
+        // but it forwards to the main-site profile when one was supplied.
+        override_target_url: profile ? null : externalUrl,
       })
       .select()
       .single();
@@ -142,7 +151,7 @@ function ActivatePage() {
       signup_session_id: session.id,
       event_type: "CARD_TOKEN_MINTED",
       actor_user_id: user.id,
-      payload: { token },
+      payload: { token, target: profile ? "fieldhub" : "taxcomppro" },
     });
   }
 
