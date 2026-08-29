@@ -146,7 +146,7 @@ function PipelinePage() {
         placeholder="Search name, firm, badge ID, DUB code…"
       />
 
-      <SectionLabel>{loading ? "Loading…" : `${visible.length} signups`}</SectionLabel>
+      <SectionLabel>{loading ? "Loading…" : `${visible.length} sales`}</SectionLabel>
       <div className="space-y-2">
         {visible.map((session) => (
           <Link
