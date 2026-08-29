@@ -17,8 +17,10 @@ import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as CTokenRouteImport } from './routes/c.$token'
+import { Route as JoinSessionIdRouteImport } from './routes/join.$sessionId'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
+import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +61,11 @@ const CTokenRoute = CTokenRouteImport.update({
   path: '/c/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JoinSessionIdRoute = JoinSessionIdRouteImport.update({
+  id: '/join/$sessionId',
+  path: '/join/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PSlugRoute = PSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -70,6 +77,12 @@ const AuthenticatedLeadAttendeeIdRoute =
     path: '/lead/$attendeeId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSignupSessionIdRoute =
+  AuthenticatedSignupSessionIdRouteImport.update({
+    id: '/signup/$sessionId',
+    path: '/signup/$sessionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,8 +92,10 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
+  '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -90,8 +105,10 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
+  '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -103,8 +120,10 @@ export interface FileRoutesById {
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/c/$token': typeof CTokenRoute
+  '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,8 +135,10 @@ export interface FileRouteTypes {
     | '/leads'
     | '/scan'
     | '/c/$token'
+    | '/join/$sessionId'
     | '/p/$slug'
     | '/lead/$attendeeId'
+    | '/signup/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -127,8 +148,10 @@ export interface FileRouteTypes {
     | '/leads'
     | '/scan'
     | '/c/$token'
+    | '/join/$sessionId'
     | '/p/$slug'
     | '/lead/$attendeeId'
+    | '/signup/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -139,8 +162,10 @@ export interface FileRouteTypes {
     | '/_authenticated/leads'
     | '/_authenticated/scan'
     | '/c/$token'
+    | '/join/$sessionId'
     | '/p/$slug'
     | '/_authenticated/lead/$attendeeId'
+    | '/_authenticated/signup/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,6 +174,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CardNotFoundRoute: typeof CardNotFoundRoute
   CTokenRoute: typeof CTokenRoute
+  JoinSessionIdRoute: typeof JoinSessionIdRoute
   PSlugRoute: typeof PSlugRoute
 }
 
@@ -210,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/join/$sessionId': {
+      id: '/join/$sessionId'
+      path: '/join/$sessionId'
+      fullPath: '/join/$sessionId'
+      preLoaderRoute: typeof JoinSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$slug': {
       id: '/p/$slug'
       path: '/p/$slug'
@@ -224,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadAttendeeIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/signup/$sessionId': {
+      id: '/_authenticated/signup/$sessionId'
+      path: '/signup/$sessionId'
+      fullPath: '/signup/$sessionId'
+      preLoaderRoute: typeof AuthenticatedSignupSessionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -232,6 +272,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
+  AuthenticatedSignupSessionIdRoute: typeof AuthenticatedSignupSessionIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -239,6 +280,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
+  AuthenticatedSignupSessionIdRoute: AuthenticatedSignupSessionIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -250,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CardNotFoundRoute: CardNotFoundRoute,
   CTokenRoute: CTokenRoute,
+  JoinSessionIdRoute: JoinSessionIdRoute,
   PSlugRoute: PSlugRoute,
 }
 export const routeTree = rootRouteImport
