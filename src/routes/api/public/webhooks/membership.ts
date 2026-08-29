@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import type { TablesUpdate } from "@/integrations/supabase/types";
+
 /**
  * Minimal main-site bridge: TaxCompPro checkout fires one POST here when a
  * membership purchase completes. Verified with HMAC-SHA256 over
