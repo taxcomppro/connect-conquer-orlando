@@ -78,6 +78,7 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
             .from("signup_sessions")
             .insert({
               email,
+              rep_user_id: null,
               full_name: payload.fullName ?? null,
               stage: "membership_confirmed",
               membership_confirmed_at: now,
