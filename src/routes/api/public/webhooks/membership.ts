@@ -22,6 +22,9 @@ const payloadSchema = z.object({
   fullName: z.string().max(160).optional(),
   membershipRef: z.string().max(120).optional(),
   plan: z.string().max(80).optional(),
+  /** Finished profile link on the main site; the card is written to this when present. */
+  profileUrl: z.string().url().max(500).optional(),
+  memberId: z.string().max(120).optional(),
 });
 
 export const Route = createFileRoute("/api/public/webhooks/membership")({
@@ -71,6 +74,10 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
         const now = new Date().toISOString();
         let session = found;
 
+        // A profile link means the main site already built the profile, so the
+        // card can be written immediately — no Field Hub intake needed.
+        const nextStage = payload.profileUrl ? "ready_for_card" : "membership_confirmed";
+
         if (!session) {
           // Card-first flow: customer tapped a generic card and bought without a
           // prior badge scan — open their sales record straight from the purchase.
@@ -80,10 +87,12 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
               email,
               rep_user_id: null,
               full_name: payload.fullName ?? null,
-              stage: "membership_confirmed",
+              stage: nextStage,
               membership_confirmed_at: now,
               membership_ref: payload.membershipRef ?? null,
               membership_plan: payload.plan ?? null,
+              external_profile_url: payload.profileUrl ?? null,
+              external_member_id: payload.memberId ?? null,
             })
             .select("id, stage, email, membership_confirmed_at")
             .single();
@@ -97,11 +106,15 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
           };
           if (payload.membershipRef) update["membership_ref"] = payload.membershipRef;
           if (payload.plan) update["membership_plan"] = payload.plan;
+          if (payload.memberId) update["external_member_id"] = payload.memberId;
+          if (payload.profileUrl) update["external_profile_url"] = payload.profileUrl;
           if (payload.fullName && session.stage !== "card_issued") {
             update["full_name"] = payload.fullName;
           }
           if (session.stage === "scanned" || session.stage === "signup_sent") {
-            update["stage"] = "membership_confirmed";
+            update["stage"] = nextStage;
+          } else if (payload.profileUrl && session.stage === "membership_confirmed") {
+            update["stage"] = "ready_for_card";
           }
           const { error } = await supabaseAdmin
             .from("signup_sessions")
@@ -112,7 +125,7 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
           }
         }
 
-        if (!session.membership_confirmed_at) {
+        if (!found?.membership_confirmed_at) {
           await supabaseAdmin.from("signup_events").insert({
             signup_session_id: session.id,
             event_type: "MEMBERSHIP_CONFIRMED",
@@ -120,6 +133,7 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
             payload: {
               ref: payload.membershipRef ?? null,
               plan: payload.plan ?? null,
+              profileUrl: payload.profileUrl ?? null,
               source: "webhook",
             },
           });
@@ -129,6 +143,7 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
           ok: true,
           sessionId: session.id,
           joinPath: `/join/${session.id}`,
+          readyForCard: Boolean(payload.profileUrl),
           alreadyConfirmed: Boolean(found?.membership_confirmed_at),
         });
       },

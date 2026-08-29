@@ -1,0 +1,1 @@
+ALTER TABLE public.card_tokens ALTER COLUMN profile_id DROP NOT NULL;
