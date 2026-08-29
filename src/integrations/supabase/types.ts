@@ -411,7 +411,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           rep_name: string | null
-          rep_user_id: string
+          rep_user_id: string | null
           source: string
           stage: Database["public"]["Enums"]["signup_stage"]
           title: string | null
@@ -435,7 +435,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           rep_name?: string | null
-          rep_user_id: string
+          rep_user_id?: string | null
           source?: string
           stage?: Database["public"]["Enums"]["signup_stage"]
           title?: string | null
@@ -459,7 +459,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           rep_name?: string | null
-          rep_user_id?: string
+          rep_user_id?: string | null
           source?: string
           stage?: Database["public"]["Enums"]["signup_stage"]
           title?: string | null
