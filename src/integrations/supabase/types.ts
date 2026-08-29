@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      approved_staff_emails: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string
+          note: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email: string
+          note?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          note?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       card_tokens: {
         Row: {
           created_at: string
