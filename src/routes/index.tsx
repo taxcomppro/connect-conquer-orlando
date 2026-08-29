@@ -82,7 +82,7 @@ function Hub() {
       />
 
       <SectionLabel>Lead capture</SectionLabel>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Link
           to="/scan"
           className="group rounded-2xl border border-signal-line bg-signal-soft p-5 transition-transform hover:-translate-y-0.5"
