@@ -45,7 +45,7 @@ export type Database = {
           issued_by: string | null
           last_tap_at: string | null
           override_target_url: string | null
-          profile_id: string
+          profile_id: string | null
           signup_session_id: string
           status: string
           tap_count: number
@@ -60,7 +60,7 @@ export type Database = {
           issued_by?: string | null
           last_tap_at?: string | null
           override_target_url?: string | null
-          profile_id: string
+          profile_id?: string | null
           signup_session_id: string
           status?: string
           tap_count?: number
@@ -75,7 +75,7 @@ export type Database = {
           issued_by?: string | null
           last_tap_at?: string | null
           override_target_url?: string | null
-          profile_id?: string
+          profile_id?: string | null
           signup_session_id?: string
           status?: string
           tap_count?: number
