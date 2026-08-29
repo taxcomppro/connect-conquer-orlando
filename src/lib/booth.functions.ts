@@ -171,7 +171,10 @@ export const getPublicProfile = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const supabasePublic = createClient(process.env["SUPABASE_URL"]!, key, {
+    const supabasePublic = createClient<import("@/integrations/supabase/types").Database>(
+      process.env["SUPABASE_URL"]!,
+      key,
+      {
       auth: { persistSession: false, autoRefreshToken: false },
       global: {
         fetch: (input, init) => {
