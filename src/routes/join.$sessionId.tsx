@@ -176,7 +176,7 @@ function JoinPage() {
           Choose your plan and complete your Tax Compliance Pro membership.
         </p>
         <a
-          href={MEMBERSHIP_URL}
+          href={`${MEMBERSHIP_URL}?sid=${encodeURIComponent(sessionId)}`}
           target="_blank"
           rel="noreferrer"
           className="mt-4 flex h-12 items-center justify-center rounded-xl border border-gold/60 bg-gold/20 text-base text-gold"
