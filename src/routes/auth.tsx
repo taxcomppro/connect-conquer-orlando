@@ -76,7 +76,12 @@ function AuthPage() {
         toast.success("Welcome back.");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Sign in failed.");
+      const message = error instanceof Error ? error.message : "Sign in failed.";
+      toast.error(
+        /approved booth staff|Database error saving new user/i.test(message)
+          ? "That email isn't on the approved booth staff list. Ask an admin to add it."
+          : message,
+      );
     } finally {
       setBusy(false);
     }
@@ -102,7 +107,7 @@ function AuthPage() {
         <PageTitle
           title="Booth staff"
           accent="sign in"
-          lede="Every scan is attributed to the person who captured it. Sign in once at the start of your shift."
+          lede="Access is limited to approved booth staff emails. Every scan is attributed to the person who captured it — sign in once at the start of your shift."
         />
 
         <form
