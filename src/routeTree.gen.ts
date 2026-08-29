@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
+import { Route as CTokenRouteImport } from './routes/c.$token'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +32,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CardNotFoundRoute = CardNotFoundRouteImport.update({
+  id: '/card-not-found',
+  path: '/card-not-found',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedBriefingRoute = AuthenticatedBriefingRouteImport.update({
@@ -46,6 +54,16 @@ const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CTokenRoute = CTokenRouteImport.update({
+  id: '/c/$token',
+  path: '/c/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedLeadAttendeeIdRoute =
   AuthenticatedLeadAttendeeIdRouteImport.update({
     id: '/lead/$attendeeId',
@@ -56,17 +74,23 @@ const AuthenticatedLeadAttendeeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/c/$token': typeof CTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/scan': typeof AuthenticatedScanRoute
+  '/c/$token': typeof CTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRoutesById {
@@ -74,25 +98,48 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/card-not-found': typeof CardNotFoundRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
+  '/c/$token': typeof CTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/briefing' | '/leads' | '/scan' | '/lead/$attendeeId'
+    | '/'
+    | '/auth'
+    | '/card-not-found'
+    | '/briefing'
+    | '/leads'
+    | '/scan'
+    | '/c/$token'
+    | '/p/$slug'
+    | '/lead/$attendeeId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/briefing' | '/leads' | '/scan' | '/lead/$attendeeId'
+  to:
+    | '/'
+    | '/auth'
+    | '/card-not-found'
+    | '/briefing'
+    | '/leads'
+    | '/scan'
+    | '/c/$token'
+    | '/p/$slug'
+    | '/lead/$attendeeId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/card-not-found'
     | '/_authenticated/briefing'
     | '/_authenticated/leads'
     | '/_authenticated/scan'
+    | '/c/$token'
+    | '/p/$slug'
     | '/_authenticated/lead/$attendeeId'
   fileRoutesById: FileRoutesById
 }
@@ -100,6 +147,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CardNotFoundRoute: typeof CardNotFoundRoute
+  CTokenRoute: typeof CTokenRoute
+  PSlugRoute: typeof PSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -125,6 +175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/card-not-found': {
+      id: '/card-not-found'
+      path: '/card-not-found'
+      fullPath: '/card-not-found'
+      preLoaderRoute: typeof CardNotFoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/briefing': {
       id: '/_authenticated/briefing'
       path: '/briefing'
@@ -145,6 +202,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/scan'
       preLoaderRoute: typeof AuthenticatedScanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/c/$token': {
+      id: '/c/$token'
+      path: '/c/$token'
+      fullPath: '/c/$token'
+      preLoaderRoute: typeof CTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/lead/$attendeeId': {
       id: '/_authenticated/lead/$attendeeId'
@@ -177,6 +248,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CardNotFoundRoute: CardNotFoundRoute,
+  CTokenRoute: CTokenRoute,
+  PSlugRoute: PSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
