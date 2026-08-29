@@ -16,14 +16,13 @@ import type { TablesUpdate } from "@/integrations/supabase/types";
  * Body (JSON):
  *   { sessionId?: uuid, email?: string, membershipRef?: string, plan?: string }
  */
-const payloadSchema = z
-  .object({
-    sessionId: z.string().uuid().optional(),
-    email: z.string().email().max(200).optional(),
-    membershipRef: z.string().max(120).optional(),
-    plan: z.string().max(80).optional(),
-  })
-  .refine((v) => v.sessionId || v.email, { message: "sessionId or email required" });
+const payloadSchema = z.object({
+  sessionId: z.string().uuid().optional(),
+  email: z.string().email().max(200),
+  fullName: z.string().max(160).optional(),
+  membershipRef: z.string().max(120).optional(),
+  plan: z.string().max(80).optional(),
+});
 
 export const Route = createFileRoute("/api/public/webhooks/membership")({
   server: {
