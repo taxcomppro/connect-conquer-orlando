@@ -74,13 +74,13 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
         }
 
         const now = new Date().toISOString();
-        const update: Record<string, string> = {
+        const update: TablesUpdate<"signup_sessions"> = {
           membership_confirmed_at: session.membership_confirmed_at ?? now,
         };
-        if (payload.membershipRef) update.membership_ref = payload.membershipRef;
-        if (payload.plan) update.membership_plan = payload.plan;
+        if (payload.membershipRef) update["membership_ref"] = payload.membershipRef;
+        if (payload.plan) update["membership_plan"] = payload.plan;
         if (session.stage === "scanned" || session.stage === "signup_sent") {
-          update.stage = "membership_confirmed";
+          update["stage"] = "membership_confirmed";
         }
 
         const { error } = await supabaseAdmin
