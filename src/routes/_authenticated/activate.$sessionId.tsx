@@ -194,6 +194,11 @@ function ActivatePage() {
   const link = card ? cardUrl(base, card.token) : "";
   const publicProfile = profile ? profileUrl(base, profile.slug) : "";
 
+  // During the show the cards must resolve to Field Hub, not the main site,
+  // unless the main site has already been wired to redirect here.
+  const usingMainSiteBase = /taxcomppro\.com\/connect/i.test(base);
+  const baseIsValid = base.trim().length > 0 && !usingMainSiteBase;
+
   return (
     <FieldShell
       eyebrowRight={STAGE_LABEL[session.stage as Stage]}
@@ -251,14 +256,22 @@ function ActivatePage() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Set this to the live published domain once, on each activation device.
+            Set this to the Field Hub published domain. After the show, migrate each card by
+            setting its override target URL on the main site.
           </p>
+          {usingMainSiteBase ? (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              <strong>Do not write cards to www.taxcomppro.com/connect</strong> unless the main site
+              is already redirecting that path to Field Hub. During the show, use the Field Hub
+              domain so taps resolve here.
+            </div>
+          ) : null}
         </div>
 
         {!card ? (
           <Button
             onClick={issueCard}
-            disabled={busy || !profile}
+            disabled={busy || !profile || !baseIsValid}
             className="h-12 w-full text-base"
           >
             {busy ? "Working…" : "Mint permanent card address"}
@@ -290,7 +303,11 @@ function ActivatePage() {
                 placeholder={link}
               />
             </div>
-            <Button onClick={confirmWritten} disabled={busy} className="h-12 w-full text-base">
+            <Button
+              onClick={confirmWritten}
+              disabled={busy || !baseIsValid}
+              className="h-12 w-full text-base"
+            >
               {busy ? "Saving…" : "Confirm written & issue card"}
             </Button>
           </Panel>
