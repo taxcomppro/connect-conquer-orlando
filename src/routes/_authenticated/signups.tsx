@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { refreshMembershipStatus } from "@/lib/signup-sessions.functions";
+import { issueProConnectCard, refreshMembershipStatus } from "@/lib/signup-sessions.functions";
 import {
   STATUS_LABELS,
   isReadyForCard,
@@ -46,8 +46,9 @@ const pendingStatuses: SignupSessionStatus[] = ["CREATED", "QR_SCANNED", "CHECKO
 const completedStatuses: SignupSessionStatus[] = ["MEMBERSHIP_ACTIVE", "CARD_ISSUED"];
 
 function SignupsPage() {
-  const { user } = useAuth();
+  const { user, session: authSession } = useAuth();
   const refreshFromMainSite = useServerFn(refreshMembershipStatus);
+  const activateProConnectCard = useServerFn(issueProConnectCard);
   const [sessions, setSessions] = useState<SignupSession[]>([]);
   const [leads, setLeads] = useState<Record<string, LeadSummary>>({});
   const [staff, setStaff] = useState<Record<string, StaffSummary>>({});
@@ -138,16 +139,24 @@ function SignupsPage() {
   }
 
   async function issueCard(session: SignupSession) {
-    setBusyId(session.id);
-    const { error } = await supabase.rpc("issue_proconnect_card", {
-      _signup_session_id: session.id,
-    });
-    setBusyId(null);
-    if (error) {
-      toast.error(error.message);
+    if (!authSession?.access_token) {
+      toast.error("Your Field Hub session expired. Please sign in again.");
       return;
     }
-    toast.success("ProConnect card issued. Sales attribution remains unchanged.");
+    setBusyId(session.id);
+    const result = await activateProConnectCard({
+      data: { publicId: session.public_id, accessToken: authSession.access_token },
+    });
+    setBusyId(null);
+    if (!result.ok) {
+      toast.error(result.message);
+      return;
+    }
+    toast.success(
+      result.activation.status === "ACTIVE"
+        ? "ProConnect card issued and profile is active."
+        : "ProConnect card issued. The member can now finish activation.",
+    );
     await loadSessions();
   }
 
