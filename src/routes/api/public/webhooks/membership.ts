@@ -22,6 +22,9 @@ const payloadSchema = z.object({
   fullName: z.string().max(160).optional(),
   membershipRef: z.string().max(120).optional(),
   plan: z.string().max(80).optional(),
+  /** Finished profile link on the main site; the card is written to this when present. */
+  profileUrl: z.string().url().max(500).optional(),
+  memberId: z.string().max(120).optional(),
 });
 
 export const Route = createFileRoute("/api/public/webhooks/membership")({
