@@ -14,6 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
+      card_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          issued_by: string | null
+          last_tap_at: string | null
+          override_target_url: string | null
+          profile_id: string
+          signup_session_id: string
+          status: string
+          tap_count: number
+          token: string
+          updated_at: string
+          verified_at: string | null
+          written_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          last_tap_at?: string | null
+          override_target_url?: string | null
+          profile_id: string
+          signup_session_id: string
+          status?: string
+          tap_count?: number
+          token: string
+          updated_at?: string
+          verified_at?: string | null
+          written_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          last_tap_at?: string | null
+          override_target_url?: string | null
+          profile_id?: string
+          signup_session_id?: string
+          status?: string
+          tap_count?: number
+          token?: string
+          updated_at?: string
+          verified_at?: string | null
+          written_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_tokens_signup_session_id_fkey"
+            columns: ["signup_session_id"]
+            isOneToOne: false
+            referencedRelation: "signup_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_profiles: {
+        Row: {
+          bio: string | null
+          city: string | null
+          company: string | null
+          created_at: string
+          credential: string | null
+          display_name: string
+          email: string | null
+          external_profile_id: string | null
+          id: string
+          migrated_at: string | null
+          phone: string | null
+          published: boolean
+          services: string[]
+          show_email: boolean
+          show_location: boolean
+          show_phone: boolean
+          signup_session_id: string
+          slug: string
+          state: string | null
+          title: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          credential?: string | null
+          display_name: string
+          email?: string | null
+          external_profile_id?: string | null
+          id?: string
+          migrated_at?: string | null
+          phone?: string | null
+          published?: boolean
+          services?: string[]
+          show_email?: boolean
+          show_location?: boolean
+          show_phone?: boolean
+          signup_session_id: string
+          slug: string
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          credential?: string | null
+          display_name?: string
+          email?: string | null
+          external_profile_id?: string | null
+          id?: string
+          migrated_at?: string | null
+          phone?: string | null
+          published?: boolean
+          services?: string[]
+          show_email?: boolean
+          show_location?: boolean
+          show_phone?: boolean
+          signup_session_id?: string
+          slug?: string
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_profiles_signup_session_id_fkey"
+            columns: ["signup_session_id"]
+            isOneToOne: false
+            referencedRelation: "signup_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_submissions: {
         Row: {
           attendee_id: string
@@ -184,6 +330,127 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_events: {
+        Row: {
+          actor_label: string | null
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          signup_session_id: string
+        }
+        Insert: {
+          actor_label?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          signup_session_id: string
+        }
+        Update: {
+          actor_label?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          signup_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signup_events_signup_session_id_fkey"
+            columns: ["signup_session_id"]
+            isOneToOne: false
+            referencedRelation: "signup_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signup_sessions: {
+        Row: {
+          attendee_id: string | null
+          company: string | null
+          created_at: string
+          dub_code: string | null
+          email: string | null
+          external_member_id: string | null
+          full_name: string | null
+          id: string
+          lead_id: string | null
+          membership_confirmed_at: string | null
+          membership_confirmed_by: string | null
+          membership_plan: string | null
+          membership_ref: string | null
+          migrated_at: string | null
+          notes: string | null
+          phone: string | null
+          rep_name: string | null
+          rep_user_id: string
+          source: string
+          stage: Database["public"]["Enums"]["signup_stage"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendee_id?: string | null
+          company?: string | null
+          created_at?: string
+          dub_code?: string | null
+          email?: string | null
+          external_member_id?: string | null
+          full_name?: string | null
+          id?: string
+          lead_id?: string | null
+          membership_confirmed_at?: string | null
+          membership_confirmed_by?: string | null
+          membership_plan?: string | null
+          membership_ref?: string | null
+          migrated_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          rep_name?: string | null
+          rep_user_id: string
+          source?: string
+          stage?: Database["public"]["Enums"]["signup_stage"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendee_id?: string | null
+          company?: string | null
+          created_at?: string
+          dub_code?: string | null
+          email?: string | null
+          external_member_id?: string | null
+          full_name?: string | null
+          id?: string
+          lead_id?: string | null
+          membership_confirmed_at?: string | null
+          membership_confirmed_by?: string | null
+          membership_plan?: string | null
+          membership_ref?: string | null
+          migrated_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          rep_name?: string | null
+          rep_user_id?: string
+          source?: string
+          stage?: Database["public"]["Enums"]["signup_stage"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signup_sessions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_profiles: {
         Row: {
           booth_role: string | null
@@ -244,6 +511,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "staff"
+      signup_stage:
+        | "scanned"
+        | "signup_sent"
+        | "membership_confirmed"
+        | "ready_for_card"
+        | "card_issued"
+        | "void"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -372,6 +646,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "staff"],
+      signup_stage: [
+        "scanned",
+        "signup_sent",
+        "membership_confirmed",
+        "ready_for_card",
+        "card_issued",
+        "void",
+      ],
     },
   },
 } as const
