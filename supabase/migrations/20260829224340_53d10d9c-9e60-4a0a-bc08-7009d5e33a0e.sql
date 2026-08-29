@@ -1,0 +1,1 @@
+ALTER TABLE public.signup_sessions ADD COLUMN IF NOT EXISTS external_profile_url text;

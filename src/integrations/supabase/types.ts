@@ -400,6 +400,7 @@ export type Database = {
           dub_code: string | null
           email: string | null
           external_member_id: string | null
+          external_profile_url: string | null
           full_name: string | null
           id: string
           lead_id: string | null
@@ -424,6 +425,7 @@ export type Database = {
           dub_code?: string | null
           email?: string | null
           external_member_id?: string | null
+          external_profile_url?: string | null
           full_name?: string | null
           id?: string
           lead_id?: string | null
@@ -448,6 +450,7 @@ export type Database = {
           dub_code?: string | null
           email?: string | null
           external_member_id?: string | null
+          external_profile_url?: string | null
           full_name?: string | null
           id?: string
           lead_id?: string | null
