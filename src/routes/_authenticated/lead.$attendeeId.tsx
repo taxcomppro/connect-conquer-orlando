@@ -51,6 +51,72 @@ function LeadPage() {
   const [joinTitle, setJoinTitle] = useState("");
   const [consent, setConsent] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [dubCode, setDubCode] = useState("");
+  const [startingSignup, setStartingSignup] = useState(false);
+
+  useEffect(() => {
+    setDubCode(window.localStorage.getItem("tcpc.dubCode") ?? "");
+  }, []);
+
+  async function startSignup() {
+    if (!user || !lead) return;
+    setStartingSignup(true);
+    window.localStorage.setItem("tcpc.dubCode", dubCode.trim());
+
+    const { data: staff } = await supabase
+      .from("staff_profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const { data: existing } = await supabase
+      .from("signup_sessions")
+      .select("id")
+      .eq("lead_id", lead.id)
+      .neq("stage", "void")
+      .maybeSingle();
+
+    if (existing) {
+      setStartingSignup(false);
+      navigate({ to: "/signup/$sessionId", params: { sessionId: existing.id } });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("signup_sessions")
+      .insert({
+        lead_id: lead.id,
+        attendee_id: lead.attendee_id,
+        rep_user_id: user.id,
+        rep_name: staff?.display_name ?? null,
+        dub_code: dubCode.trim() || null,
+        full_name: [lead.first_name, lead.last_name].filter(Boolean).join(" ") || null,
+        email: lead.email,
+        phone: lead.phone,
+        company: lead.company,
+        title: lead.title,
+      })
+      .select()
+      .single();
+
+    if (error || !data) {
+      setStartingSignup(false);
+      toast.error("Couldn't start the signup. Try again.");
+      return;
+    }
+
+    await supabase.from("signup_events").insert({
+      signup_session_id: data.id,
+      event_type: "LEAD_SCANNED",
+      actor_user_id: user.id,
+      actor_label: staff?.display_name ?? null,
+      payload: { attendee_id: lead.attendee_id, dub_code: dubCode.trim() || null },
+    });
+
+    setStartingSignup(false);
+    navigate({ to: "/signup/$sessionId", params: { sessionId: data.id } });
+  }
+
 
   useEffect(() => {
     if (!user) return;
@@ -240,7 +306,33 @@ function LeadPage() {
         placeholder="Runs a 3-person shop, filing 400 returns, hates their current software…"
       />
 
+      <div className="mt-8 rounded-2xl border border-signal-line bg-signal-soft p-5">
+        <div className="eyebrow">ProConnect signup</div>
+        <h2 className="mt-2 font-display text-xl">Membership + card flow</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Creates the signup session, locks your attribution to it, and shows the QR code the
+          customer scans on their own phone.
+        </p>
+        <div className="mt-3 space-y-2">
+          <Label htmlFor="dub">DUB code</Label>
+          <Input
+            id="dub"
+            value={dubCode}
+            onChange={(e) => setDubCode(e.target.value)}
+            placeholder="Your DUB attribution code"
+          />
+        </div>
+        <Button
+          onClick={startSignup}
+          disabled={startingSignup}
+          className="mt-4 h-12 w-full text-base"
+        >
+          {startingSignup ? "Starting…" : "Start ProConnect signup →"}
+        </Button>
+      </div>
+
       {!lead.joined_tcpc ? (
+
         <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
           <div className="eyebrow">Close the loop</div>
           <h2 className="mt-2 font-display text-xl">Join Tax Compliance Pro Connect</h2>
