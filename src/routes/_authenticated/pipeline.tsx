@@ -109,9 +109,9 @@ function PipelinePage() {
   }
 
   return (
-    <FieldShell eyebrowRight="Signup pipeline" back={{ to: "/", label: "Back to hub" }}>
+    <FieldShell eyebrowRight="Sales pipeline" back={{ to: "/", label: "Back to hub" }}>
       <PageTitle
-        title="Signup"
+        title="Sales"
         accent="pipeline"
         lede="Scan → membership → profile → card. Every step attributed to the rep who started it."
       />

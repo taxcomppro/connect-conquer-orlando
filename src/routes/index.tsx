@@ -112,7 +112,7 @@ function Hub() {
           className="group rounded-2xl border border-gold/40 bg-gold/10 p-5 transition-transform hover:-translate-y-0.5"
         >
           <div className="text-2xl">◎</div>
-          <div className="mt-3 font-display text-xl">Signup Pipeline</div>
+          <div className="mt-3 font-display text-xl">Sales Pipeline</div>
           <p className="mt-1 text-sm text-muted-foreground">
             Membership signups, Connect profiles and ProConnect card activation, end to end.
           </p>
