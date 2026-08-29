@@ -16,14 +16,13 @@ import type { TablesUpdate } from "@/integrations/supabase/types";
  * Body (JSON):
  *   { sessionId?: uuid, email?: string, membershipRef?: string, plan?: string }
  */
-const payloadSchema = z
-  .object({
-    sessionId: z.string().uuid().optional(),
-    email: z.string().email().max(200).optional(),
-    membershipRef: z.string().max(120).optional(),
-    plan: z.string().max(80).optional(),
-  })
-  .refine((v) => v.sessionId || v.email, { message: "sessionId or email required" });
+const payloadSchema = z.object({
+  sessionId: z.string().uuid().optional(),
+  email: z.string().email().max(200),
+  fullName: z.string().max(160).optional(),
+  membershipRef: z.string().max(120).optional(),
+  plan: z.string().max(80).optional(),
+});
 
 export const Route = createFileRoute("/api/public/webhooks/membership")({
   server: {
@@ -59,38 +58,58 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+        const email = payload.email.toLowerCase();
         let query = supabaseAdmin
           .from("signup_sessions")
           .select("id, stage, email, membership_confirmed_at")
           .neq("stage", "void")
           .order("created_at", { ascending: false })
           .limit(1);
-        if (payload.sessionId) {
-          query = query.eq("id", payload.sessionId);
-        } else {
-          query = query.eq("email", payload.email!.toLowerCase());
-        }
-        const { data: session } = await query.maybeSingle();
-        if (!session) {
-          return Response.json({ error: "session_not_found" }, { status: 404 });
-        }
+        query = payload.sessionId ? query.eq("id", payload.sessionId) : query.eq("email", email);
+        const { data: found } = await query.maybeSingle();
 
         const now = new Date().toISOString();
-        const update: TablesUpdate<"signup_sessions"> = {
-          membership_confirmed_at: session.membership_confirmed_at ?? now,
-        };
-        if (payload.membershipRef) update["membership_ref"] = payload.membershipRef;
-        if (payload.plan) update["membership_plan"] = payload.plan;
-        if (session.stage === "scanned" || session.stage === "signup_sent") {
-          update["stage"] = "membership_confirmed";
-        }
+        let session = found;
 
-        const { error } = await supabaseAdmin
-          .from("signup_sessions")
-          .update(update)
-          .eq("id", session.id);
-        if (error) {
-          return Response.json({ error: "update_failed" }, { status: 500 });
+        if (!session) {
+          // Card-first flow: customer tapped a generic card and bought without a
+          // prior badge scan — open their sales record straight from the purchase.
+          const { data: created, error: insertError } = await supabaseAdmin
+            .from("signup_sessions")
+            .insert({
+              email,
+              rep_user_id: null,
+              full_name: payload.fullName ?? null,
+              stage: "membership_confirmed",
+              membership_confirmed_at: now,
+              membership_ref: payload.membershipRef ?? null,
+              membership_plan: payload.plan ?? null,
+            })
+            .select("id, stage, email, membership_confirmed_at")
+            .single();
+          if (insertError || !created) {
+            return Response.json({ error: "create_failed" }, { status: 500 });
+          }
+          session = created;
+        } else {
+          const update: TablesUpdate<"signup_sessions"> = {
+            membership_confirmed_at: session.membership_confirmed_at ?? now,
+          };
+          if (payload.membershipRef) update["membership_ref"] = payload.membershipRef;
+          if (payload.plan) update["membership_plan"] = payload.plan;
+          if (payload.fullName && session.stage !== "card_issued") {
+            update["full_name"] = payload.fullName;
+          }
+          if (session.stage === "scanned" || session.stage === "signup_sent") {
+            update["stage"] = "membership_confirmed";
+          }
+          const { error } = await supabaseAdmin
+            .from("signup_sessions")
+            .update(update)
+            .eq("id", session.id);
+          if (error) {
+            return Response.json({ error: "update_failed" }, { status: 500 });
+          }
         }
 
         if (!session.membership_confirmed_at) {
@@ -109,7 +128,8 @@ export const Route = createFileRoute("/api/public/webhooks/membership")({
         return Response.json({
           ok: true,
           sessionId: session.id,
-          alreadyConfirmed: Boolean(session.membership_confirmed_at),
+          joinPath: `/join/${session.id}`,
+          alreadyConfirmed: Boolean(found?.membership_confirmed_at),
         });
       },
     },

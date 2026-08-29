@@ -1,0 +1,1 @@
+ALTER TABLE public.signup_sessions ALTER COLUMN rep_user_id DROP NOT NULL;
