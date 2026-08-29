@@ -10,13 +10,13 @@ import { STAGE_LABEL, STAGE_TONE, sessionName, type SignupSession, type Stage } 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
     meta: [
-      { title: "Signup pipeline — TCPC Field Hub" },
+      { title: "Sales pipeline — TCPC Field Hub" },
       {
         name: "description",
         content:
           "Track every booth signup from badge scan to membership, profile and issued ProConnect card, with rep and DUB attribution.",
       },
-      { property: "og:title", content: "Signup pipeline — TCPC Field Hub" },
+      { property: "og:title", content: "Sales pipeline — TCPC Field Hub" },
       {
         property: "og:description",
         content: "Every booth signup from scan to card, with full attribution and export.",
@@ -109,15 +109,15 @@ function PipelinePage() {
   }
 
   return (
-    <FieldShell eyebrowRight="Signup pipeline" back={{ to: "/", label: "Back to hub" }}>
+    <FieldShell eyebrowRight="Sales pipeline" back={{ to: "/", label: "Back to hub" }}>
       <PageTitle
-        title="Signup"
+        title="Sales"
         accent="pipeline"
         lede="Scan → membership → profile → card. Every step attributed to the rep who started it."
       />
 
       <div className="mt-5 grid grid-cols-3 gap-3">
-        <Stat label="Signups" value={stats.total} />
+        <Stat label="Sales" value={stats.total} />
         <Stat label="Ready for card" value={stats.ready} tone="text-gold" />
         <Stat label="Cards issued" value={stats.issued} tone="text-go" />
       </div>
@@ -146,7 +146,7 @@ function PipelinePage() {
         placeholder="Search name, firm, badge ID, DUB code…"
       />
 
-      <SectionLabel>{loading ? "Loading…" : `${visible.length} signups`}</SectionLabel>
+      <SectionLabel>{loading ? "Loading…" : `${visible.length} sales`}</SectionLabel>
       <div className="space-y-2">
         {visible.map((session) => (
           <Link
