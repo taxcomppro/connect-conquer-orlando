@@ -8,6 +8,7 @@ import { lookupBadge } from "@/lib/edc.functions";
 import { runSmsTriggers } from "@/lib/sms-triggers.functions";
 import { badgeToDraft, pendingDraft } from "@/lib/leads";
 import { enqueueLead, flushQueue, queueSize } from "@/lib/offline-queue";
+import { resolveAttribution } from "@/lib/attribution";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
