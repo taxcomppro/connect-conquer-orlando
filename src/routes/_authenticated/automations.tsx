@@ -337,7 +337,7 @@ function AutomationsPage() {
             />
             <p className="text-xs text-muted-foreground">
               Placeholders: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"},{" "}
-              {"{{company}}"}, {"{{rep_name}}"}
+              {"{{company}}"}, {"{{rep_name}}"}, {"{{signup_link}}"}
             </p>
           </div>
           <Button type="submit" disabled={busy} className="h-11">

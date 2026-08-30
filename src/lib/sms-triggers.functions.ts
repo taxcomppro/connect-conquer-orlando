@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Tables } from "@/integrations/supabase/types";
+import { FIELD_HUB_URL, joinUrl } from "./connect";
 
 export type SmsTrigger = Tables<"sms_triggers">;
 
@@ -22,15 +23,20 @@ function normalizePhone(value: string): string {
 
 export function renderTemplate(
   body: string,
-  lead: { first_name?: string | null; last_name?: string | null; company?: string | null },
-  repName?: string | null,
+  options: {
+    lead: { first_name?: string | null; last_name?: string | null; company?: string | null };
+    repName?: string | null;
+    signupLink?: string | null;
+  },
 ): string {
+  const { lead, repName, signupLink } = options;
   const map: Record<string, string> = {
     first_name: lead.first_name?.trim() || "there",
     last_name: lead.last_name?.trim() || "",
     full_name: [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim() || "there",
     company: lead.company?.trim() || "",
     rep_name: repName?.trim() || "the TCPC team",
+    signup_link: signupLink?.trim() || "",
   };
   return body.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => map[key] ?? match);
 }
@@ -141,7 +147,7 @@ export const runSmsTriggers = createServerFn({ method: "POST" })
 
     const { data: lead } = await supabase
       .from("leads")
-      .select("id, phone, first_name, last_name, company, sms_consent, outcome")
+      .select("id, attendee_id, phone, first_name, last_name, company, email, sms_consent, outcome")
       .eq("id", data.leadId)
       .maybeSingle();
 
@@ -150,11 +156,66 @@ export const runSmsTriggers = createServerFn({ method: "POST" })
 
     const { data: staff } = await supabase
       .from("staff_profiles")
-      .select("display_name")
+      .select("display_name, commission_eligible, dub_partner_key")
       .eq("id", userId)
       .maybeSingle();
 
+    const { data: settings } = await supabase
+      .from("booth_settings")
+      .select("pooled_dub_key")
+      .maybeSingle();
+
     const outcome = data.outcome ?? lead.outcome;
+
+    // Resolve or create a signup session so templates can include a welcome link.
+    let signupSessionId: string | null = null;
+    const { data: existingSession } = await supabase
+      .from("signup_sessions")
+      .select("id")
+      .eq("lead_id", lead.id)
+      .neq("stage", "void")
+      .maybeSingle();
+
+    if (existingSession) {
+      signupSessionId = existingSession.id;
+    } else {
+      let dubCode: string | null = null;
+      let dubAttribution = "none";
+      if (staff?.commission_eligible === false) {
+        dubAttribution = "owner";
+      } else if (staff?.dub_partner_key) {
+        dubCode = staff.dub_partner_key;
+        dubAttribution = "personal";
+      } else if (settings?.pooled_dub_key) {
+        dubCode = settings.pooled_dub_key;
+        dubAttribution = "pooled";
+      }
+
+      const { data: newSession, error: sessionError } = await supabase
+        .from("signup_sessions")
+        .insert({
+          lead_id: lead.id,
+          attendee_id: lead.attendee_id,
+          rep_user_id: userId,
+          rep_name: staff?.display_name ?? null,
+          dub_code: dubCode,
+          dub_attribution: dubAttribution,
+          full_name: [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim() || null,
+          email: lead.email,
+          phone: lead.phone,
+          company: lead.company,
+          source: "sms_trigger",
+          stage: "scanned",
+        })
+        .select("id")
+        .single();
+
+      if (!sessionError && newSession) {
+        signupSessionId = newSession.id;
+      }
+    }
+
+    const signupLink = signupSessionId ? joinUrl(FIELD_HUB_URL, signupSessionId) : "";
 
     for (const trigger of triggers) {
       if (trigger.event === "outcome_changed" && trigger.match_outcome && trigger.match_outcome !== outcome) {
@@ -184,7 +245,11 @@ export const runSmsTriggers = createServerFn({ method: "POST" })
         continue;
       }
 
-      const body = renderTemplate(templateBody, lead, staff?.display_name ?? null);
+      const body = renderTemplate(templateBody, {
+        lead,
+        repName: staff?.display_name ?? null,
+        signupLink,
+      });
       const to = normalizePhone(lead.phone);
 
       try {

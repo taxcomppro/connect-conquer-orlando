@@ -36,6 +36,9 @@ export const STAGE_TONE: Record<Stage, string> = {
 /** Where the salesperson sends the customer to buy a membership. */
 export const MEMBERSHIP_URL = "https://www.taxcomppro.com/connect";
 
+/** Public origin for the Field Hub — used in welcome texts and card URLs. */
+export const FIELD_HUB_URL = "https://fieldhub.taxcomppro.com";
+
 /**
  * Canonical origin used when writing NFC cards. Cards must carry the published
  * domain, never a preview URL, so the activation station lets staff pin it and
