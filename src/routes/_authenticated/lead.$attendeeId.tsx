@@ -607,7 +607,7 @@ function LeadPage() {
               {smsHistory.map((msg) => (
                 <div
                   key={msg.id}
-                  className="rounded-xl border border-border bg-canvas p-3 text-sm"
+                  className="rounded-xl border border-border bg-muted p-3 text-sm"
                 >
                   <p className="whitespace-pre-wrap">{msg.body}</p>
                   <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
