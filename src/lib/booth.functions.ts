@@ -169,36 +169,24 @@ export const getPublicProfile = createServerFn({ method: "POST" })
     return { slug };
   })
   .handler(async ({ data }) => {
-    const { createClient } = await import("@supabase/supabase-js");
-    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const supabasePublic = createClient<import("@/integrations/supabase/types").Database>(
-      process.env["SUPABASE_URL"]!,
-      key,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
-        global: {
-          fetch: (input, init) => {
-            const h = new Headers(init?.headers);
-            if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
-              h.delete("Authorization");
-            }
-            h.set("apikey", key);
-            return fetch(input, { ...init, headers: h });
-          },
-        },
-      },
-    );
-    // The view enforces published-only and masks email/phone/location
-    // unless the member opted in — the raw table is not readable by anon.
-    const { data: profile } = await supabasePublic
-      .from("public_connect_profiles")
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Privileged server-side read; hidden fields are stripped here so nothing
+    // sensitive ever reaches the browser. The table is not readable by anon.
+    const { data: profile } = await supabaseAdmin
+      .from("connect_profiles")
       .select(
-        "slug, display_name, credential, title, company, city, state, email, phone, website, bio, services",
+        "slug, display_name, credential, title, company, city, state, email, phone, website, bio, services, show_email, show_phone, show_location, published",
       )
       .eq("slug", data.slug)
+      .eq("published", true)
       .maybeSingle();
 
     if (!profile) return null;
+
+    const location = profile.show_location
+      ? [profile.city, profile.state].filter(Boolean).join(", ") || null
+      : null;
 
     return {
       slug: profile.slug,
@@ -206,11 +194,12 @@ export const getPublicProfile = createServerFn({ method: "POST" })
       credential: profile.credential,
       title: profile.title,
       company: profile.company,
-      location: [profile.city, profile.state].filter(Boolean).join(", ") || null,
-      email: profile.email,
-      phone: profile.phone,
+      location,
+      email: profile.show_email ? profile.email : null,
+      phone: profile.show_phone ? profile.phone : null,
       website: profile.website,
       bio: profile.bio,
       services: profile.services ?? [],
     };
   });
+

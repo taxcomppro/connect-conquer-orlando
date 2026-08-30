@@ -719,51 +719,7 @@ export type Database = {
       }
     }
     Views: {
-      public_connect_profiles: {
-        Row: {
-          bio: string | null
-          city: string | null
-          company: string | null
-          credential: string | null
-          display_name: string | null
-          email: string | null
-          phone: string | null
-          services: string[] | null
-          slug: string | null
-          state: string | null
-          title: string | null
-          website: string | null
-        }
-        Insert: {
-          bio?: string | null
-          city?: never
-          company?: string | null
-          credential?: string | null
-          display_name?: string | null
-          email?: never
-          phone?: never
-          services?: string[] | null
-          slug?: string | null
-          state?: never
-          title?: string | null
-          website?: string | null
-        }
-        Update: {
-          bio?: string | null
-          city?: never
-          company?: string | null
-          credential?: string | null
-          display_name?: string | null
-          email?: never
-          phone?: never
-          services?: string[] | null
-          slug?: string | null
-          state?: never
-          title?: string | null
-          website?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       has_role: {
