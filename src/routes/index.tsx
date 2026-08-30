@@ -81,7 +81,7 @@ function Hub() {
         lede="Everything the floor team needs in one place. Scan a badge, qualify the lead, close the TCPC join before they walk away."
       />
 
-      <SectionLabel>Lead capture</SectionLabel>
+      <SectionLabel>Two tracks: capture every lead, close the ones that buy</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-3">
         <Link
           to="/scan"
