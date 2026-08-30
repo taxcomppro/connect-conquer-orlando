@@ -191,7 +191,7 @@ function DubPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="workspace">Dub workspace / group ID (optional)</Label>
+          <Label htmlFor="workspace">Dub workspace ID (optional)</Label>
           <Input
             id="workspace"
             value={workspaceId}
@@ -199,6 +199,19 @@ function DubPage() {
             placeholder="ws_..."
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="group">Dub group ID</Label>
+          <Input
+            id="group"
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            placeholder="grp_..."
+          />
+          <p className="text-xs text-muted-foreground">
+            New links are tagged with this group so they show up in your Dub group reporting.
+          </p>
+        </div>
+
         <Button onClick={savePooled} disabled={busy || !pooledKey} className="h-12 w-full">
           {busy ? "Working…" : "Create / verify in Dub and save"}
         </Button>
