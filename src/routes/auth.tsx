@@ -17,17 +17,19 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Booth Staff Sign In — TCPC Lead Scanner" },
+      { title: "Booth Staff Sign In — TCPC Field Hub" },
       {
         name: "description",
         content:
-          "Sign in to the Tax Compliance Pro booth scanner to capture and qualify leads at the IRS Nationwide Tax Forum.",
+          "Approved booth staff sign in with a one-time email link to capture and qualify leads at the IRS Nationwide Tax Forum.",
       },
-      { property: "og:title", content: "Booth Staff Sign In — TCPC Lead Scanner" },
+      { property: "og:title", content: "Booth Staff Sign In — TCPC Field Hub" },
       {
         property: "og:description",
-        content: "Sign in to the Tax Compliance Pro booth scanner for the IRS Forum in Orlando.",
+        content: "Passwordless sign in for Tax Compliance Pro booth staff at the IRS Forum in Orlando.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
@@ -43,11 +45,9 @@ function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && session) {
@@ -57,28 +57,26 @@ function AuthPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    const address = email.trim().toLowerCase();
+    if (!address) return;
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}${safeNext(next)}`,
-            data: { display_name: displayName || email.split("@")[0] },
-          },
-        });
-        if (error) throw error;
-        toast.success("Account created. You're on the booth roster.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Welcome back.");
-      }
+      const { error } = await supabase.auth.signInWithOtp({
+        email: address,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}${safeNext(next)}`,
+        },
+      });
+      if (error) throw error;
+      setSentTo(address);
+      toast.success("Sign-in link sent. Check your email on this device.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Sign in failed.";
+      const message = error instanceof Error ? error.message : "Could not send the sign-in link.";
       toast.error(
-        /approved booth staff|Database error saving new user/i.test(message)
+        /approved booth staff|Database error saving new user|not allowed|signups not allowed/i.test(
+          message,
+        )
           ? "That email isn't on the approved booth staff list. Ask an admin to add it."
           : message,
       );
@@ -94,7 +92,7 @@ function AuthPage() {
     });
     if (result.error) {
       setBusy(false);
-      toast.error("Google sign-in failed. Try email instead.");
+      toast.error("Google sign-in failed. Use the email link instead.");
       return;
     }
     if (result.redirected) return;
@@ -107,82 +105,68 @@ function AuthPage() {
         <PageTitle
           title="Booth staff"
           accent="sign in"
-          lede="Access is limited to approved booth staff emails. Every scan is attributed to the person who captured it — sign in once at the start of your shift."
+          lede="No passwords. Enter your approved booth email and we'll send a one-time sign-in link. Every scan is attributed to the person who captured it."
         />
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-7 space-y-4 rounded-xl border border-border bg-panel p-5"
-        >
-          {mode === "signup" ? (
+        {sentTo ? (
+          <div className="mt-7 space-y-4 rounded-xl border border-border bg-panel p-5">
+            <p className="eyebrow">Link sent</p>
+            <p className="text-sm text-muted-foreground">
+              We emailed a sign-in link to <span className="text-foreground">{sentTo}</span>. Open it
+              on this device to land straight in the Field Hub.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full"
+              onClick={() => setSentTo(null)}
+            >
+              Use a different email
+            </Button>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="mt-7 space-y-4 rounded-xl border border-border bg-panel p-5"
+          >
             <div className="space-y-2">
-              <Label htmlFor="name">Your name</Label>
+              <Label htmlFor="email">Approved booth email</Label>
               <Input
-                id="name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Jordan Ellis"
-                autoComplete="name"
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@taxcompliancepro.com"
+                autoComplete="email"
               />
             </div>
-          ) : null}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@taxcompliancepro.com"
-              autoComplete="email"
-            />
-          </div>
+            <Button type="submit" disabled={busy} className="h-11 w-full">
+              {busy ? "Sending link…" : "Email me a sign-in link"}
+            </Button>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            />
-          </div>
+            <div className="flex items-center gap-3 py-1">
+              <span className="h-px flex-1 bg-border" />
+              <span className="eyebrow">or</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
-            {mode === "signup" ? "Create booth account" : "Sign in"}
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={handleGoogle}
+              className="h-11 w-full"
+            >
+              Continue with Google
+            </Button>
 
-          <div className="flex items-center gap-3 py-1">
-            <span className="h-px flex-1 bg-border" />
-            <span className="eyebrow">or</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={handleGoogle}
-            className="h-11 w-full"
-          >
-            Continue with Google
-          </Button>
-
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="w-full pt-1 text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {mode === "signin"
-              ? "New on the team? Create an account"
-              : "Already have an account? Sign in"}
-          </button>
-        </form>
+            <p className="pt-1 text-center text-xs text-muted-foreground">
+              Only emails on the approved booth staff list can get in.
+            </p>
+          </form>
+        )}
       </div>
     </FieldShell>
   );
