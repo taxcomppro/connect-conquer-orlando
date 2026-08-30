@@ -101,8 +101,37 @@ function HandoffPage() {
       actor_user_id: user.id,
       actor_label: "staff",
     });
+    if (session.lead_id) {
+      await supabase
+        .from("leads")
+        .update({ outcome: "sale_closed", joined_tcpc: true })
+        .eq("id", session.lead_id);
+    }
     toast.success("Marked confirmed — send them to the activation station.");
     setSession({ ...session, stage: "membership_confirmed" });
+  }
+
+  async function markNoSale() {
+    if (!session || !user) return;
+    const { error } = await supabase
+      .from("signup_sessions")
+      .update({ stage: "void" })
+      .eq("id", session.id);
+    if (error) {
+      toast.error("Couldn't close out the signup.");
+      return;
+    }
+    await supabase.from("signup_events").insert({
+      signup_session_id: session.id,
+      event_type: "SIGNUP_VOIDED",
+      actor_user_id: user.id,
+      actor_label: "staff",
+    });
+    if (session.lead_id) {
+      await supabase.from("leads").update({ outcome: "follow_up" }).eq("id", session.lead_id);
+    }
+    toast.success("Closed out — the lead stays on the follow-up list.");
+    setSession({ ...session, stage: "void" });
   }
 
   if (loading) {
@@ -171,6 +200,13 @@ function HandoffPage() {
           </p>
           <Button variant="outline" onClick={markConfirmed} className="mt-4 h-12 w-full text-base">
             Membership confirmed at booth
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={markNoSale}
+            className="mt-2 h-11 w-full text-sm text-muted-foreground"
+          >
+            No sale today — keep as follow-up
           </Button>
         </div>
       )}

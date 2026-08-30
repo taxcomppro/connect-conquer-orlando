@@ -173,6 +173,12 @@ function ActivatePage() {
       })
       .eq("id", card.id);
     await supabase.from("signup_sessions").update({ stage: "card_issued" }).eq("id", session.id);
+    if (session.lead_id) {
+      await supabase
+        .from("leads")
+        .update({ outcome: "sale_closed", joined_tcpc: true })
+        .eq("id", session.lead_id);
+    }
     await supabase.from("signup_events").insert({
       signup_session_id: session.id,
       event_type: "CARD_ISSUED",

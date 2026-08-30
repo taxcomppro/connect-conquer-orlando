@@ -4,7 +4,17 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { INTEREST_OPTIONS, RATINGS, leadName, type Lead, type Rating } from "@/lib/leads";
+import {
+  INTEREST_OPTIONS,
+  OUTCOME_LABEL,
+  OUTCOME_TONE,
+  RATINGS,
+  leadName,
+  leadOutcome,
+  type Lead,
+  type Outcome,
+  type Rating,
+} from "@/lib/leads";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +51,7 @@ function LeadPage() {
   const [rating, setRating] = useState<Rating>("warm");
   const [interests, setInterests] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [outcome, setOutcome] = useState<Outcome>("open");
   const [saving, setSaving] = useState(false);
 
   const [showJoin, setShowJoin] = useState(false);
@@ -113,6 +124,12 @@ function LeadPage() {
       payload: { attendee_id: lead.attendee_id, dub_code: dubCode.trim() || null },
     });
 
+    await supabase
+      .from("leads")
+      .update({ outcome: "sale_started" })
+      .eq("id", lead.id);
+    setOutcome("sale_started");
+
     setStartingSignup(false);
     navigate({ to: "/signup/$sessionId", params: { sessionId: data.id } });
   }
@@ -136,6 +153,7 @@ function LeadPage() {
         setRating((RATINGS as readonly string[]).includes(data.rating) ? (data.rating as Rating) : "warm");
         setInterests(data.interests ?? []);
         setNotes(data.notes ?? "");
+        setOutcome(leadOutcome(data));
         setJoinName([data.first_name, data.last_name].filter(Boolean).join(" "));
         setJoinEmail(data.email ?? "");
         setJoinPhone(data.phone ?? "");
@@ -165,7 +183,7 @@ function LeadPage() {
     setSaving(true);
     const { error } = await supabase
       .from("leads")
-      .update({ rating, interests, notes: notes.trim() || null })
+      .update({ rating, interests, notes: notes.trim() || null, outcome })
       .eq("id", lead.id);
     setSaving(false);
 
@@ -305,6 +323,32 @@ function LeadPage() {
         rows={3}
         placeholder="Runs a 3-person shop, filing 400 returns, hates their current software…"
       />
+
+      <SectionLabel>Where does this lead land?</SectionLabel>
+      <p className="-mt-2 mb-3 text-sm text-muted-foreground">
+        Not every scan becomes a sale. Mark the outcome so follow-up after the show is clean.
+      </p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {(["open", "follow_up", "not_a_fit", "sale_closed"] as Outcome[]).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setOutcome(option)}
+            className={`min-h-14 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+              outcome === option
+                ? OUTCOME_TONE[option]
+                : "border-border bg-panel text-muted-foreground hover:bg-panel-hover"
+            }`}
+          >
+            {OUTCOME_LABEL[option]}
+          </button>
+        ))}
+      </div>
+      {outcome === "sale_started" ? (
+        <p className="mt-2 text-sm text-signal">
+          {OUTCOME_LABEL.sale_started} — a signup session is open in the sales pipeline.
+        </p>
+      ) : null}
 
       <div className="mt-8 rounded-2xl border border-signal-line bg-signal-soft p-5">
         <div className="eyebrow">ProConnect signup</div>

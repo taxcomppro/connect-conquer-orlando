@@ -263,6 +263,7 @@ export type Database = {
           middle_name: string | null
           nickname: string | null
           notes: string | null
+          outcome: string
           phone: string | null
           postal_code: string | null
           prefix: string | null
@@ -301,6 +302,7 @@ export type Database = {
           middle_name?: string | null
           nickname?: string | null
           notes?: string | null
+          outcome?: string
           phone?: string | null
           postal_code?: string | null
           prefix?: string | null
@@ -339,6 +341,7 @@ export type Database = {
           middle_name?: string | null
           nickname?: string | null
           notes?: string | null
+          outcome?: string
           phone?: string | null
           postal_code?: string | null
           prefix?: string | null
