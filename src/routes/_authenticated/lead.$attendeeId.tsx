@@ -581,7 +581,7 @@ function LeadPage() {
               </p>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border border-border bg-canvas px-4 py-3">
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
               <Label htmlFor="smsConsent" className="text-sm font-normal">
                 Lead consented to SMS updates
               </Label>
