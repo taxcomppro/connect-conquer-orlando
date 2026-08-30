@@ -59,19 +59,19 @@ export async function sendSms(input: { to: string; body: string }): Promise<Twil
 
   if (!response.ok) {
     const message =
-      typeof data.message === "string"
-        ? data.message
-        : typeof data.error === "string"
-          ? data.error
+      typeof data["message"] === "string"
+        ? data["message"]
+        : typeof data["error"] === "string"
+          ? data["error"]
           : `Twilio request failed (${response.status})`;
     throw new Error(message);
   }
 
   return {
-    sid: String(data.sid ?? ""),
-    status: String(data.status ?? "queued"),
-    to: String(data.to ?? to),
-    from: String(data.from ?? fromNumber()),
-    body: String(data.body ?? body),
+    sid: String(data["sid"] ?? ""),
+    status: String(data["status"] ?? "queued"),
+    to: String(data["to"] ?? to),
+    from: String(data["from"] ?? fromNumber()),
+    body: String(data["body"] ?? body),
   };
 }
