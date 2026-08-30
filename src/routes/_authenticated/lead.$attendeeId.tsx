@@ -62,17 +62,19 @@ function LeadPage() {
   const [joinTitle, setJoinTitle] = useState("");
   const [consent, setConsent] = useState(true);
   const [joining, setJoining] = useState(false);
-  const [dubCode, setDubCode] = useState("");
+  const [attribution, setAttribution] = useState<Attribution | null>(null);
   const [startingSignup, setStartingSignup] = useState(false);
 
   useEffect(() => {
-    setDubCode(window.localStorage.getItem("tcpc.dubCode") ?? "");
-  }, []);
+    if (!user) return;
+    void resolveAttribution(user.id).then(setAttribution);
+  }, [user]);
 
   async function startSignup() {
     if (!user || !lead) return;
     setStartingSignup(true);
-    window.localStorage.setItem("tcpc.dubCode", dubCode.trim());
+    const attr = attribution ?? (await resolveAttribution(user.id));
+
 
     const { data: staff } = await supabase
       .from("staff_profiles")
