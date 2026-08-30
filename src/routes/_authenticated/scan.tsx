@@ -140,11 +140,46 @@ function ScanPage() {
 
       const { data: savedLead, error } = await supabase
         .from("leads")
-        .upsert({ ...draft, scanned_by: user.id }, { onConflict: "attendee_id,scanned_by" })
+        .upsert(
+          // Scanning implies the rep already asked "Can I text you the link?" and got a yes.
+          { ...draft, scanned_by: user.id, sms_consent: true },
+          { onConflict: "attendee_id,scanned_by" },
+        )
         .select("id")
         .maybeSingle();
 
       if (!error && savedLead) {
+        // Pre-create the signup session so the welcome text has a link to send.
+        const [{ data: staff }, attr] = await Promise.all([
+          supabase.from("staff_profiles").select("display_name").eq("id", user.id).maybeSingle(),
+          resolveAttribution(user.id),
+        ]);
+
+        const { data: existingSession } = await supabase
+          .from("signup_sessions")
+          .select("id")
+          .eq("lead_id", savedLead.id)
+          .neq("stage", "void")
+          .maybeSingle();
+
+        if (!existingSession) {
+          await supabase.from("signup_sessions").insert({
+            lead_id: savedLead.id,
+            attendee_id: draft.attendee_id,
+            rep_user_id: user.id,
+            rep_name: staff?.display_name ?? null,
+            dub_code: attr.code,
+            dub_attribution: attr.kind,
+            full_name: [draft.first_name, draft.last_name].filter(Boolean).join(" ").trim() || null,
+            email: draft.email,
+            phone: draft.phone,
+            company: draft.company,
+            title: draft.title,
+            source: "badge_scan",
+            stage: "scanned",
+          });
+        }
+
         void fireTriggers({ data: { leadId: savedLead.id, event: "lead_captured" } }).catch(
           () => undefined,
         );
