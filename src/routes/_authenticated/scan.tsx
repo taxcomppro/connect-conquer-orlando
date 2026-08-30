@@ -39,6 +39,8 @@ function ScanPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const lookup = useServerFn(lookupBadge);
+  const fireTriggers = useServerFn(runSmsTriggers);
+
 
   const [cameraOn, setCameraOn] = useState(false);
   const [manualId, setManualId] = useState("");
