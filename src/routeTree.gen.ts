@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
+import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
@@ -47,6 +48,11 @@ const CardNotFoundRoute = CardNotFoundRouteImport.update({
 const AuthenticatedBriefingRoute = AuthenticatedBriefingRouteImport.update({
   id: '/briefing',
   path: '/briefing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDubRoute = AuthenticatedDubRouteImport.update({
+  id: '/dub',
+  path: '/dub',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
+  '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/briefing': typeof AuthenticatedBriefingRoute
+  '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
+  '/_authenticated/dub': typeof AuthenticatedDubRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/card-not-found'
     | '/briefing'
+    | '/dub'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/card-not-found'
     | '/briefing'
+    | '/dub'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/card-not-found'
     | '/_authenticated/briefing'
+    | '/_authenticated/dub'
     | '/_authenticated/leads'
     | '/_authenticated/pipeline'
     | '/_authenticated/scan'
@@ -252,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/briefing'
       fullPath: '/briefing'
       preLoaderRoute: typeof AuthenticatedBriefingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dub': {
+      id: '/_authenticated/dub'
+      path: '/dub'
+      fullPath: '/dub'
+      preLoaderRoute: typeof AuthenticatedDubRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leads': {
@@ -329,6 +348,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
+  AuthenticatedDubRoute: typeof AuthenticatedDubRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
@@ -339,6 +359,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
+  AuthenticatedDubRoute: AuthenticatedDubRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,

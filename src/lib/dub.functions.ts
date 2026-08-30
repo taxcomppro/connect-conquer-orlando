@@ -16,7 +16,7 @@ export const dubStatus = createServerFn({ method: "GET" })
 /** Creates the pooled booth link if it doesn't exist, otherwise returns it. */
 export const ensureBoothLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { key: string; url: string; workspaceId?: string }) => {
+  .inputValidator((input: { key: string; url: string; workspaceId?: string | undefined }) => {
     const key = input.key.trim().toLowerCase();
     if (!/^[a-z0-9-_/]{2,60}$/.test(key)) throw new Error("Use letters, numbers and dashes only.");
     if (!/^https?:\/\//.test(input.url.trim())) throw new Error("Destination must be a full URL.");
@@ -37,7 +37,7 @@ export const ensureBoothLink = createServerFn({ method: "POST" })
 /** Creates a personal link for one commission-eligible seller. */
 export const ensureSellerLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { staffId: string; key: string; url: string; workspaceId?: string }) => {
+  .inputValidator((input: { staffId: string; key: string; url: string; workspaceId?: string | undefined }) => {
     const key = input.key.trim().toLowerCase();
     if (!/^[a-z0-9-_/]{2,60}$/.test(key)) throw new Error("Use letters, numbers and dashes only.");
     if (!/^https?:\/\//.test(input.url.trim())) throw new Error("Destination must be a full URL.");
@@ -70,7 +70,7 @@ export const ensureSellerLink = createServerFn({ method: "POST" })
 /** Click / lead / sale counts for the keys Field Hub cares about. */
 export const dubLinkStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { keys: string[]; workspaceId?: string }) => ({
+  .inputValidator((input: { keys: string[]; workspaceId?: string | undefined }) => ({
     keys: input.keys.filter(Boolean).slice(0, 30),
     workspaceId: input.workspaceId?.trim() || undefined,
   }))
