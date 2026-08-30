@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,12 +17,20 @@ import {
   type Rating,
 } from "@/lib/leads";
 import { resolveAttribution, type Attribution } from "@/lib/attribution";
+import {
+  listSmsTemplates,
+  getLeadSmsHistory,
+  sendLeadSms,
+  type SmsTemplate,
+  type SmsMessage,
+} from "@/lib/sms.functions";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   head: () => ({
