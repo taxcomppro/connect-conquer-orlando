@@ -6,6 +6,31 @@ export type Lead = Tables<"leads">;
 export const RATINGS = ["hot", "warm", "cold"] as const;
 export type Rating = (typeof RATINGS)[number];
 
+export const OUTCOMES = ["open", "follow_up", "not_a_fit", "sale_started", "sale_closed"] as const;
+export type Outcome = (typeof OUTCOMES)[number];
+
+export const OUTCOME_LABEL: Record<Outcome, string> = {
+  open: "Open",
+  follow_up: "Follow up after show",
+  not_a_fit: "Not a fit",
+  sale_started: "Sale started",
+  sale_closed: "Sale closed",
+};
+
+export const OUTCOME_TONE: Record<Outcome, string> = {
+  open: "border-border bg-panel text-muted-foreground",
+  follow_up: "border-gold/50 bg-gold/15 text-gold",
+  not_a_fit: "border-border bg-muted text-muted-foreground",
+  sale_started: "border-signal-line bg-signal-soft text-signal",
+  sale_closed: "border-go-line bg-go-soft text-go",
+};
+
+export function leadOutcome(lead: Pick<Lead, "outcome">): Outcome {
+  return (OUTCOMES as readonly string[]).includes(lead.outcome)
+    ? (lead.outcome as Outcome)
+    : "open";
+}
+
 export const INTEREST_OPTIONS = [
   "Atlas AI",
   "TaxCompPro Membership",
@@ -145,6 +170,7 @@ export function toCsv(leads: Lead[]): string {
     "postal_code",
     "country",
     "rating",
+    "outcome",
     "joined_tcpc",
     "interests",
     "notes",
