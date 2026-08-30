@@ -47,6 +47,7 @@ export type Database = {
       booth_settings: {
         Row: {
           created_at: string
+          dub_group_id: string | null
           dub_program_id: string | null
           dub_workspace_id: string | null
           id: boolean
@@ -56,6 +57,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dub_group_id?: string | null
           dub_program_id?: string | null
           dub_workspace_id?: string | null
           id?: boolean
@@ -65,6 +67,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dub_group_id?: string | null
           dub_program_id?: string | null
           dub_workspace_id?: string | null
           id?: boolean
