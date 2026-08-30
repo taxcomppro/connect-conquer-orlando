@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,12 +17,20 @@ import {
   type Rating,
 } from "@/lib/leads";
 import { resolveAttribution, type Attribution } from "@/lib/attribution";
+import {
+  listSmsTemplates,
+  getLeadSmsHistory,
+  sendLeadSms,
+  type SmsTemplate,
+  type SmsMessage,
+} from "@/lib/sms.functions";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   head: () => ({
@@ -65,6 +74,16 @@ function LeadPage() {
   const [joining, setJoining] = useState(false);
   const [attribution, setAttribution] = useState<Attribution | null>(null);
   const [startingSignup, setStartingSignup] = useState(false);
+
+  const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [smsHistory, setSmsHistory] = useState<SmsMessage[]>([]);
+  const [smsBody, setSmsBody] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [sendingSms, setSendingSms] = useState(false);
+
+  const fetchTemplates = useServerFn(listSmsTemplates);
+  const fetchSmsHistory = useServerFn(getLeadSmsHistory);
+  const doSendSms = useServerFn(sendLeadSms);
 
   useEffect(() => {
     if (!user) return;
@@ -176,6 +195,30 @@ function LeadPage() {
     return [lead.city, lead.state].filter(Boolean).join(", ");
   }, [lead]);
 
+  useEffect(() => {
+    if (!lead) return;
+    let active = true;
+    void (async () => {
+      try {
+        const [{ templates: t }, { messages }] = await Promise.all([
+          fetchTemplates(),
+          fetchSmsHistory({ data: { leadId: lead.id } }),
+        ]);
+        if (!active) return;
+        setTemplates(t ?? []);
+        setSmsHistory(messages ?? []);
+        const defaultTemplate = (t ?? []).find((template) => template.is_default);
+        if (defaultTemplate) setSmsBody(defaultTemplate.body);
+        setSmsConsent(lead.sms_consent ?? false);
+      } catch {
+        // non-critical; history will just be empty
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [lead, fetchTemplates, fetchSmsHistory]);
+
   function toggleInterest(value: string) {
     setInterests((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
@@ -197,6 +240,38 @@ function LeadPage() {
     }
     toast.success("Lead saved.");
     if (options.thenScan) navigate({ to: "/scan" });
+  }
+
+  async function handleSendSms(event: React.FormEvent) {
+    event.preventDefault();
+    if (!user || !lead) return;
+    if (!lead.phone) {
+      toast.error("This lead has no phone number on file.");
+      return;
+    }
+    if (!smsBody.trim()) {
+      toast.error("Type a message first.");
+      return;
+    }
+    setSendingSms(true);
+    try {
+      await doSendSms({
+        data: {
+          leadId: lead.id,
+          to: lead.phone,
+          body: smsBody.trim(),
+          recordConsent: smsConsent,
+        },
+      });
+      toast.success("Text sent.");
+      const { messages } = await fetchSmsHistory({ data: { leadId: lead.id } });
+      setSmsHistory(messages ?? []);
+      if (smsConsent) setLead({ ...lead, sms_consent: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Text failed.");
+    } finally {
+      setSendingSms(false);
+    }
   }
 
   async function submitJoin(event: React.FormEvent) {
@@ -455,6 +530,100 @@ function LeadPage() {
           <p className="mt-1 text-sm">
             This attendee joined TCPC at the booth. Give them the welcome kit and the Atlas AI demo
             link.
+          </p>
+        </div>
+      )}
+
+      {lead.phone ? (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Send a quick follow-up to the number on their badge: {lead.phone}
+          </p>
+
+          <form onSubmit={handleSendSms} className="mt-4 space-y-3">
+            {templates.length > 0 ? (
+              <div className="space-y-2">
+                <Label htmlFor="template">Template</Label>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    const template = templates.find((t) => t.id === value);
+                    if (template) setSmsBody(template.body);
+                  }}
+                >
+                  <SelectTrigger id="template" className="w-full">
+                    <SelectValue placeholder="Pick a template…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <Label htmlFor="smsBody">Message</Label>
+              <Textarea
+                id="smsBody"
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                rows={4}
+                placeholder="Thanks for stopping by TCPC booth 540…"
+              />
+              <p className="text-right text-xs text-muted-foreground">
+                {smsBody.length}/1600
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+              <Label htmlFor="smsConsent" className="text-sm font-normal">
+                Lead consented to SMS updates
+              </Label>
+              <Switch
+                id="smsConsent"
+                checked={smsConsent}
+                onCheckedChange={setSmsConsent}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={sendingSms || !smsBody.trim()}
+              className="h-12 w-full text-base"
+            >
+              {sendingSms ? "Sending…" : "Send text →"}
+            </Button>
+          </form>
+
+          {smsHistory.length > 0 ? (
+            <div className="mt-5 space-y-2">
+              <div className="eyebrow">Sent messages</div>
+              {smsHistory.map((msg) => (
+                <div
+                  key={msg.id}
+                  className="rounded-xl border border-border bg-muted p-3 text-sm"
+                >
+                  <p className="whitespace-pre-wrap">{msg.body}</p>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="capitalize">{msg.status}</span>
+                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No phone number on this badge, so SMS follow-up isn't available.
           </p>
         </div>
       )}

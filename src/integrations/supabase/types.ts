@@ -310,6 +310,7 @@ export type Database = {
           rating: string
           scanned_at: string
           scanned_by: string
+          sms_consent: boolean
           state: string | null
           suffix: string | null
           title: string | null
@@ -349,6 +350,7 @@ export type Database = {
           rating?: string
           scanned_at?: string
           scanned_by: string
+          sms_consent?: boolean
           state?: string | null
           suffix?: string | null
           title?: string | null
@@ -388,6 +390,7 @@ export type Database = {
           rating?: string
           scanned_at?: string
           scanned_by?: string
+          sms_consent?: boolean
           state?: string | null
           suffix?: string | null
           title?: string | null
@@ -522,6 +525,89 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sms_messages: {
+        Row: {
+          body: string
+          created_at: string
+          error: string | null
+          from_number: string
+          id: string
+          lead_id: string
+          sent_at: string
+          sent_by: string | null
+          status: string
+          to_number: string
+          twilio_sid: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error?: string | null
+          from_number: string
+          id?: string
+          lead_id: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+          to_number: string
+          twilio_sid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error?: string | null
+          from_number?: string
+          id?: string
+          lead_id?: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+          to_number?: string
+          twilio_sid?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       staff_profiles: {
         Row: {
