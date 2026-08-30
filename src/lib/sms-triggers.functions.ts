@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Tables } from "@/integrations/supabase/types";
+import { FIELD_HUB_URL, joinUrl } from "./connect";
 
 export type SmsTrigger = Tables<"sms_triggers">;
 
@@ -22,15 +23,20 @@ function normalizePhone(value: string): string {
 
 export function renderTemplate(
   body: string,
-  lead: { first_name?: string | null; last_name?: string | null; company?: string | null },
-  repName?: string | null,
+  options: {
+    lead: { first_name?: string | null; last_name?: string | null; company?: string | null };
+    repName?: string | null;
+    signupLink?: string | null;
+  },
 ): string {
+  const { lead, repName, signupLink } = options;
   const map: Record<string, string> = {
     first_name: lead.first_name?.trim() || "there",
     last_name: lead.last_name?.trim() || "",
     full_name: [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim() || "there",
     company: lead.company?.trim() || "",
     rep_name: repName?.trim() || "the TCPC team",
+    signup_link: signupLink?.trim() || "",
   };
   return body.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => map[key] ?? match);
 }
