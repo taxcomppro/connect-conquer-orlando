@@ -102,7 +102,7 @@ function Hub() {
           <div className="text-2xl">◈</div>
           <div className="mt-3 font-display text-xl">Captured Leads</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Review the day's scans, track TCPC joins and export a CSV for follow-up.
+            Every scan lands here. Mark follow-up, not a fit or sale, and export a CSV.
           </p>
           <div className="mt-4 text-sm text-go">View leads →</div>
         </Link>
@@ -114,7 +114,7 @@ function Hub() {
           <div className="text-2xl">◎</div>
           <div className="mt-3 font-display text-xl">Sales Pipeline</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Membership signups, Connect profiles and ProConnect card activation, end to end.
+            Only the leads that buy: membership, profile and ProConnect card activation.
           </p>
           <div className="mt-4 text-sm text-gold">Open pipeline →</div>
         </Link>
