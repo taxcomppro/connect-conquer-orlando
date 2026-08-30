@@ -75,6 +75,16 @@ function LeadPage() {
   const [attribution, setAttribution] = useState<Attribution | null>(null);
   const [startingSignup, setStartingSignup] = useState(false);
 
+  const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [smsHistory, setSmsHistory] = useState<SmsMessage[]>([]);
+  const [smsBody, setSmsBody] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [sendingSms, setSendingSms] = useState(false);
+
+  const fetchTemplates = useServerFn(listSmsTemplates);
+  const fetchSmsHistory = useServerFn(getLeadSmsHistory);
+  const doSendSms = useServerFn(sendLeadSms);
+
   useEffect(() => {
     if (!user) return;
     void resolveAttribution(user.id).then(setAttribution);
