@@ -53,14 +53,14 @@ function qs(params: Record<string, string | undefined>) {
   return s ? `?${s}` : "";
 }
 
-export async function listLinks(workspaceId?: string, search?: string) {
+export async function listLinks(workspaceId?: string | undefined, search?: string | undefined) {
   const body = (await dubFetch(
     `/links${qs({ workspaceId, search, pageSize: "100" })}`,
   )) as DubLink[];
   return Array.isArray(body) ? body : [];
 }
 
-export async function findLinkByKey(key: string, workspaceId?: string) {
+export async function findLinkByKey(key: string, workspaceId?: string | undefined) {
   const links = await listLinks(workspaceId, key);
   return links.find((l) => l.key.toLowerCase() === key.toLowerCase()) ?? null;
 }
@@ -68,9 +68,9 @@ export async function findLinkByKey(key: string, workspaceId?: string) {
 export async function createLink(input: {
   key: string;
   url: string;
-  workspaceId?: string;
-  comments?: string;
-  tenantId?: string;
+  workspaceId?: string | undefined;
+  comments?: string | undefined;
+  tenantId?: string | undefined;
 }) {
   return (await dubFetch(`/links${qs({ workspaceId: input.workspaceId })}`, {
     method: "POST",
@@ -86,8 +86,8 @@ export async function createLink(input: {
 export async function ensureLink(input: {
   key: string;
   url: string;
-  workspaceId?: string;
-  comments?: string;
+  workspaceId?: string | undefined;
+  comments?: string | undefined;
 }) {
   const existing = await findLinkByKey(input.key, input.workspaceId);
   if (existing) return { link: existing, created: false };
