@@ -534,6 +534,100 @@ function LeadPage() {
         </div>
       )}
 
+      {lead.phone ? (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Send a quick follow-up to the number on their badge: {lead.phone}
+          </p>
+
+          <form onSubmit={handleSendSms} className="mt-4 space-y-3">
+            {templates.length > 0 ? (
+              <div className="space-y-2">
+                <Label htmlFor="template">Template</Label>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    const template = templates.find((t) => t.id === value);
+                    if (template) setSmsBody(template.body);
+                  }}
+                >
+                  <SelectTrigger id="template" className="w-full">
+                    <SelectValue placeholder="Pick a template…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <Label htmlFor="smsBody">Message</Label>
+              <Textarea
+                id="smsBody"
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                rows={4}
+                placeholder="Thanks for stopping by TCPC booth 540…"
+              />
+              <p className="text-right text-xs text-muted-foreground">
+                {smsBody.length}/1600
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border bg-canvas px-4 py-3">
+              <Label htmlFor="smsConsent" className="text-sm font-normal">
+                Lead consented to SMS updates
+              </Label>
+              <Switch
+                id="smsConsent"
+                checked={smsConsent}
+                onCheckedChange={setSmsConsent}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={sendingSms || !smsBody.trim()}
+              className="h-12 w-full text-base"
+            >
+              {sendingSms ? "Sending…" : "Send text →"}
+            </Button>
+          </form>
+
+          {smsHistory.length > 0 ? (
+            <div className="mt-5 space-y-2">
+              <div className="eyebrow">Sent messages</div>
+              {smsHistory.map((msg) => (
+                <div
+                  key={msg.id}
+                  className="rounded-xl border border-border bg-canvas p-3 text-sm"
+                >
+                  <p className="whitespace-pre-wrap">{msg.body}</p>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="capitalize">{msg.status}</span>
+                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No phone number on this badge, so SMS follow-up isn't available.
+          </p>
+        </div>
+      )}
+
       <div className="mt-8 flex flex-col gap-2 sm:flex-row">
         <Button
           onClick={() => saveLead({ thenScan: true })}
