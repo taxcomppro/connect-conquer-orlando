@@ -147,7 +147,7 @@ export const runSmsTriggers = createServerFn({ method: "POST" })
 
     const { data: lead } = await supabase
       .from("leads")
-      .select("id, phone, first_name, last_name, company, sms_consent, outcome")
+      .select("id, attendee_id, phone, first_name, last_name, company, email, sms_consent, outcome")
       .eq("id", data.leadId)
       .maybeSingle();
 
