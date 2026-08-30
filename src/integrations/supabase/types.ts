@@ -16,25 +16,61 @@ export type Database = {
     Tables: {
       approved_staff_emails: {
         Row: {
+          commission_eligible: boolean
           created_at: string
           display_name: string | null
+          dub_partner_key: string | null
           email: string
           note: string | null
           role: Database["public"]["Enums"]["app_role"]
         }
         Insert: {
+          commission_eligible?: boolean
           created_at?: string
           display_name?: string | null
+          dub_partner_key?: string | null
           email: string
           note?: string | null
           role?: Database["public"]["Enums"]["app_role"]
         }
         Update: {
+          commission_eligible?: boolean
           created_at?: string
           display_name?: string | null
+          dub_partner_key?: string | null
           email?: string
           note?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      booth_settings: {
+        Row: {
+          created_at: string
+          dub_program_id: string | null
+          dub_workspace_id: string | null
+          id: boolean
+          pooled_dub_key: string | null
+          pooled_dub_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dub_program_id?: string | null
+          dub_workspace_id?: string | null
+          id?: boolean
+          pooled_dub_key?: string | null
+          pooled_dub_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dub_program_id?: string | null
+          dub_workspace_id?: string | null
+          id?: boolean
+          pooled_dub_key?: string | null
+          pooled_dub_url?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -400,6 +436,7 @@ export type Database = {
           attendee_id: string | null
           company: string | null
           created_at: string
+          dub_attribution: string
           dub_code: string | null
           email: string | null
           external_member_id: string | null
@@ -425,6 +462,7 @@ export type Database = {
           attendee_id?: string | null
           company?: string | null
           created_at?: string
+          dub_attribution?: string
           dub_code?: string | null
           email?: string | null
           external_member_id?: string | null
@@ -450,6 +488,7 @@ export type Database = {
           attendee_id?: string | null
           company?: string | null
           created_at?: string
+          dub_attribution?: string
           dub_code?: string | null
           email?: string | null
           external_member_id?: string | null
@@ -484,22 +523,28 @@ export type Database = {
       staff_profiles: {
         Row: {
           booth_role: string | null
+          commission_eligible: boolean
           created_at: string
           display_name: string
+          dub_partner_key: string | null
           id: string
           updated_at: string
         }
         Insert: {
           booth_role?: string | null
+          commission_eligible?: boolean
           created_at?: string
           display_name?: string
+          dub_partner_key?: string | null
           id: string
           updated_at?: string
         }
         Update: {
           booth_role?: string | null
+          commission_eligible?: boolean
           created_at?: string
           display_name?: string
+          dub_partner_key?: string | null
           id?: string
           updated_at?: string
         }
