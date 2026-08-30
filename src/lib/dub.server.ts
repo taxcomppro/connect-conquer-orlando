@@ -53,15 +53,23 @@ function qs(params: Record<string, string | undefined>) {
   return s ? `?${s}` : "";
 }
 
-export async function listLinks(workspaceId?: string | undefined, search?: string | undefined) {
+export async function listLinks(
+  workspaceId?: string | undefined,
+  search?: string | undefined,
+  groupId?: string | undefined,
+) {
   const body = (await dubFetch(
-    `/links${qs({ workspaceId, search, pageSize: "100" })}`,
+    `/links${qs({ workspaceId, search, pageSize: "100", groupId })}`,
   )) as DubLink[];
   return Array.isArray(body) ? body : [];
 }
 
-export async function findLinkByKey(key: string, workspaceId?: string | undefined) {
-  const links = await listLinks(workspaceId, key);
+export async function findLinkByKey(
+  key: string,
+  workspaceId?: string | undefined,
+  groupId?: string | undefined,
+) {
+  const links = await listLinks(workspaceId, key, groupId);
   return links.find((l) => l.key.toLowerCase() === key.toLowerCase()) ?? null;
 }
 
@@ -69,10 +77,11 @@ export async function createLink(input: {
   key: string;
   url: string;
   workspaceId?: string | undefined;
+  groupId?: string | undefined;
   comments?: string | undefined;
   tenantId?: string | undefined;
 }) {
-  return (await dubFetch(`/links${qs({ workspaceId: input.workspaceId })}`, {
+  return (await dubFetch(`/links${qs({ workspaceId: input.workspaceId, groupId: input.groupId })}`, {
     method: "POST",
     body: JSON.stringify({
       key: input.key,
@@ -87,10 +96,12 @@ export async function ensureLink(input: {
   key: string;
   url: string;
   workspaceId?: string | undefined;
+  groupId?: string | undefined;
   comments?: string | undefined;
 }) {
-  const existing = await findLinkByKey(input.key, input.workspaceId);
+  const existing = await findLinkByKey(input.key, input.workspaceId, input.groupId);
   if (existing) return { link: existing, created: false };
   const link = await createLink(input);
   return { link, created: true };
 }
+

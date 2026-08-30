@@ -51,6 +51,7 @@ function DubPage() {
   const [pooledKey, setPooledKey] = useState("");
   const [pooledUrl, setPooledUrl] = useState("https://www.taxcomppro.com/connect");
   const [workspaceId, setWorkspaceId] = useState("");
+  const [groupId, setGroupId] = useState("");
   const [busy, setBusy] = useState(false);
   const [stats, setStats] = useState<Stat[]>([]);
 
@@ -72,6 +73,7 @@ function DubPage() {
         setPooledKey(settings.pooled_dub_key ?? "");
         setPooledUrl(settings.pooled_dub_url ?? "https://www.taxcomppro.com/connect");
         setWorkspaceId(settings.dub_workspace_id ?? "");
+        setGroupId(settings.dub_group_id ?? "");
       }
     }
     void load();
@@ -80,11 +82,17 @@ function DubPage() {
     };
   }, [status]);
 
+
   async function savePooled() {
     setBusy(true);
     try {
       const result = await saveBoothLink({
-        data: { key: pooledKey, url: pooledUrl, workspaceId: workspaceId || undefined },
+        data: {
+          key: pooledKey,
+          url: pooledUrl,
+          workspaceId: workspaceId || undefined,
+          groupId: groupId || undefined,
+        },
       });
       await supabase.from("booth_settings").update({
         pooled_dub_key: result.key,
@@ -101,6 +109,7 @@ function DubPage() {
     setBusy(false);
   }
 
+
   async function createSeller(person: Staff) {
     const suggested =
       person.dub_partner_key ??
@@ -113,6 +122,7 @@ function DubPage() {
           key: suggested,
           url: pooledUrl,
           workspaceId: workspaceId || undefined,
+          groupId: groupId || undefined,
         },
       });
       setStaff((prev) =>
@@ -127,12 +137,16 @@ function DubPage() {
     setBusy(false);
   }
 
+
   async function refreshStats() {
     const keys = [pooledKey, ...staff.map((s) => s.dub_partner_key ?? "")].filter(Boolean);
-    const result = await loadStats({ data: { keys, workspaceId: workspaceId || undefined } });
+    const result = await loadStats({
+      data: { keys, workspaceId: workspaceId || undefined, groupId: groupId || undefined },
+    });
     setStats(result.links);
     if (result.links.length === 0) toast.message("No matching links returned by Dub yet.");
   }
+
 
   const owners = staff.filter((s) => !s.commission_eligible);
   const sellers = staff.filter((s) => s.commission_eligible);
@@ -177,7 +191,7 @@ function DubPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="workspace">Dub workspace / group ID (optional)</Label>
+          <Label htmlFor="workspace">Dub workspace ID (optional)</Label>
           <Input
             id="workspace"
             value={workspaceId}
@@ -185,6 +199,19 @@ function DubPage() {
             placeholder="ws_..."
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="group">Dub group ID</Label>
+          <Input
+            id="group"
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            placeholder="grp_..."
+          />
+          <p className="text-xs text-muted-foreground">
+            New links are tagged with this group so they show up in your Dub group reporting.
+          </p>
+        </div>
+
         <Button onClick={savePooled} disabled={busy || !pooledKey} className="h-12 w-full">
           {busy ? "Working…" : "Create / verify in Dub and save"}
         </Button>
