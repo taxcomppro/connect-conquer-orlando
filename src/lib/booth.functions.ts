@@ -188,28 +188,27 @@ export const getPublicProfile = createServerFn({ method: "POST" })
         },
       },
     );
+    // The view enforces published-only and masks email/phone/location
+    // unless the member opted in — the raw table is not readable by anon.
     const { data: profile } = await supabasePublic
-      .from("connect_profiles")
+      .from("public_connect_profiles")
       .select(
-        "slug, display_name, credential, title, company, city, state, email, phone, website, bio, services, show_email, show_phone, show_location",
+        "slug, display_name, credential, title, company, city, state, email, phone, website, bio, services",
       )
       .eq("slug", data.slug)
-      .eq("published", true)
       .maybeSingle();
 
     if (!profile) return null;
 
     return {
       slug: profile.slug,
-      displayName: profile.display_name,
+      displayName: profile.display_name ?? "Member",
       credential: profile.credential,
       title: profile.title,
       company: profile.company,
-      location: profile.show_location
-        ? [profile.city, profile.state].filter(Boolean).join(", ")
-        : null,
-      email: profile.show_email ? profile.email : null,
-      phone: profile.show_phone ? profile.phone : null,
+      location: [profile.city, profile.state].filter(Boolean).join(", ") || null,
+      email: profile.email,
+      phone: profile.phone,
       website: profile.website,
       bio: profile.bio,
       services: profile.services ?? [],
