@@ -79,15 +79,16 @@ export const ensureSellerLink = createServerFn({ method: "POST" })
 /** Click / lead / sale counts for the keys Field Hub cares about. */
 export const dubLinkStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { keys: string[]; workspaceId?: string | undefined }) => ({
+  .inputValidator((input: { keys: string[]; workspaceId?: string | undefined; groupId?: string | undefined }) => ({
     keys: input.keys.filter(Boolean).slice(0, 30),
     workspaceId: input.workspaceId?.trim() || undefined,
+    groupId: input.groupId?.trim() || undefined,
   }))
   .handler(async ({ data }) => {
     if (!process.env["DUB_API_KEY"] || data.keys.length === 0) return { links: [] };
     const { listLinks } = await import("./dub.server");
     try {
-      const all = await listLinks(data.workspaceId);
+      const all = await listLinks(data.workspaceId, undefined, data.groupId);
       const wanted = new Set(data.keys.map((k) => k.toLowerCase()));
       return {
         links: all
@@ -105,3 +106,4 @@ export const dubLinkStats = createServerFn({ method: "POST" })
       return { links: [] };
     }
   });
+

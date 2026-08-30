@@ -51,6 +51,7 @@ function DubPage() {
   const [pooledKey, setPooledKey] = useState("");
   const [pooledUrl, setPooledUrl] = useState("https://www.taxcomppro.com/connect");
   const [workspaceId, setWorkspaceId] = useState("");
+  const [groupId, setGroupId] = useState("");
   const [busy, setBusy] = useState(false);
   const [stats, setStats] = useState<Stat[]>([]);
 
@@ -72,6 +73,7 @@ function DubPage() {
         setPooledKey(settings.pooled_dub_key ?? "");
         setPooledUrl(settings.pooled_dub_url ?? "https://www.taxcomppro.com/connect");
         setWorkspaceId(settings.dub_workspace_id ?? "");
+        setGroupId(settings.dub_group_id ?? "");
       }
     }
     void load();
@@ -79,6 +81,7 @@ function DubPage() {
       active = false;
     };
   }, [status]);
+
 
   async function savePooled() {
     setBusy(true);
