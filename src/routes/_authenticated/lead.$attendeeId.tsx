@@ -24,6 +24,7 @@ import {
   type SmsTemplate,
   type SmsMessage,
 } from "@/lib/sms.functions";
+import { runSmsTriggers } from "@/lib/sms-triggers.functions";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,6 +85,7 @@ function LeadPage() {
   const fetchTemplates = useServerFn(listSmsTemplates);
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
   const doSendSms = useServerFn(sendLeadSms);
+  const fireTriggers = useServerFn(runSmsTriggers);
 
   useEffect(() => {
     if (!user) return;
@@ -239,6 +241,9 @@ function LeadPage() {
       return;
     }
     toast.success("Lead saved.");
+    void fireTriggers({
+      data: { leadId: lead.id, event: "outcome_changed", outcome },
+    }).catch(() => undefined);
     if (options.thenScan) navigate({ to: "/scan" });
   }
 
@@ -299,6 +304,7 @@ function LeadPage() {
     }
 
     await supabase.from("leads").update({ joined_tcpc: true, rating: "hot" }).eq("id", lead.id);
+    void fireTriggers({ data: { leadId: lead.id, event: "joined_tcpc" } }).catch(() => undefined);
     setJoining(false);
     setShowJoin(false);
     setLead({ ...lead, joined_tcpc: true });
