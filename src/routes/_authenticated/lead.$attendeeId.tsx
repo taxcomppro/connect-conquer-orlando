@@ -242,6 +242,38 @@ function LeadPage() {
     if (options.thenScan) navigate({ to: "/scan" });
   }
 
+  async function handleSendSms(event: React.FormEvent) {
+    event.preventDefault();
+    if (!user || !lead) return;
+    if (!lead.phone) {
+      toast.error("This lead has no phone number on file.");
+      return;
+    }
+    if (!smsBody.trim()) {
+      toast.error("Type a message first.");
+      return;
+    }
+    setSendingSms(true);
+    try {
+      await doSendSms({
+        data: {
+          leadId: lead.id,
+          to: lead.phone,
+          body: smsBody.trim(),
+          recordConsent: smsConsent,
+        },
+      });
+      toast.success("Text sent.");
+      const { messages } = await fetchSmsHistory({ data: { leadId: lead.id } });
+      setSmsHistory(messages ?? []);
+      if (smsConsent) setLead({ ...lead, sms_consent: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Text failed.");
+    } finally {
+      setSendingSms(false);
+    }
+  }
+
   async function submitJoin(event: React.FormEvent) {
     event.preventDefault();
     if (!user || !lead) return;
