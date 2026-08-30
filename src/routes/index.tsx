@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,6 +74,8 @@ const TOOLKITS_AND_COURSES = [
 ];
 
 function Hub() {
+  const { isAdmin } = useIsAdmin();
+
   return (
     <FieldShell eyebrowRight="IRS Nationwide Tax Forum · Orlando">
       <PageTitle
