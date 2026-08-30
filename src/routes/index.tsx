@@ -118,7 +118,20 @@ function Hub() {
           </p>
           <div className="mt-4 text-sm text-gold">Open pipeline →</div>
         </Link>
+
+        <Link
+          to="/dub"
+          className="group rounded-2xl border border-border bg-panel p-5 transition-transform hover:-translate-y-0.5"
+        >
+          <div className="text-2xl">⌁</div>
+          <div className="mt-3 font-display text-xl">Dub Attribution</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Pooled booth link, seller links, and owner accounts excluded from commission.
+          </p>
+          <div className="mt-4 text-sm text-muted-foreground">Open settings →</div>
+        </Link>
       </div>
+
 
 
       <SectionLabel>Trip briefing</SectionLabel>
