@@ -87,7 +87,12 @@ function DubPage() {
     setBusy(true);
     try {
       const result = await saveBoothLink({
-        data: { key: pooledKey, url: pooledUrl, workspaceId: workspaceId || undefined },
+        data: {
+          key: pooledKey,
+          url: pooledUrl,
+          workspaceId: workspaceId || undefined,
+          groupId: groupId || undefined,
+        },
       });
       await supabase.from("booth_settings").update({
         pooled_dub_key: result.key,
@@ -104,6 +109,7 @@ function DubPage() {
     setBusy(false);
   }
 
+
   async function createSeller(person: Staff) {
     const suggested =
       person.dub_partner_key ??
@@ -116,6 +122,7 @@ function DubPage() {
           key: suggested,
           url: pooledUrl,
           workspaceId: workspaceId || undefined,
+          groupId: groupId || undefined,
         },
       });
       setStaff((prev) =>
@@ -130,12 +137,16 @@ function DubPage() {
     setBusy(false);
   }
 
+
   async function refreshStats() {
     const keys = [pooledKey, ...staff.map((s) => s.dub_partner_key ?? "")].filter(Boolean);
-    const result = await loadStats({ data: { keys, workspaceId: workspaceId || undefined } });
+    const result = await loadStats({
+      data: { keys, workspaceId: workspaceId || undefined, groupId: groupId || undefined },
+    });
     setStats(result.links);
     if (result.links.length === 0) toast.message("No matching links returned by Dub yet.");
   }
+
 
   const owners = staff.filter((s) => !s.commission_eligible);
   const sellers = staff.filter((s) => s.commission_eligible);
