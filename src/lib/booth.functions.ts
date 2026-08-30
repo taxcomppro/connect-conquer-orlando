@@ -202,7 +202,7 @@ export const getPublicProfile = createServerFn({ method: "POST" })
 
     return {
       slug: profile.slug,
-      displayName: profile.display_name,
+      displayName: profile.display_name ?? "Member",
       credential: profile.credential,
       title: profile.title,
       company: profile.company,
