@@ -195,6 +195,30 @@ function LeadPage() {
     return [lead.city, lead.state].filter(Boolean).join(", ");
   }, [lead]);
 
+  useEffect(() => {
+    if (!lead) return;
+    let active = true;
+    void (async () => {
+      try {
+        const [{ templates: t }, { messages }] = await Promise.all([
+          fetchTemplates(),
+          fetchSmsHistory({ data: { leadId: lead.id } }),
+        ]);
+        if (!active) return;
+        setTemplates(t ?? []);
+        setSmsHistory(messages ?? []);
+        const defaultTemplate = (t ?? []).find((template) => template.is_default);
+        if (defaultTemplate) setSmsBody(defaultTemplate.body);
+        setSmsConsent(lead.sms_consent ?? false);
+      } catch {
+        // non-critical; history will just be empty
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [lead, fetchTemplates, fetchSmsHistory]);
+
   function toggleInterest(value: string) {
     setInterests((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
