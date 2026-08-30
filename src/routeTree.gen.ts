@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
 import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
@@ -45,6 +46,11 @@ const CardNotFoundRoute = CardNotFoundRouteImport.update({
   id: '/card-not-found',
   path: '/card-not-found',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAutomationsRoute =
   AuthenticatedAutomationsRouteImport.update({
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/dub': typeof AuthenticatedDubRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/dub': typeof AuthenticatedDubRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
   '/_authenticated/dub': typeof AuthenticatedDubRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/admin'
     | '/automations'
     | '/briefing'
     | '/dub'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/admin'
     | '/automations'
     | '/briefing'
     | '/dub'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/card-not-found'
+    | '/_authenticated/admin'
     | '/_authenticated/automations'
     | '/_authenticated/briefing'
     | '/_authenticated/dub'
@@ -271,6 +283,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/card-not-found'
       preLoaderRoute: typeof CardNotFoundRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/automations': {
       id: '/_authenticated/automations'
@@ -367,6 +386,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
   AuthenticatedDubRoute: typeof AuthenticatedDubRoute
@@ -379,6 +399,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
   AuthenticatedDubRoute: AuthenticatedDubRoute,
