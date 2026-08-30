@@ -119,7 +119,19 @@ function Hub() {
           <div className="mt-4 text-sm text-gold">Open pipeline →</div>
         </Link>
 
+        <Link
+          to="/automations"
+          className="group rounded-2xl border border-border bg-panel p-5 transition-transform hover:-translate-y-0.5"
+        >
+          <div className="text-2xl">⚡</div>
+          <div className="mt-3 font-display text-xl">Auto-Send Texts</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Rules that text a lead automatically on scan, outcome change or join.
+          </p>
+          <div className="mt-4 text-sm text-muted-foreground">Manage rules →</div>
+        </Link>
       </div>
+
 
 
 

@@ -538,6 +538,7 @@ export type Database = {
           sent_by: string | null
           status: string
           to_number: string
+          trigger_id: string | null
           twilio_sid: string | null
           updated_at: string
         }
@@ -552,6 +553,7 @@ export type Database = {
           sent_by?: string | null
           status?: string
           to_number: string
+          trigger_id?: string | null
           twilio_sid?: string | null
           updated_at?: string
         }
@@ -566,6 +568,7 @@ export type Database = {
           sent_by?: string | null
           status?: string
           to_number?: string
+          trigger_id?: string | null
           twilio_sid?: string | null
           updated_at?: string
         }
@@ -575,6 +578,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_messages_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "sms_triggers"
             referencedColumns: ["id"]
           },
         ]
@@ -608,6 +618,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sms_triggers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          event: string
+          id: string
+          match_outcome: string | null
+          name: string
+          require_consent: boolean
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          event: string
+          id?: string
+          match_outcome?: string | null
+          name: string
+          require_consent?: boolean
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          event?: string
+          id?: string
+          match_outcome?: string | null
+          name?: string
+          require_consent?: boolean
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_triggers_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "sms_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_profiles: {
         Row: {

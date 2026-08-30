@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
+import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
 import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
@@ -45,6 +46,12 @@ const CardNotFoundRoute = CardNotFoundRouteImport.update({
   path: '/card-not-found',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAutomationsRoute =
+  AuthenticatedAutomationsRouteImport.update({
+    id: '/automations',
+    path: '/automations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBriefingRoute = AuthenticatedBriefingRouteImport.update({
   id: '/briefing',
   path: '/briefing',
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
   '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
   '/_authenticated/dub': typeof AuthenticatedDubRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/automations'
     | '/briefing'
     | '/dub'
     | '/leads'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/automations'
     | '/briefing'
     | '/dub'
     | '/leads'
@@ -204,6 +216,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/card-not-found'
+    | '/_authenticated/automations'
     | '/_authenticated/briefing'
     | '/_authenticated/dub'
     | '/_authenticated/leads'
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/card-not-found'
       preLoaderRoute: typeof CardNotFoundRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/automations': {
+      id: '/_authenticated/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AuthenticatedAutomationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/briefing': {
       id: '/_authenticated/briefing'
@@ -347,6 +367,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
   AuthenticatedDubRoute: typeof AuthenticatedDubRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
@@ -358,6 +379,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
   AuthenticatedDubRoute: AuthenticatedDubRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,

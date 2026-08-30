@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Html5Qrcode } from "html5-qrcode";
 
 import { lookupBadge } from "@/lib/edc.functions";
+import { runSmsTriggers } from "@/lib/sms-triggers.functions";
 import { badgeToDraft, pendingDraft } from "@/lib/leads";
 import { enqueueLead, flushQueue, queueSize } from "@/lib/offline-queue";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,8 @@ function ScanPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const lookup = useServerFn(lookupBadge);
+  const fireTriggers = useServerFn(runSmsTriggers);
+
 
   const [cameraOn, setCameraOn] = useState(false);
   const [manualId, setManualId] = useState("");
@@ -134,9 +137,17 @@ function ScanPage() {
         toast.warning(result.message);
       }
 
-      const { error } = await supabase
+      const { data: savedLead, error } = await supabase
         .from("leads")
-        .upsert({ ...draft, scanned_by: user.id }, { onConflict: "attendee_id,scanned_by" });
+        .upsert({ ...draft, scanned_by: user.id }, { onConflict: "attendee_id,scanned_by" })
+        .select("id")
+        .maybeSingle();
+
+      if (!error && savedLead) {
+        void fireTriggers({ data: { leadId: savedLead.id, event: "lead_captured" } }).catch(
+          () => undefined,
+        );
+      }
 
       if (error) {
         await enqueueLead({
