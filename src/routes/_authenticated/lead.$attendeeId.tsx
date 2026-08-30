@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   INTEREST_OPTIONS,
-  OUTCOMES,
   OUTCOME_LABEL,
   OUTCOME_TONE,
   RATINGS,
@@ -128,8 +127,7 @@ function LeadPage() {
     await supabase
       .from("leads")
       .update({ outcome: "sale_started" })
-      .eq("id", lead.id)
-      .lt("outcome", "zzz");
+      .eq("id", lead.id);
     setOutcome("sale_started");
 
     setStartingSignup(false);

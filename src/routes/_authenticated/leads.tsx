@@ -4,7 +4,14 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { leadName, toCsv, type Lead } from "@/lib/leads";
+import {
+  OUTCOME_LABEL,
+  OUTCOME_TONE,
+  leadName,
+  leadOutcome,
+  toCsv,
+  type Lead,
+} from "@/lib/leads";
 import { FieldShell, PageTitle } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   component: LeadsPage,
 });
 
-type Filter = "all" | "hot" | "warm" | "cold" | "joined";
+type Filter = "all" | "hot" | "warm" | "cold" | "follow_up" | "not_a_fit" | "sales";
 
 function LeadsPage() {
   const { user } = useAuth();
@@ -59,7 +66,11 @@ function LeadsPage() {
     () => ({
       total: leads.length,
       hot: leads.filter((l) => l.rating === "hot").length,
-      joined: leads.filter((l) => l.joined_tcpc).length,
+      followUp: leads.filter((l) => leadOutcome(l) === "follow_up").length,
+      sales: leads.filter((l) => {
+        const outcome = leadOutcome(l);
+        return outcome === "sale_started" || outcome === "sale_closed";
+      }).length,
     }),
     [leads],
   );
@@ -67,8 +78,12 @@ function LeadsPage() {
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
     return leads.filter((lead) => {
-      if (filter === "joined" && !lead.joined_tcpc) return false;
-      if (filter !== "all" && filter !== "joined" && lead.rating !== filter) return false;
+      const outcome = leadOutcome(lead);
+      if (filter === "follow_up" && outcome !== "follow_up") return false;
+      if (filter === "not_a_fit" && outcome !== "not_a_fit") return false;
+      if (filter === "sales" && outcome !== "sale_started" && outcome !== "sale_closed")
+        return false;
+      if (["hot", "warm", "cold"].includes(filter) && lead.rating !== filter) return false;
       if (!query) return true;
       return [lead.first_name, lead.last_name, lead.company, lead.email, lead.attendee_id]
         .filter(Boolean)
@@ -86,7 +101,15 @@ function LeadsPage() {
     URL.revokeObjectURL(url);
   }
 
-  const filters: Filter[] = ["all", "hot", "warm", "cold", "joined"];
+  const filters: Array<{ key: Filter; label: string }> = [
+    { key: "all", label: "All" },
+    { key: "hot", label: "Hot" },
+    { key: "warm", label: "Warm" },
+    { key: "cold", label: "Cold" },
+    { key: "follow_up", label: "Follow up" },
+    { key: "not_a_fit", label: "Not a fit" },
+    { key: "sales", label: "Sales" },
+  ];
 
   return (
     <FieldShell
@@ -99,10 +122,11 @@ function LeadsPage() {
     >
       <PageTitle title="Booth" accent="leads" />
 
-      <div className="mt-5 grid grid-cols-3 gap-2">
+      <div className="mt-5 grid grid-cols-4 gap-2">
         <Stat label="Scanned" value={stats.total} tone="text-foreground" />
         <Stat label="Hot" value={stats.hot} tone="text-hot" />
-        <Stat label="TCPC joins" value={stats.joined} tone="text-go" />
+        <Stat label="Follow up" value={stats.followUp} tone="text-gold" />
+        <Stat label="Sales" value={stats.sales} tone="text-go" />
       </div>
 
       <div className="mt-6 flex flex-col gap-2 sm:flex-row">
@@ -120,16 +144,16 @@ function LeadsPage() {
       <div className="mt-3 flex flex-wrap gap-2">
         {filters.map((option) => (
           <button
-            key={option}
+            key={option.key}
             type="button"
-            onClick={() => setFilter(option)}
-            className={`rounded-full border px-4 py-1.5 text-sm capitalize transition-colors ${
-              filter === option
+            onClick={() => setFilter(option.key)}
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+              filter === option.key
                 ? "border-signal-line bg-signal-soft text-signal"
                 : "border-border bg-panel text-muted-foreground hover:bg-panel-hover"
             }`}
           >
-            {option}
+            {option.label}
           </button>
         ))}
       </div>
@@ -156,9 +180,11 @@ function LeadsPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {lead.joined_tcpc ? (
-                  <span className="rounded-full border border-go-line bg-go-soft px-2.5 py-1 text-xs text-go">
-                    Joined
+                {leadOutcome(lead) !== "open" ? (
+                  <span
+                    className={`rounded-full border px-2.5 py-1 text-xs ${OUTCOME_TONE[leadOutcome(lead)]}`}
+                  >
+                    {OUTCOME_LABEL[leadOutcome(lead)]}
                   </span>
                 ) : null}
                 <span
