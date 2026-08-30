@@ -15,6 +15,7 @@ import {
   type Outcome,
   type Rating,
 } from "@/lib/leads";
+import { resolveAttribution, type Attribution } from "@/lib/attribution";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +103,8 @@ function LeadPage() {
         attendee_id: lead.attendee_id,
         rep_user_id: user.id,
         rep_name: staff?.display_name ?? null,
-        dub_code: dubCode.trim() || null,
+        dub_code: attr.code,
+        dub_attribution: attr.kind,
         full_name: [lead.first_name, lead.last_name].filter(Boolean).join(" ") || null,
         email: lead.email,
         phone: lead.phone,
@@ -123,7 +125,7 @@ function LeadPage() {
       event_type: "LEAD_SCANNED",
       actor_user_id: user.id,
       actor_label: staff?.display_name ?? null,
-      payload: { attendee_id: lead.attendee_id, dub_code: dubCode.trim() || null },
+      payload: { attendee_id: lead.attendee_id, dub_code: attr.code, dub_attribution: attr.kind },
     });
 
     await supabase
@@ -359,14 +361,12 @@ function LeadPage() {
           Creates the signup session, locks your attribution to it, and shows the QR code the
           customer scans on their own phone.
         </p>
-        <div className="mt-3 space-y-2">
-          <Label htmlFor="dub">DUB code</Label>
-          <Input
-            id="dub"
-            value={dubCode}
-            onChange={(e) => setDubCode(e.target.value)}
-            placeholder="Your DUB attribution code"
-          />
+        <div className="mt-3 rounded-xl border border-border bg-panel p-4">
+          <div className="eyebrow">Attribution</div>
+          <div className="mt-1 font-medium">{attribution?.label ?? "Checking…"}</div>
+          {attribution ? (
+            <p className="mt-1 text-sm text-muted-foreground">{attribution.detail}</p>
+          ) : null}
         </div>
         <Button
           onClick={startSignup}
