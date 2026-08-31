@@ -327,3 +327,10 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function formatMoney(cents: number, currency?: string | null): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency || "USD",
+  }).format(cents / 100);
+}
