@@ -24,7 +24,9 @@ import {
   type SmsTemplate,
   type SmsMessage,
 } from "@/lib/sms.functions";
-import { runSmsTriggers } from "@/lib/sms-triggers.functions";
+import { runSmsTriggers, renderTemplate } from "@/lib/sms-triggers.functions";
+import { PRODUCTS, renderProductMessage } from "@/lib/products";
+
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
