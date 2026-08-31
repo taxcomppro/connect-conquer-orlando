@@ -865,8 +865,12 @@ function LeadPage() {
         <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
           <div className="eyebrow">SMS follow-up</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            No phone number on this badge, so SMS follow-up isn't available.
+            No mobile number on this badge — many list an office landline. Add one to text them.
           </p>
+          <Button type="button" variant="outline" onClick={startEditing} className="mt-3 h-11">
+            Edit contact details
+          </Button>
+
         </div>
       )}
 
