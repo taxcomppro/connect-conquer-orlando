@@ -46,6 +46,49 @@ function HandoffPage() {
   const { base } = useCardBase();
   const [session, setSession] = useState<SignupSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
+  const [applying, setApplying] = useState<string | null>(null);
+  const [stripe, setStripe] = useState<LookupResult | null>(null);
+  const doLookup = useServerFn(lookupStripePurchases);
+  const doConfirm = useServerFn(confirmStripePurchase);
+
+  async function checkStripe() {
+    if (!session?.email) {
+      toast.error("This signup has no email address to match in Stripe.");
+      return;
+    }
+    setChecking(true);
+    try {
+      const result = await doLookup({ data: { email: session.email } });
+      setStripe(result);
+      if (!result.configured) {
+        toast.error("Stripe isn't connected yet.");
+      } else if (result.error) {
+        toast.error(result.error);
+      } else if (result.purchases.length === 0) {
+        toast("No paid Stripe checkout found for that email yet.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Stripe lookup failed.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function applyPurchase(reference: string) {
+    if (!session) return;
+    setApplying(reference);
+    try {
+      const result = await doConfirm({ data: { sessionId: session.id, reference } });
+      toast.success(`Confirmed — ${result.summary}`);
+      setSession({ ...session, stage: "membership_confirmed" });
+      setStripe(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't confirm the purchase.");
+    } finally {
+      setApplying(null);
+    }
+  }
 
   useEffect(() => {
     let active = true;
