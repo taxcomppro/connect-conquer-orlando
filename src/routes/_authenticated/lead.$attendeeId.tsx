@@ -52,7 +52,26 @@ export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   component: LeadPage,
 });
 
+const EDIT_FIELDS: [string, string][] = [
+  ["first_name", "First name"],
+  ["last_name", "Last name"],
+  ["credential", "Credential"],
+  ["title", "Title"],
+  ["company", "Firm"],
+  ["department", "Department"],
+  ["email", "Email"],
+  ["phone", "Mobile phone"],
+  ["website", "Website"],
+  ["address1", "Address line 1"],
+  ["address2", "Address line 2"],
+  ["city", "City"],
+  ["state", "State"],
+  ["postal_code", "ZIP"],
+  ["country", "Country"],
+];
+
 function LeadPage() {
+
   const { attendeeId } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
