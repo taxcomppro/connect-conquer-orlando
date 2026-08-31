@@ -414,18 +414,80 @@ function LeadPage() {
           "No title on the badge"}
       </p>
 
-      <Panel className="mt-5 space-y-2 text-sm">
-        <Row label="Badge ID" value={lead.attendee_id} />
-        {lead.email ? <Row label="Email" value={lead.email} /> : null}
-        {lead.phone ? <Row label="Phone" value={lead.phone} /> : null}
-        {location ? <Row label="Location" value={location} /> : null}
-        {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
-        {lead.lookup_status !== "found" ? (
-          <p className="pt-1 text-xs text-gold">
-            Badge details weren't available yet — the record fills in after the show data sync.
+      {!editing ? (
+        <Panel className="mt-5 space-y-2 text-sm">
+          <div className="flex items-center justify-between pb-1">
+            <span className="eyebrow">Badge record</span>
+            <button
+              type="button"
+              onClick={startEditing}
+              className="text-xs text-signal hover:underline"
+            >
+              Edit details
+            </button>
+          </div>
+          <Row label="Badge ID" value={lead.attendee_id} />
+          {fullName ? <Row label="Name" value={fullName} /> : null}
+          {lead.nickname ? <Row label="Goes by" value={lead.nickname} /> : null}
+          {lead.credential ? <Row label="Credential" value={lead.credential} /> : null}
+          {lead.title ? <Row label="Title" value={lead.title} /> : null}
+          {lead.company ? <Row label="Firm" value={lead.company} /> : null}
+          {lead.department ? <Row label="Department" value={lead.department} /> : null}
+          {lead.email ? <Row label="Email" value={lead.email} /> : null}
+          {lead.phone ? <Row label="Phone" value={lead.phone} /> : null}
+          {lead.fax ? <Row label="Fax" value={lead.fax} /> : null}
+          {lead.website ? <Row label="Website" value={lead.website} /> : null}
+          {mailing ? <Row label="Address" value={mailing} /> : null}
+          {location ? <Row label="Location" value={location} /> : null}
+          {lead.country ? <Row label="Country" value={lead.country} /> : null}
+          {lead.association ? <Row label="Association" value={lead.association} /> : null}
+          {lead.demographics ? <Row label="Demographics" value={lead.demographics} /> : null}
+          {lead.qualifiers ? <Row label="Qualifiers" value={lead.qualifiers} /> : null}
+          {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
+          {lead.lookup_status !== "found" ? (
+            <p className="pt-1 text-xs text-gold">
+              Badge details weren't available yet — the record fills in after the show data sync.
+            </p>
+          ) : null}
+        </Panel>
+      ) : (
+        <Panel className="mt-5">
+          <div className="eyebrow">Edit contact details</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Badges often carry an office landline. Update the phone or email so texts and follow-up
+            reach them directly.
           </p>
-        ) : null}
-      </Panel>
+          <form onSubmit={saveContact} className="mt-4 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {EDIT_FIELDS.map(([key, label]) => (
+                <div key={key} className="space-y-2">
+                  <Label htmlFor={`ed-${key}`}>{label}</Label>
+                  <Input
+                    id={`ed-${key}`}
+                    value={edit[key] ?? ""}
+                    inputMode={key === "phone" ? "tel" : undefined}
+                    onChange={(e) => setEdit((c) => ({ ...c, [key]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={savingEdit} className="h-12 flex-1">
+                {savingEdit ? "Saving…" : "Save details"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditing(false)}
+                className="h-12 flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      )}
+
 
       <SectionLabel>How hot is this lead?</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
