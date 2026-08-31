@@ -327,14 +327,18 @@ function LeadPage() {
     setSavingEdit(true);
     const patch = Object.fromEntries(
       Object.entries(edit).map(([key, value]) => [key, value.trim() || null]),
-    );
-    const { error } = await supabase.from("leads").update(patch).eq("id", lead.id);
+    ) as Partial<Lead>;
+    const { error } = await supabase
+      .from("leads")
+      .update(patch as never)
+      .eq("id", lead.id);
     setSavingEdit(false);
     if (error) {
       toast.error("Couldn't save the contact details.");
       return;
     }
-    setLead({ ...lead, ...(patch as Partial<Lead>) });
+    setLead({ ...lead, ...patch });
+
     setEditing(false);
     toast.success("Contact details updated.");
   }
