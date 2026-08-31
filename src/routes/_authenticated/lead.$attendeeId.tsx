@@ -81,6 +81,11 @@ function LeadPage() {
   const [smsBody, setSmsBody] = useState("");
   const [smsConsent, setSmsConsent] = useState(false);
   const [sendingSms, setSendingSms] = useState(false);
+  const [productBase, setProductBase] = useState<string | null>(null);
+
+  const [editing, setEditing] = useState(false);
+  const [edit, setEdit] = useState<Record<string, string>>({});
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchTemplates = useServerFn(listSmsTemplates);
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
@@ -91,6 +96,15 @@ function LeadPage() {
     if (!user) return;
     void resolveAttribution(user.id).then(setAttribution);
   }, [user]);
+
+  useEffect(() => {
+    void supabase
+      .from("booth_settings")
+      .select("pooled_dub_url")
+      .maybeSingle()
+      .then(({ data }) => setProductBase(data?.pooled_dub_url ?? null));
+  }, []);
+
 
   async function startSignup() {
     if (!user || !lead) return;
