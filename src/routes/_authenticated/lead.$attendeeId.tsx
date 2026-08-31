@@ -211,6 +211,22 @@ function LeadPage() {
     return [lead.city, lead.state].filter(Boolean).join(", ");
   }, [lead]);
 
+  const fullName = useMemo(() => {
+    if (!lead) return "";
+    return [lead.prefix, lead.first_name, lead.middle_name, lead.last_name, lead.suffix]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+  }, [lead]);
+
+  const mailing = useMemo(() => {
+    if (!lead) return "";
+    return [lead.address1, lead.address2, lead.address3, lead.postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, [lead]);
+
+
   useEffect(() => {
     if (!lead) return;
     let active = true;
