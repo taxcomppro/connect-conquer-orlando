@@ -707,10 +707,82 @@ function LeadPage() {
           <div className="eyebrow">SMS follow-up</div>
           <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send a quick follow-up to the number on their badge: {lead.phone}
+            Send a quick follow-up to {lead.phone}. Every product link carries the booth Dub code
+            {attribution?.code ? ` (${attribution.code})` : ""}.
           </p>
 
-          <form onSubmit={handleSendSms} className="mt-4 space-y-3">
+          <div className="mt-4">
+            <div className="eyebrow">Product links</div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {PRODUCTS.map((product) => {
+                const message = renderProductMessage(product, {
+                  firstName: lead.first_name,
+                  fullName: leadName(lead),
+                  baseUrl: productBase,
+                  dubCode: attribution?.code ?? null,
+                });
+                return (
+                  <div
+                    key={product.slug}
+                    className="rounded-xl border border-border bg-muted p-3 text-sm"
+                  >
+                    <div className="font-medium">{product.name}</div>
+                    <p className="mt-1 text-xs text-muted-foreground">{product.blurb}</p>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setSmsBody(message)}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="flex-1"
+                        disabled={sendingSms}
+                        onClick={() => {
+                          setSmsBody(message);
+                          void sendText(message);
+                        }}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {templates.length > 0 ? (
+            <div className="mt-5">
+              <div className="eyebrow">Saved templates — send now</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {templates.map((template) => (
+                  <Button
+                    key={`quick-${template.id}`}
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={sendingSms}
+                    onClick={() => {
+                      const body = renderTemplate(template.body, { lead });
+                      setSmsBody(body);
+                      void sendText(body);
+                    }}
+                  >
+                    {template.name} →
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <form onSubmit={handleSendSms} className="mt-5 space-y-3">
+
             {templates.length > 0 ? (
               <div className="space-y-2">
                 <Label htmlFor="template">Template</Label>
