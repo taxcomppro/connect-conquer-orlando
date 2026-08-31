@@ -261,14 +261,13 @@ function LeadPage() {
     if (options.thenScan) navigate({ to: "/scan" });
   }
 
-  async function handleSendSms(event: React.FormEvent) {
-    event.preventDefault();
+  async function sendText(body: string) {
     if (!user || !lead) return;
     if (!lead.phone) {
-      toast.error("This lead has no phone number on file.");
+      toast.error("This lead has no phone number on file. Edit the contact details to add one.");
       return;
     }
-    if (!smsBody.trim()) {
+    if (!body.trim()) {
       toast.error("Type a message first.");
       return;
     }
@@ -278,7 +277,7 @@ function LeadPage() {
         data: {
           leadId: lead.id,
           to: lead.phone,
-          body: smsBody.trim(),
+          body: body.trim(),
           recordConsent: smsConsent,
         },
       });
@@ -292,6 +291,54 @@ function LeadPage() {
       setSendingSms(false);
     }
   }
+
+  function handleSendSms(event: React.FormEvent) {
+    event.preventDefault();
+    void sendText(smsBody);
+  }
+
+  function startEditing() {
+    if (!lead) return;
+    setEdit({
+      prefix: lead.prefix ?? "",
+      first_name: lead.first_name ?? "",
+      last_name: lead.last_name ?? "",
+      suffix: lead.suffix ?? "",
+      credential: lead.credential ?? "",
+      title: lead.title ?? "",
+      company: lead.company ?? "",
+      department: lead.department ?? "",
+      email: lead.email ?? "",
+      phone: lead.phone ?? "",
+      website: lead.website ?? "",
+      address1: lead.address1 ?? "",
+      address2: lead.address2 ?? "",
+      city: lead.city ?? "",
+      state: lead.state ?? "",
+      postal_code: lead.postal_code ?? "",
+      country: lead.country ?? "",
+    });
+    setEditing(true);
+  }
+
+  async function saveContact(event: React.FormEvent) {
+    event.preventDefault();
+    if (!lead) return;
+    setSavingEdit(true);
+    const patch = Object.fromEntries(
+      Object.entries(edit).map(([key, value]) => [key, value.trim() || null]),
+    );
+    const { error } = await supabase.from("leads").update(patch).eq("id", lead.id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error("Couldn't save the contact details.");
+      return;
+    }
+    setLead({ ...lead, ...(patch as Partial<Lead>) });
+    setEditing(false);
+    toast.success("Contact details updated.");
+  }
+
 
   async function submitJoin(event: React.FormEvent) {
     event.preventDefault();
