@@ -24,7 +24,9 @@ import {
   type SmsTemplate,
   type SmsMessage,
 } from "@/lib/sms.functions";
-import { runSmsTriggers } from "@/lib/sms-triggers.functions";
+import { runSmsTriggers, renderTemplate } from "@/lib/sms-triggers.functions";
+import { PRODUCTS, renderProductMessage } from "@/lib/products";
+
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +54,26 @@ export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   component: LeadPage,
 });
 
+const EDIT_FIELDS: [string, string][] = [
+  ["first_name", "First name"],
+  ["last_name", "Last name"],
+  ["credential", "Credential"],
+  ["title", "Title"],
+  ["company", "Firm"],
+  ["department", "Department"],
+  ["email", "Email"],
+  ["phone", "Mobile phone"],
+  ["website", "Website"],
+  ["address1", "Address line 1"],
+  ["address2", "Address line 2"],
+  ["city", "City"],
+  ["state", "State"],
+  ["postal_code", "ZIP"],
+  ["country", "Country"],
+];
+
 function LeadPage() {
+
   const { attendeeId } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -81,6 +102,11 @@ function LeadPage() {
   const [smsBody, setSmsBody] = useState("");
   const [smsConsent, setSmsConsent] = useState(false);
   const [sendingSms, setSendingSms] = useState(false);
+  const [productBase, setProductBase] = useState<string | null>(null);
+
+  const [editing, setEditing] = useState(false);
+  const [edit, setEdit] = useState<Record<string, string>>({});
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchTemplates = useServerFn(listSmsTemplates);
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
@@ -91,6 +117,15 @@ function LeadPage() {
     if (!user) return;
     void resolveAttribution(user.id).then(setAttribution);
   }, [user]);
+
+  useEffect(() => {
+    void supabase
+      .from("booth_settings")
+      .select("pooled_dub_url")
+      .maybeSingle()
+      .then(({ data }) => setProductBase(data?.pooled_dub_url ?? null));
+  }, []);
+
 
   async function startSignup() {
     if (!user || !lead) return;
@@ -197,6 +232,22 @@ function LeadPage() {
     return [lead.city, lead.state].filter(Boolean).join(", ");
   }, [lead]);
 
+  const fullName = useMemo(() => {
+    if (!lead) return "";
+    return [lead.prefix, lead.first_name, lead.middle_name, lead.last_name, lead.suffix]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+  }, [lead]);
+
+  const mailing = useMemo(() => {
+    if (!lead) return "";
+    return [lead.address1, lead.address2, lead.address3, lead.postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, [lead]);
+
+
   useEffect(() => {
     if (!lead) return;
     let active = true;
@@ -247,14 +298,13 @@ function LeadPage() {
     if (options.thenScan) navigate({ to: "/scan" });
   }
 
-  async function handleSendSms(event: React.FormEvent) {
-    event.preventDefault();
+  async function sendText(body: string) {
     if (!user || !lead) return;
     if (!lead.phone) {
-      toast.error("This lead has no phone number on file.");
+      toast.error("This lead has no phone number on file. Edit the contact details to add one.");
       return;
     }
-    if (!smsBody.trim()) {
+    if (!body.trim()) {
       toast.error("Type a message first.");
       return;
     }
@@ -264,7 +314,7 @@ function LeadPage() {
         data: {
           leadId: lead.id,
           to: lead.phone,
-          body: smsBody.trim(),
+          body: body.trim(),
           recordConsent: smsConsent,
         },
       });
@@ -278,6 +328,58 @@ function LeadPage() {
       setSendingSms(false);
     }
   }
+
+  function handleSendSms(event: React.FormEvent) {
+    event.preventDefault();
+    void sendText(smsBody);
+  }
+
+  function startEditing() {
+    if (!lead) return;
+    setEdit({
+      prefix: lead.prefix ?? "",
+      first_name: lead.first_name ?? "",
+      last_name: lead.last_name ?? "",
+      suffix: lead.suffix ?? "",
+      credential: lead.credential ?? "",
+      title: lead.title ?? "",
+      company: lead.company ?? "",
+      department: lead.department ?? "",
+      email: lead.email ?? "",
+      phone: lead.phone ?? "",
+      website: lead.website ?? "",
+      address1: lead.address1 ?? "",
+      address2: lead.address2 ?? "",
+      city: lead.city ?? "",
+      state: lead.state ?? "",
+      postal_code: lead.postal_code ?? "",
+      country: lead.country ?? "",
+    });
+    setEditing(true);
+  }
+
+  async function saveContact(event: React.FormEvent) {
+    event.preventDefault();
+    if (!lead) return;
+    setSavingEdit(true);
+    const patch = Object.fromEntries(
+      Object.entries(edit).map(([key, value]) => [key, value.trim() || null]),
+    ) as Partial<Lead>;
+    const { error } = await supabase
+      .from("leads")
+      .update(patch as never)
+      .eq("id", lead.id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error("Couldn't save the contact details.");
+      return;
+    }
+    setLead({ ...lead, ...patch });
+
+    setEditing(false);
+    toast.success("Contact details updated.");
+  }
+
 
   async function submitJoin(event: React.FormEvent) {
     event.preventDefault();
@@ -349,18 +451,80 @@ function LeadPage() {
           "No title on the badge"}
       </p>
 
-      <Panel className="mt-5 space-y-2 text-sm">
-        <Row label="Badge ID" value={lead.attendee_id} />
-        {lead.email ? <Row label="Email" value={lead.email} /> : null}
-        {lead.phone ? <Row label="Phone" value={lead.phone} /> : null}
-        {location ? <Row label="Location" value={location} /> : null}
-        {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
-        {lead.lookup_status !== "found" ? (
-          <p className="pt-1 text-xs text-gold">
-            Badge details weren't available yet — the record fills in after the show data sync.
+      {!editing ? (
+        <Panel className="mt-5 space-y-2 text-sm">
+          <div className="flex items-center justify-between pb-1">
+            <span className="eyebrow">Badge record</span>
+            <button
+              type="button"
+              onClick={startEditing}
+              className="text-xs text-signal hover:underline"
+            >
+              Edit details
+            </button>
+          </div>
+          <Row label="Badge ID" value={lead.attendee_id} />
+          {fullName ? <Row label="Name" value={fullName} /> : null}
+          {lead.nickname ? <Row label="Goes by" value={lead.nickname} /> : null}
+          {lead.credential ? <Row label="Credential" value={lead.credential} /> : null}
+          {lead.title ? <Row label="Title" value={lead.title} /> : null}
+          {lead.company ? <Row label="Firm" value={lead.company} /> : null}
+          {lead.department ? <Row label="Department" value={lead.department} /> : null}
+          {lead.email ? <Row label="Email" value={lead.email} /> : null}
+          {lead.phone ? <Row label="Phone" value={lead.phone} /> : null}
+          {lead.fax ? <Row label="Fax" value={lead.fax} /> : null}
+          {lead.website ? <Row label="Website" value={lead.website} /> : null}
+          {mailing ? <Row label="Address" value={mailing} /> : null}
+          {location ? <Row label="Location" value={location} /> : null}
+          {lead.country ? <Row label="Country" value={lead.country} /> : null}
+          {lead.association ? <Row label="Association" value={lead.association} /> : null}
+          {lead.demographics ? <Row label="Demographics" value={lead.demographics} /> : null}
+          {lead.qualifiers ? <Row label="Qualifiers" value={lead.qualifiers} /> : null}
+          {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
+          {lead.lookup_status !== "found" ? (
+            <p className="pt-1 text-xs text-gold">
+              Badge details weren't available yet — the record fills in after the show data sync.
+            </p>
+          ) : null}
+        </Panel>
+      ) : (
+        <Panel className="mt-5">
+          <div className="eyebrow">Edit contact details</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Badges often carry an office landline. Update the phone or email so texts and follow-up
+            reach them directly.
           </p>
-        ) : null}
-      </Panel>
+          <form onSubmit={saveContact} className="mt-4 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {EDIT_FIELDS.map(([key, label]) => (
+                <div key={key} className="space-y-2">
+                  <Label htmlFor={`ed-${key}`}>{label}</Label>
+                  <Input
+                    id={`ed-${key}`}
+                    value={edit[key] ?? ""}
+                    inputMode={key === "phone" ? "tel" : undefined}
+                    onChange={(e) => setEdit((c) => ({ ...c, [key]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={savingEdit} className="h-12 flex-1">
+                {savingEdit ? "Saving…" : "Save details"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditing(false)}
+                className="h-12 flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      )}
+
 
       <SectionLabel>How hot is this lead?</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
@@ -545,10 +709,82 @@ function LeadPage() {
           <div className="eyebrow">SMS follow-up</div>
           <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send a quick follow-up to the number on their badge: {lead.phone}
+            Send a quick follow-up to {lead.phone}. Every product link carries the booth Dub code
+            {attribution?.code ? ` (${attribution.code})` : ""}.
           </p>
 
-          <form onSubmit={handleSendSms} className="mt-4 space-y-3">
+          <div className="mt-4">
+            <div className="eyebrow">Product links</div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {PRODUCTS.map((product) => {
+                const message = renderProductMessage(product, {
+                  firstName: lead.first_name,
+                  fullName: leadName(lead),
+                  baseUrl: productBase,
+                  dubCode: attribution?.code ?? null,
+                });
+                return (
+                  <div
+                    key={product.slug}
+                    className="rounded-xl border border-border bg-muted p-3 text-sm"
+                  >
+                    <div className="font-medium">{product.name}</div>
+                    <p className="mt-1 text-xs text-muted-foreground">{product.blurb}</p>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setSmsBody(message)}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="flex-1"
+                        disabled={sendingSms}
+                        onClick={() => {
+                          setSmsBody(message);
+                          void sendText(message);
+                        }}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {templates.length > 0 ? (
+            <div className="mt-5">
+              <div className="eyebrow">Saved templates — send now</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {templates.map((template) => (
+                  <Button
+                    key={`quick-${template.id}`}
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={sendingSms}
+                    onClick={() => {
+                      const body = renderTemplate(template.body, { lead });
+                      setSmsBody(body);
+                      void sendText(body);
+                    }}
+                  >
+                    {template.name} →
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <form onSubmit={handleSendSms} className="mt-5 space-y-3">
+
             {templates.length > 0 ? (
               <div className="space-y-2">
                 <Label htmlFor="template">Template</Label>
@@ -629,8 +865,12 @@ function LeadPage() {
         <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
           <div className="eyebrow">SMS follow-up</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            No phone number on this badge, so SMS follow-up isn't available.
+            No mobile number on this badge — many list an office landline. Add one to text them.
           </p>
+          <Button type="button" variant="outline" onClick={startEditing} className="mt-3 h-11">
+            Edit contact details
+          </Button>
+
         </div>
       )}
 
