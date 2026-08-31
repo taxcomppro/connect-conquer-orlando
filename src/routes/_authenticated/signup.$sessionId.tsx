@@ -226,6 +226,65 @@ function HandoffPage() {
         <Row label="Session ID" value={session.id} />
       </Panel>
 
+      {session.purchase_confirmed_source ? (
+        <>
+          <SectionLabel>Purchase verified in Stripe</SectionLabel>
+          <Panel className="space-y-2 text-sm">
+            <Row label="Bought" value={session.membership_plan ?? "—"} />
+            <Row
+              label="Amount"
+              value={
+                session.purchase_amount_cents != null
+                  ? formatMoney(session.purchase_amount_cents, session.purchase_currency)
+                  : "—"
+              }
+            />
+            <Row label="Stripe ref" value={session.stripe_reference ?? "—"} />
+          </Panel>
+        </>
+      ) : (
+        <>
+          <SectionLabel>Confirm the sale with Stripe</SectionLabel>
+          <Panel className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Checks the Stripe account for a completed checkout on{" "}
+              <span className="font-mono text-xs">{session.email ?? "no email on file"}</span>.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => void checkStripe()}
+              disabled={checking || !session.email}
+              className="h-11 w-full"
+            >
+              {checking ? "Checking Stripe…" : "Check Stripe for payment"}
+            </Button>
+
+            {stripe?.configured === false ? (
+              <p className="text-xs text-muted-foreground">
+                Stripe isn&apos;t connected yet — add the read-only Stripe key in settings.
+              </p>
+            ) : null}
+
+            {stripe?.purchases.map((purchase) => (
+              <div key={purchase.reference} className="rounded-xl border border-go-line bg-go-soft p-3">
+                <div className="font-medium">{purchase.summary}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {formatMoney(purchase.amountCents, purchase.currency)} ·{" "}
+                  {new Date(purchase.createdAt).toLocaleString()}
+                </div>
+                <Button
+                  onClick={() => void applyPurchase(purchase.reference)}
+                  disabled={applying === purchase.reference}
+                  className="mt-3 h-10 w-full"
+                >
+                  {applying === purchase.reference ? "Confirming…" : "Confirm this purchase"}
+                </Button>
+              </div>
+            ))}
+          </Panel>
+        </>
+      )}
+
       {ready ? (
         <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
           <div className="eyebrow">Ready for card</div>
