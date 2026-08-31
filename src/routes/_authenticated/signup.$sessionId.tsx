@@ -1,6 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { confirmStripePurchase, lookupStripePurchases, type LookupResult } from "@/lib/stripe.functions";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,6 +46,49 @@ function HandoffPage() {
   const { base } = useCardBase();
   const [session, setSession] = useState<SignupSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
+  const [applying, setApplying] = useState<string | null>(null);
+  const [stripe, setStripe] = useState<LookupResult | null>(null);
+  const doLookup = useServerFn(lookupStripePurchases);
+  const doConfirm = useServerFn(confirmStripePurchase);
+
+  async function checkStripe() {
+    if (!session?.email) {
+      toast.error("This signup has no email address to match in Stripe.");
+      return;
+    }
+    setChecking(true);
+    try {
+      const result = await doLookup({ data: { email: session.email } });
+      setStripe(result);
+      if (!result.configured) {
+        toast.error("Stripe isn't connected yet.");
+      } else if (result.error) {
+        toast.error(result.error);
+      } else if (result.purchases.length === 0) {
+        toast("No paid Stripe checkout found for that email yet.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Stripe lookup failed.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function applyPurchase(reference: string) {
+    if (!session) return;
+    setApplying(reference);
+    try {
+      const result = await doConfirm({ data: { sessionId: session.id, reference } });
+      toast.success(`Confirmed — ${result.summary}`);
+      setSession({ ...session, stage: "membership_confirmed" });
+      setStripe(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't confirm the purchase.");
+    } finally {
+      setApplying(null);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -180,6 +226,65 @@ function HandoffPage() {
         <Row label="Session ID" value={session.id} />
       </Panel>
 
+      {session.purchase_confirmed_source ? (
+        <>
+          <SectionLabel>Purchase verified in Stripe</SectionLabel>
+          <Panel className="space-y-2 text-sm">
+            <Row label="Bought" value={session.membership_plan ?? "—"} />
+            <Row
+              label="Amount"
+              value={
+                session.purchase_amount_cents != null
+                  ? formatMoney(session.purchase_amount_cents, session.purchase_currency)
+                  : "—"
+              }
+            />
+            <Row label="Stripe ref" value={session.stripe_reference ?? "—"} />
+          </Panel>
+        </>
+      ) : (
+        <>
+          <SectionLabel>Confirm the sale with Stripe</SectionLabel>
+          <Panel className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Checks the Stripe account for a completed checkout on{" "}
+              <span className="font-mono text-xs">{session.email ?? "no email on file"}</span>.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => void checkStripe()}
+              disabled={checking || !session.email}
+              className="h-11 w-full"
+            >
+              {checking ? "Checking Stripe…" : "Check Stripe for payment"}
+            </Button>
+
+            {stripe?.configured === false ? (
+              <p className="text-xs text-muted-foreground">
+                Stripe isn&apos;t connected yet — add the read-only Stripe key in settings.
+              </p>
+            ) : null}
+
+            {stripe?.purchases.map((purchase) => (
+              <div key={purchase.reference} className="rounded-xl border border-go-line bg-go-soft p-3">
+                <div className="font-medium">{purchase.summary}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {formatMoney(purchase.amountCents, purchase.currency)} ·{" "}
+                  {new Date(purchase.createdAt).toLocaleString()}
+                </div>
+                <Button
+                  onClick={() => void applyPurchase(purchase.reference)}
+                  disabled={applying === purchase.reference}
+                  className="mt-3 h-10 w-full"
+                >
+                  {applying === purchase.reference ? "Confirming…" : "Confirm this purchase"}
+                </Button>
+              </div>
+            ))}
+          </Panel>
+        </>
+      )}
+
       {ready ? (
         <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
           <div className="eyebrow">Ready for card</div>
@@ -221,4 +326,11 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="truncate text-right font-mono text-xs">{value}</span>
     </div>
   );
+}
+
+function formatMoney(cents: number, currency?: string | null): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency || "USD",
+  }).format(cents / 100);
 }

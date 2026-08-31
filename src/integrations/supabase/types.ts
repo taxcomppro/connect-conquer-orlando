@@ -457,10 +457,16 @@ export type Database = {
           migrated_at: string | null
           notes: string | null
           phone: string | null
+          purchase_amount_cents: number | null
+          purchase_confirmed_source: string | null
+          purchase_currency: string | null
+          purchase_items: Json | null
           rep_name: string | null
           rep_user_id: string | null
           source: string
           stage: Database["public"]["Enums"]["signup_stage"]
+          stripe_customer_id: string | null
+          stripe_reference: string | null
           title: string | null
           updated_at: string
         }
@@ -483,10 +489,16 @@ export type Database = {
           migrated_at?: string | null
           notes?: string | null
           phone?: string | null
+          purchase_amount_cents?: number | null
+          purchase_confirmed_source?: string | null
+          purchase_currency?: string | null
+          purchase_items?: Json | null
           rep_name?: string | null
           rep_user_id?: string | null
           source?: string
           stage?: Database["public"]["Enums"]["signup_stage"]
+          stripe_customer_id?: string | null
+          stripe_reference?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -509,10 +521,16 @@ export type Database = {
           migrated_at?: string | null
           notes?: string | null
           phone?: string | null
+          purchase_amount_cents?: number | null
+          purchase_confirmed_source?: string | null
+          purchase_currency?: string | null
+          purchase_items?: Json | null
           rep_name?: string | null
           rep_user_id?: string | null
           source?: string
           stage?: Database["public"]["Enums"]["signup_stage"]
+          stripe_customer_id?: string | null
+          stripe_reference?: string | null
           title?: string | null
           updated_at?: string
         }
