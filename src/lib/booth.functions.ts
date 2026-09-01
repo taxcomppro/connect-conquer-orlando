@@ -29,8 +29,11 @@ function text(value: unknown, max = 300): string | null {
 }
 
 async function publicRpc<T>(name: string, body: Record<string, unknown>): Promise<T | null> {
-  const url = process.env["SUPABASE_URL"];
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  // Fall back to the build-time public values so the booth flow keeps working
+  // even if the server env is missing the runtime pair.
+  const url = process.env["SUPABASE_URL"] || import.meta.env["VITE_SUPABASE_URL"];
+  const key =
+    process.env["SUPABASE_PUBLISHABLE_KEY"] || import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
   if (!url || !key) throw new Error("The signup service is not configured.");
 
   const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
