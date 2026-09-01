@@ -26,7 +26,6 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
-import { Route as ApiPublicEnvcheckRouteImport } from './routes/api/public/envcheck'
 import { Route as ApiPublicWebhooksMembershipRouteImport } from './routes/api/public/webhooks/membership'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 
@@ -118,11 +117,6 @@ const AuthenticatedSignupSessionIdRoute =
     path: '/signup/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiPublicEnvcheckRoute = ApiPublicEnvcheckRouteImport.update({
-  id: '/api/public/envcheck',
-  path: '/api/public/envcheck',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicWebhooksMembershipRoute =
   ApiPublicWebhooksMembershipRouteImport.update({
     id: '/api/public/webhooks/membership',
@@ -152,7 +146,6 @@ export interface FileRoutesByFullPath {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -173,7 +166,6 @@ export interface FileRoutesByTo {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -196,7 +188,6 @@ export interface FileRoutesById {
   '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -219,7 +210,6 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
-    | '/api/public/envcheck'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -240,7 +230,6 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
-    | '/api/public/envcheck'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   id:
@@ -262,7 +251,6 @@ export interface FileRouteTypes {
     | '/_authenticated/activate/$sessionId'
     | '/_authenticated/lead/$attendeeId'
     | '/_authenticated/signup/$sessionId'
-    | '/api/public/envcheck'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -275,7 +263,6 @@ export interface RootRouteChildren {
   CTokenRoute: typeof CTokenRoute
   JoinSessionIdRoute: typeof JoinSessionIdRoute
   PSlugRoute: typeof PSlugRoute
-  ApiPublicEnvcheckRoute: typeof ApiPublicEnvcheckRoute
   ApiPublicWebhooksMembershipRoute: typeof ApiPublicWebhooksMembershipRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
@@ -401,13 +388,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSignupSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/envcheck': {
-      id: '/api/public/envcheck'
-      path: '/api/public/envcheck'
-      fullPath: '/api/public/envcheck'
-      preLoaderRoute: typeof ApiPublicEnvcheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/webhooks/membership': {
       id: '/api/public/webhooks/membership'
       path: '/api/public/webhooks/membership'
@@ -462,7 +442,6 @@ const rootRouteChildren: RootRouteChildren = {
   CTokenRoute: CTokenRoute,
   JoinSessionIdRoute: JoinSessionIdRoute,
   PSlugRoute: PSlugRoute,
-  ApiPublicEnvcheckRoute: ApiPublicEnvcheckRoute,
   ApiPublicWebhooksMembershipRoute: ApiPublicWebhooksMembershipRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
