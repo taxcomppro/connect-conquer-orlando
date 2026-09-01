@@ -740,12 +740,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_join_session: { Args: { _session_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      submit_public_connect_profile: {
+        Args: {
+          _bio?: string
+          _city?: string
+          _company?: string
+          _credential?: string
+          _display_name: string
+          _email?: string
+          _membership_plan?: string
+          _membership_ref?: string
+          _phone?: string
+          _services?: string[]
+          _session_id: string
+          _show_email?: boolean
+          _show_location?: boolean
+          _show_phone?: boolean
+          _state?: string
+          _title?: string
+          _website?: string
+        }
+        Returns: Json
       }
     }
     Enums: {
