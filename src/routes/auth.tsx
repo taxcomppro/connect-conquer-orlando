@@ -49,6 +49,24 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
+  // If a sign-in link failed (opened in a different browser, expired, already
+  // used), the provider returns here with an error in the URL — show it
+  // instead of silently bouncing back to this form.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const description =
+      params.get("error_description") ??
+      hash.get("error_description") ??
+      params.get("error") ??
+      hash.get("error");
+    if (description) {
+      toast.error(decodeURIComponent(description).replace(/\+/g, " "), { duration: 8000 });
+      window.history.replaceState(null, "", window.location.pathname + (next ? `?next=${encodeURIComponent(next)}` : ""));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!loading && session) {
       navigate({ to: safeNext(next), replace: true });
@@ -65,7 +83,7 @@ function AuthPage() {
         email: address,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}${safeNext(next)}`,
+          emailRedirectTo: `${window.location.origin}/auth?next=${encodeURIComponent(safeNext(next))}`,
         },
       });
       if (error) throw error;
