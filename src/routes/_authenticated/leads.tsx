@@ -139,6 +139,9 @@ function LeadsPage() {
         <Button variant="outline" onClick={exportCsv} className="h-11 sm:w-40">
           Export CSV
         </Button>
+        <Button asChild className="h-11 sm:w-40">
+          <Link to="/broadcast">Text all leads</Link>
+        </Button>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">

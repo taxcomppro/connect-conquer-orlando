@@ -16,6 +16,7 @@ import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
+import { Route as AuthenticatedBroadcastRouteImport } from './routes/_authenticated/broadcast'
 import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
@@ -62,6 +63,11 @@ const AuthenticatedAutomationsRoute =
 const AuthenticatedBriefingRoute = AuthenticatedBriefingRouteImport.update({
   id: '/briefing',
   path: '/briefing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBroadcastRoute = AuthenticatedBroadcastRouteImport.update({
+  id: '/broadcast',
+  path: '/broadcast',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDubRoute = AuthenticatedDubRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
+  '/broadcast': typeof AuthenticatedBroadcastRoute
   '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
+  '/broadcast': typeof AuthenticatedBroadcastRoute
   '/dub': typeof AuthenticatedDubRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
+  '/_authenticated/broadcast': typeof AuthenticatedBroadcastRoute
   '/_authenticated/dub': typeof AuthenticatedDubRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/automations'
     | '/briefing'
+    | '/broadcast'
     | '/dub'
     | '/leads'
     | '/pipeline'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/automations'
     | '/briefing'
+    | '/broadcast'
     | '/dub'
     | '/leads'
     | '/pipeline'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/automations'
     | '/_authenticated/briefing'
+    | '/_authenticated/broadcast'
     | '/_authenticated/dub'
     | '/_authenticated/leads'
     | '/_authenticated/pipeline'
@@ -316,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/briefing'
       fullPath: '/briefing'
       preLoaderRoute: typeof AuthenticatedBriefingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/broadcast': {
+      id: '/_authenticated/broadcast'
+      path: '/broadcast'
+      fullPath: '/broadcast'
+      preLoaderRoute: typeof AuthenticatedBroadcastRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dub': {
@@ -409,6 +428,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
+  AuthenticatedBroadcastRoute: typeof AuthenticatedBroadcastRoute
   AuthenticatedDubRoute: typeof AuthenticatedDubRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
@@ -422,6 +442,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
+  AuthenticatedBroadcastRoute: AuthenticatedBroadcastRoute,
   AuthenticatedDubRoute: AuthenticatedDubRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
