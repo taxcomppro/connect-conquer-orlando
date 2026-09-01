@@ -65,7 +65,7 @@ function AuthPage() {
         email: address,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}${safeNext(next)}`,
+          emailRedirectTo: `${window.location.origin}/auth?next=${encodeURIComponent(safeNext(next))}`,
         },
       });
       if (error) throw error;
