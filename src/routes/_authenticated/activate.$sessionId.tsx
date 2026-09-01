@@ -306,8 +306,10 @@ function ActivatePage() {
           <SectionLabel>4 · Write &amp; verify</SectionLabel>
           <Panel className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              Write the card on the USB writer or with an NFC writer app on a phone. Then tap the
-              card on a phone and paste what it opened here.
+              In the <strong>NFC Tools</strong> app (App Store) on a staff iPhone:{" "}
+              <strong>Write → Add a record → URL/URI</strong>, paste the card address above, then{" "}
+              <strong>Write</strong> and hold the card to the top of the phone. Then tap the card
+              with any phone and paste what it opened here to verify.
             </p>
             <div className="space-y-2">
               <Label htmlFor="readback">Read-back URL</Label>
