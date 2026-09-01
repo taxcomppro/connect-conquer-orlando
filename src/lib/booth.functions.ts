@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { slugify } from "./connect";
 
 type IntakeInput = {
   sessionId: string;
@@ -29,6 +28,23 @@ function text(value: unknown, max = 300): string | null {
   return trimmed ? trimmed : null;
 }
 
+async function publicRpc<T>(name: string, body: Record<string, unknown>): Promise<T | null> {
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) throw new Error("The signup service is not configured.");
+
+  const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: { apikey: key, "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || "The signup service could not complete the request.");
+  }
+  return (await response.json()) as T | null;
+}
+
 /** Public: minimal prefill for the customer's own device. Guarded by the unguessable session id. */
 export const getJoinSession = createServerFn({ method: "POST" })
   .validator((input: { sessionId: string }) => {
@@ -36,22 +52,17 @@ export const getJoinSession = createServerFn({ method: "POST" })
     return { sessionId: input.sessionId };
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: session } = await supabaseAdmin
-      .from("signup_sessions")
-      .select("id, stage, full_name, email, phone, company, title, rep_name")
-      .eq("id", data.sessionId)
-      .maybeSingle();
-
-    if (!session) return null;
-
-    const { data: profile } = await supabaseAdmin
-      .from("connect_profiles")
-      .select("slug")
-      .eq("signup_session_id", session.id)
-      .maybeSingle();
-
-    return { ...session, slug: profile?.slug ?? null };
+    return publicRpc<{
+      id: string;
+      stage: string;
+      full_name: string | null;
+      email: string | null;
+      phone: string | null;
+      company: string | null;
+      title: string | null;
+      rep_name: string | null;
+      slug: string | null;
+    }>("get_public_join_session", { _session_id: data.sessionId });
   });
 
 /** Public: the customer completes their Connect profile on their own device. */
@@ -62,103 +73,27 @@ export const submitIntake = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: session } = await supabaseAdmin
-      .from("signup_sessions")
-      .select("id, stage")
-      .eq("id", data.sessionId)
-      .maybeSingle();
-    if (!session) throw new Error("This signup link is no longer valid.");
-
-    const displayName = text(data.displayName, 120)!;
-    const fields = {
-      display_name: displayName,
-      credential: text(data.credential, 60),
-      title: text(data.title, 120),
-      company: text(data.company, 160),
-      city: text(data.city, 80),
-      state: text(data.state, 40),
-      email: text(data.email, 160),
-      phone: text(data.phone, 40),
-      website: text(data.website, 200),
-      bio: text(data.bio, 1000),
-      services: (data.services ?? []).slice(0, 12).map((s) => String(s).slice(0, 60)),
-      // safe privacy defaults: contact details stay hidden unless opted in
-      show_email: data.showEmail === true,
-      show_phone: data.showPhone === true,
-      show_location: data.showLocation !== false,
-      published: true,
-    };
-
-    const { data: existing } = await supabaseAdmin
-      .from("connect_profiles")
-      .select("id, slug")
-      .eq("signup_session_id", session.id)
-      .maybeSingle();
-
-    let slug = existing?.slug ?? "";
-    if (!existing) {
-      const base = slugify(displayName) || "pro";
-      for (let i = 0; i < 6; i += 1) {
-        const candidate = `${base}-${Math.random().toString(36).slice(2, 6)}`;
-        const { data: clash } = await supabaseAdmin
-          .from("connect_profiles")
-          .select("id")
-          .eq("slug", candidate)
-          .maybeSingle();
-        if (!clash) {
-          slug = candidate;
-          break;
-        }
-      }
-      if (!slug) throw new Error("Could not allocate a profile address. Try again.");
-    }
-
-    if (existing) {
-      const { error } = await supabaseAdmin
-        .from("connect_profiles")
-        .update(fields)
-        .eq("id", existing.id);
-      if (error) throw new Error("Could not save the profile.");
-    } else {
-      const { error } = await supabaseAdmin
-        .from("connect_profiles")
-        .insert({ ...fields, slug, signup_session_id: session.id });
-      if (error) throw new Error("Could not create the profile.");
-    }
-
-    await supabaseAdmin
-      .from("signup_sessions")
-      .update({
-        stage: "ready_for_card",
-        full_name: displayName,
-        email: fields.email,
-        phone: fields.phone,
-        company: fields.company,
-        title: fields.title,
-        membership_ref: text(data.membershipRef, 120),
-        membership_plan: text(data.membershipPlan, 80),
-        membership_confirmed_at: new Date().toISOString(),
-      })
-      .eq("id", session.id);
-
-    await supabaseAdmin.from("signup_events").insert([
-      {
-        signup_session_id: session.id,
-        event_type: "MEMBERSHIP_CONFIRMED",
-        actor_label: "customer",
-        payload: { ref: text(data.membershipRef, 120), plan: text(data.membershipPlan, 80) },
-      },
-      {
-        signup_session_id: session.id,
-        event_type: "PROFILE_CREATED",
-        actor_label: "customer",
-        payload: { slug },
-      },
-    ]);
-
-    return { slug, ok: true };
+    const result = await publicRpc<{ slug: string; ok: boolean }>("submit_public_connect_profile", {
+      _session_id: data.sessionId,
+      _display_name: text(data.displayName, 120),
+      _credential: text(data.credential, 60),
+      _title: text(data.title, 120),
+      _company: text(data.company, 160),
+      _city: text(data.city, 80),
+      _state: text(data.state, 40),
+      _email: text(data.email, 160),
+      _phone: text(data.phone, 40),
+      _website: text(data.website, 200),
+      _bio: text(data.bio, 1000),
+      _services: (data.services ?? []).slice(0, 12).map((s) => String(s).slice(0, 60)),
+      _show_email: data.showEmail === true,
+      _show_phone: data.showPhone === true,
+      _show_location: data.showLocation !== false,
+      _membership_ref: text(data.membershipRef, 120),
+      _membership_plan: text(data.membershipPlan, 80),
+    });
+    if (!result) throw new Error("This signup link is no longer valid.");
+    return result;
   });
 
 /** Public: the profile a card tap lands on. Hidden fields are stripped server-side. */
