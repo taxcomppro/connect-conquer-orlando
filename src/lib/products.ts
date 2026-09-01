@@ -75,15 +75,23 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-/** Builds the product URL with the booth/seller Dub code attached. */
+/**
+ * Builds the product URL with the booth/seller Dub code attached.
+ *
+ * The main site does not serve per-product sub-pages yet (every /connect/<path>
+ * loads the same shell, so deep links read as dead). Until the developer ships
+ * them, every link lands on the live /connect page and carries the product as a
+ * `p=<slug>` query param, which the site can pick up later without changing
+ * anything here.
+ */
 export function productLink(
   product: Product,
   options: { baseUrl?: string | null; dubCode?: string | null } = {},
 ): string {
   const base = (options.baseUrl || PRODUCT_BASE_URL).replace(/\/+$/, "");
-  const url = `${base}${product.path}`;
-  if (!options.dubCode) return url;
-  return `${url}${url.includes("?") ? "&" : "?"}via=${encodeURIComponent(options.dubCode)}`;
+  const params = new URLSearchParams({ p: product.slug });
+  if (options.dubCode) params.set("via", options.dubCode);
+  return `${base}?${params.toString()}`;
 }
 
 /** Fills {{first_name}} / {{full_name}} / {{product_link}} for a manual send. */
