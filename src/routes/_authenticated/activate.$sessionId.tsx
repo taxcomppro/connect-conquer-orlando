@@ -293,9 +293,12 @@ function ActivatePage() {
           </Button>
         ) : (
           <>
-            <CopyField label="Write this URL to the NFC card" value={link} />
+            <CopyField
+              label="Write this URL to the NFC card (NFC Tools → Write → URL/URI)"
+              value={link}
+            />
             <div className="flex justify-center py-2">
-              <QrPanel value={link} size={200} caption="Or scan into your NFC writer app" />
+              <QrPanel value={link} size={200} caption="Or scan into NFC Tools to avoid typos" />
             </div>
           </>
         )}
