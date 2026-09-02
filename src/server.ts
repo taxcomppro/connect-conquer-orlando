@@ -9,6 +9,16 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+function bindRuntimeEnvironment(env: unknown) {
+  if (!env || typeof env !== "object") return;
+
+  for (const [name, value] of Object.entries(env)) {
+    if (typeof value === "string" && !process.env[name]) {
+      process.env[name] = value;
+    }
+  }
+}
+
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
     serverEntryPromise = import("@tanstack/react-start/server-entry").then(
@@ -47,6 +57,10 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // The custom server entry receives deployment bindings directly. Mirror
+      // string bindings into process.env before loading server functions so
+      // connector credentials are available through the standard API.
+      bindRuntimeEnvironment(env);
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
