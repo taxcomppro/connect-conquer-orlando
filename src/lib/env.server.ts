@@ -9,9 +9,10 @@ export async function readEnv(name: string): Promise<string> {
   if (fromProcess) return fromProcess;
 
   try {
-    const mod = (await import(
-      /* @vite-ignore */ "cloudflare:workers"
-    )) as { env?: Record<string, string | undefined> };
+    const specifier = "cloudflare:workers";
+    const mod = (await import(/* @vite-ignore */ specifier)) as {
+      env?: Record<string, string | undefined>;
+    };
     const value = mod?.env?.[name];
     if (value) return value;
   } catch {
