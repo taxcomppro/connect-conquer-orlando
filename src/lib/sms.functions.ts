@@ -72,14 +72,8 @@ export const sendLeadSms = createServerFn({ method: "POST" })
     if (leadError) throw new Error(leadError.message);
     if (!lead) throw new Error("Lead not found.");
 
-    const canEdit = lead.scanned_by === userId;
-    if (!canEdit) {
-      const { data: isAdmin } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-      if (!isAdmin) throw new Error("You can only text leads you scanned or as an admin.");
-    }
+    // Any signed-in booth staff member can text any lead.
+
 
     const normalizedTo = normalizePhone(data.to);
 
