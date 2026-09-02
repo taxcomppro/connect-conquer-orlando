@@ -78,7 +78,13 @@ export const sendLeadSms = createServerFn({ method: "POST" })
     const normalizedTo = normalizePhone(data.to);
 
     const { sendSms } = await import("./sms.server");
-    const result = await sendSms({ to: normalizedTo, body: data.body });
+    const result = await sendSms({
+      to: normalizedTo,
+      body: data.body,
+      lovableApiKey: process.env["LOVABLE_API_KEY"] ?? "",
+      twilioApiKey: process.env["TWILIO_API_KEY"] ?? "",
+      from: process.env["TWILIO_FROM_NUMBER"],
+    });
 
     const { error: insertError } = await supabase.from("sms_messages").insert({
       lead_id: data.leadId,
