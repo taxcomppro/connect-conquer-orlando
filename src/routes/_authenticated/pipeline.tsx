@@ -117,7 +117,7 @@ function PipelinePage() {
       />
 
       <div className="mt-5 grid grid-cols-3 gap-3">
-        <Stat label="Sales" value={stats.total} />
+        <Stat label="In pipeline" value={stats.total} />
         <Stat label="Ready for card" value={stats.ready} tone="text-gold" />
         <Stat label="Cards issued" value={stats.issued} tone="text-go" />
       </div>
@@ -146,7 +146,7 @@ function PipelinePage() {
         placeholder="Search name, firm, badge ID, DUB code…"
       />
 
-      <SectionLabel>{loading ? "Loading…" : `${visible.length} sales`}</SectionLabel>
+      <SectionLabel>{loading ? "Loading…" : `${visible.length} in pipeline`}</SectionLabel>
       <div className="space-y-2">
         {visible.map((session) => (
           <Link
