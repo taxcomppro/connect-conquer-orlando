@@ -64,10 +64,6 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       const name =
         [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim() || "Lead";
 
-      if (!isAdmin && lead.scanned_by !== userId) {
-        result.skipped += 1;
-        continue;
-      }
       if (!lead.phone) {
         result.skipped += 1;
         continue;
