@@ -527,6 +527,191 @@ function LeadPage() {
         </Panel>
       )}
 
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        <Button
+          onClick={() => saveLead({ thenScan: true })}
+          disabled={saving}
+          className="h-12 flex-1 text-base"
+        >
+          Save & scan next
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => saveLead()}
+          disabled={saving}
+          className="h-12 flex-1 text-base"
+        >
+          Save
+        </Button>
+      </div>
+
+      {lead.phone ? (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Send a quick follow-up to {lead.phone}. Every product link carries the booth Dub code
+            {attribution?.code ? ` (${attribution.code})` : ""}.
+          </p>
+
+          <div className="mt-4">
+            <div className="eyebrow">Product links</div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {PRODUCTS.map((product) => {
+                const message = renderProductMessage(product, {
+                  firstName: lead.first_name,
+                  fullName: leadName(lead),
+                  baseUrl: productBase,
+                  dubCode: attribution?.code ?? null,
+                });
+                return (
+                  <div
+                    key={product.slug}
+                    className="rounded-xl border border-border bg-muted p-3 text-sm"
+                  >
+                    <div className="font-medium">{product.name}</div>
+                    <p className="mt-1 text-xs text-muted-foreground">{product.blurb}</p>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setSmsBody(message)}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="flex-1"
+                        disabled={sendingSms}
+                        onClick={() => {
+                          setSmsBody(message);
+                          void sendText(message);
+                        }}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {templates.length > 0 ? (
+            <div className="mt-5">
+              <div className="eyebrow">Saved templates — send now</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {templates.map((template) => (
+                  <Button
+                    key={`quick-${template.id}`}
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={sendingSms}
+                    onClick={() => {
+                      const body = renderTemplate(template.body, { lead });
+                      setSmsBody(body);
+                      void sendText(body);
+                    }}
+                  >
+                    {template.name} →
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <form onSubmit={handleSendSms} className="mt-5 space-y-3">
+            {templates.length > 0 ? (
+              <div className="space-y-2">
+                <Label htmlFor="template">Template</Label>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    const template = templates.find((t) => t.id === value);
+                    if (template) setSmsBody(template.body);
+                  }}
+                >
+                  <SelectTrigger id="template" className="w-full">
+                    <SelectValue placeholder="Pick a template…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <Label htmlFor="smsBody">Message</Label>
+              <Textarea
+                id="smsBody"
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                rows={4}
+                placeholder="Thanks for stopping by TCPC booth 540…"
+              />
+              <p className="text-right text-xs text-muted-foreground">
+                {smsBody.length}/1600
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+              <Label htmlFor="smsConsent" className="text-sm font-normal">
+                Lead consented to SMS updates
+              </Label>
+              <Switch
+                id="smsConsent"
+                checked={smsConsent}
+                onCheckedChange={setSmsConsent}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={sendingSms || !smsBody.trim()}
+              className="h-12 w-full text-base"
+            >
+              {sendingSms ? "Sending…" : "Send text →"}
+            </Button>
+          </form>
+
+          {smsHistory.length > 0 ? (
+            <div className="mt-5 space-y-2">
+              <div className="eyebrow">Sent messages</div>
+              {smsHistory.map((msg) => (
+                <div
+                  key={msg.id}
+                  className="rounded-xl border border-border bg-muted p-3 text-sm"
+                >
+                  <p className="whitespace-pre-wrap">{msg.body}</p>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="capitalize">{msg.status}</span>
+                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No mobile number on this badge — many list an office landline. Add one to text them.
+          </p>
+          <Button type="button" variant="outline" onClick={startEditing} className="mt-3 h-11">
+            Edit contact details
+          </Button>
+        </div>
+      )}
 
       <SectionLabel>How hot is this lead?</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
@@ -625,7 +810,6 @@ function LeadPage() {
       </div>
 
       {!lead.joined_tcpc ? (
-
         <div className="mt-8 rounded-2xl border border-go-line bg-go-soft p-5">
           <div className="eyebrow">Close the loop</div>
           <h2 className="mt-2 font-display text-xl">Join Tax Compliance Pro Connect</h2>
@@ -706,195 +890,7 @@ function LeadPage() {
         </div>
       )}
 
-      {lead.phone ? (
-        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
-          <div className="eyebrow">SMS follow-up</div>
-          <h2 className="mt-2 font-display text-xl">Text {leadName(lead)}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Send a quick follow-up to {lead.phone}. Every product link carries the booth Dub code
-            {attribution?.code ? ` (${attribution.code})` : ""}.
-          </p>
-
-          <div className="mt-4">
-            <div className="eyebrow">Product links</div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              {PRODUCTS.map((product) => {
-                const message = renderProductMessage(product, {
-                  firstName: lead.first_name,
-                  fullName: leadName(lead),
-                  baseUrl: productBase,
-                  dubCode: attribution?.code ?? null,
-                });
-                return (
-                  <div
-                    key={product.slug}
-                    className="rounded-xl border border-border bg-muted p-3 text-sm"
-                  >
-                    <div className="font-medium">{product.name}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">{product.blurb}</p>
-                    <div className="mt-3 flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => setSmsBody(message)}
-                      >
-                        Preview
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="flex-1"
-                        disabled={sendingSms}
-                        onClick={() => {
-                          setSmsBody(message);
-                          void sendText(message);
-                        }}
-                      >
-                        Send
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {templates.length > 0 ? (
-            <div className="mt-5">
-              <div className="eyebrow">Saved templates — send now</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {templates.map((template) => (
-                  <Button
-                    key={`quick-${template.id}`}
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    disabled={sendingSms}
-                    onClick={() => {
-                      const body = renderTemplate(template.body, { lead });
-                      setSmsBody(body);
-                      void sendText(body);
-                    }}
-                  >
-                    {template.name} →
-                  </Button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <form onSubmit={handleSendSms} className="mt-5 space-y-3">
-
-            {templates.length > 0 ? (
-              <div className="space-y-2">
-                <Label htmlFor="template">Template</Label>
-                <Select
-                  value=""
-                  onValueChange={(value) => {
-                    const template = templates.find((t) => t.id === value);
-                    if (template) setSmsBody(template.body);
-                  }}
-                >
-                  <SelectTrigger id="template" className="w-full">
-                    <SelectValue placeholder="Pick a template…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : null}
-
-            <div className="space-y-2">
-              <Label htmlFor="smsBody">Message</Label>
-              <Textarea
-                id="smsBody"
-                value={smsBody}
-                onChange={(e) => setSmsBody(e.target.value)}
-                rows={4}
-                placeholder="Thanks for stopping by TCPC booth 540…"
-              />
-              <p className="text-right text-xs text-muted-foreground">
-                {smsBody.length}/1600
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
-              <Label htmlFor="smsConsent" className="text-sm font-normal">
-                Lead consented to SMS updates
-              </Label>
-              <Switch
-                id="smsConsent"
-                checked={smsConsent}
-                onCheckedChange={setSmsConsent}
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={sendingSms || !smsBody.trim()}
-              className="h-12 w-full text-base"
-            >
-              {sendingSms ? "Sending…" : "Send text →"}
-            </Button>
-          </form>
-
-          {smsHistory.length > 0 ? (
-            <div className="mt-5 space-y-2">
-              <div className="eyebrow">Sent messages</div>
-              {smsHistory.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="rounded-xl border border-border bg-muted p-3 text-sm"
-                >
-                  <p className="whitespace-pre-wrap">{msg.body}</p>
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="capitalize">{msg.status}</span>
-                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : (
-        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
-          <div className="eyebrow">SMS follow-up</div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            No mobile number on this badge — many list an office landline. Add one to text them.
-          </p>
-          <Button type="button" variant="outline" onClick={startEditing} className="mt-3 h-11">
-            Edit contact details
-          </Button>
-
-        </div>
-      )}
-
-      <div className="mt-8 flex flex-col gap-2 sm:flex-row">
-        <Button
-          onClick={() => saveLead({ thenScan: true })}
-          disabled={saving}
-          className="h-12 flex-1 text-base"
-        >
-          Save & scan next
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => saveLead()}
-          disabled={saving}
-          className="h-12 flex-1 text-base"
-        >
-          Save
-        </Button>
-      </div>
-
-      <div className="mt-4 text-center">
+      <div className="mt-8 text-center">
         <Link to="/leads" className="text-sm text-muted-foreground hover:text-foreground">
           View all my leads →
         </Link>
