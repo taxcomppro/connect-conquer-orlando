@@ -17,9 +17,9 @@ export type BulkSmsResult = {
 };
 
 /**
- * Sends one message to many leads. Only leads the caller scanned are texted,
- * unless the caller is an admin. Leads without a phone (or without consent when
- * required) are skipped, and every send is logged in sms_messages.
+ * Sends one message to many leads. Any signed-in booth staff member can text
+ * any lead. Leads without a phone (or without consent when required) are
+ * skipped, and every send is logged in sms_messages.
  */
 export const sendBulkSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
