@@ -13,18 +13,22 @@ export type TwilioSendResult = {
 export async function sendSms(input: {
   to: string;
   body: string;
-  lovableApiKey: string;
-  twilioApiKey: string;
+  lovableApiKey?: string | undefined;
+  twilioApiKey?: string | undefined;
   from?: string | undefined;
 }): Promise<TwilioSendResult> {
   const to = input.to.trim();
   const body = input.body.trim();
-  const from = input.from?.trim() || DEFAULT_FROM;
+
+  const { readEnv } = await import("./env.server");
+  const lovableApiKey = input.lovableApiKey || (await readEnv("LOVABLE_API_KEY"));
+  const twilioApiKey = input.twilioApiKey || (await readEnv("TWILIO_API_KEY"));
+  const from = input.from?.trim() || (await readEnv("TWILIO_FROM_NUMBER")) || DEFAULT_FROM;
 
   if (!to) throw new Error("A phone number is required to send an SMS.");
   if (!body) throw new Error("A message body is required.");
-  if (!input.lovableApiKey) throw new Error("Text messaging is temporarily unavailable.");
-  if (!input.twilioApiKey) throw new Error("Twilio is not connected yet.");
+  if (!lovableApiKey) throw new Error("Text messaging is temporarily unavailable.");
+  if (!twilioApiKey) throw new Error("Twilio is not connected yet.");
 
   const params = new URLSearchParams({
     To: to,
