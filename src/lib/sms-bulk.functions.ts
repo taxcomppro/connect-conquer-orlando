@@ -45,11 +45,6 @@ export const sendBulkSms = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<BulkSmsResult> => {
     const { supabase, userId } = context;
 
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-
     const { data: staff } = await supabase
       .from("staff_profiles")
       .select("display_name")
