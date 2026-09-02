@@ -199,12 +199,14 @@ function LeadPage() {
     if (!user) return;
     let active = true;
     void (async () => {
-      const { data, error } = await supabase
+      const { data: rows, error } = await supabase
         .from("leads")
         .select("*")
         .eq("attendee_id", attendeeId)
-        .eq("scanned_by", user.id)
-        .maybeSingle();
+        .order("scanned_at", { ascending: false })
+        .limit(1);
+      const data = rows?.[0] ?? null;
+
 
       if (!active) return;
       if (error) toast.error("Couldn't load that lead.");
