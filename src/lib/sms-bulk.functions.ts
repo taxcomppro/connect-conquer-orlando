@@ -17,9 +17,9 @@ export type BulkSmsResult = {
 };
 
 /**
- * Sends one message to many leads. Only leads the caller scanned are texted,
- * unless the caller is an admin. Leads without a phone (or without consent when
- * required) are skipped, and every send is logged in sms_messages.
+ * Sends one message to many leads. Any signed-in booth staff member can text
+ * any lead. Leads without a phone (or without consent when required) are
+ * skipped, and every send is logged in sms_messages.
  */
 export const sendBulkSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -45,11 +45,6 @@ export const sendBulkSms = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<BulkSmsResult> => {
     const { supabase, userId } = context;
 
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-
     const { data: staff } = await supabase
       .from("staff_profiles")
       .select("display_name")
@@ -69,10 +64,6 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       const name =
         [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim() || "Lead";
 
-      if (!isAdmin && lead.scanned_by !== userId) {
-        result.skipped += 1;
-        continue;
-      }
       if (!lead.phone) {
         result.skipped += 1;
         continue;
