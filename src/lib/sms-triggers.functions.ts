@@ -254,7 +254,13 @@ export const runSmsTriggers = createServerFn({ method: "POST" })
 
       try {
         const { sendSms } = await import("./sms.server");
-        const result = await sendSms({ to, body });
+        const result = await sendSms({
+          to,
+          body,
+          lovableApiKey: process.env["LOVABLE_API_KEY"] ?? "",
+          twilioApiKey: process.env["TWILIO_API_KEY"] ?? "",
+          from: process.env["TWILIO_FROM_NUMBER"],
+        });
         await supabase.from("sms_messages").insert({
           lead_id: lead.id,
           to_number: result.to,

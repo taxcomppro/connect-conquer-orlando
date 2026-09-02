@@ -1,22 +1,6 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 const DEFAULT_FROM = "+18555285275";
 
-function lovableKey() {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("LOVABLE_API_KEY is not configured.");
-  return key;
-}
-
-function twilioKey() {
-  const key = process.env["TWILIO_API_KEY"];
-  if (!key) throw new Error("Twilio is not connected yet.");
-  return key;
-}
-
-function fromNumber() {
-  return process.env["TWILIO_FROM_NUMBER"]?.trim() || DEFAULT_FROM;
-}
-
 export type TwilioSendResult = {
   sid: string;
   status: string;
@@ -26,24 +10,33 @@ export type TwilioSendResult = {
   error?: string;
 };
 
-export async function sendSms(input: { to: string; body: string }): Promise<TwilioSendResult> {
+export async function sendSms(input: {
+  to: string;
+  body: string;
+  lovableApiKey: string;
+  twilioApiKey: string;
+  from?: string | undefined;
+}): Promise<TwilioSendResult> {
   const to = input.to.trim();
   const body = input.body.trim();
+  const from = input.from?.trim() || DEFAULT_FROM;
 
   if (!to) throw new Error("A phone number is required to send an SMS.");
   if (!body) throw new Error("A message body is required.");
+  if (!input.lovableApiKey) throw new Error("Text messaging is temporarily unavailable.");
+  if (!input.twilioApiKey) throw new Error("Twilio is not connected yet.");
 
   const params = new URLSearchParams({
     To: to,
-    From: fromNumber(),
+    From: from,
     Body: body,
   });
 
   const response = await fetch(`${GATEWAY_URL}/Messages.json`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${lovableKey()}`,
-      "X-Connection-Api-Key": twilioKey(),
+      Authorization: `Bearer ${input.lovableApiKey}`,
+      "X-Connection-Api-Key": input.twilioApiKey,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params,
@@ -71,7 +64,7 @@ export async function sendSms(input: { to: string; body: string }): Promise<Twil
     sid: String(data["sid"] ?? ""),
     status: String(data["status"] ?? "queued"),
     to: String(data["to"] ?? to),
-    from: String(data["from"] ?? fromNumber()),
+    from: String(data["from"] ?? from),
     body: String(data["body"] ?? body),
   };
 }

@@ -93,7 +93,13 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       const to = normalizePhone(lead.phone);
 
       try {
-        const sendResult = await sendSms({ to, body });
+        const sendResult = await sendSms({
+          to,
+          body,
+          lovableApiKey: process.env["LOVABLE_API_KEY"] ?? "",
+          twilioApiKey: process.env["TWILIO_API_KEY"] ?? "",
+          from: process.env["TWILIO_FROM_NUMBER"],
+        });
         await supabase.from("sms_messages").insert({
           lead_id: lead.id,
           to_number: sendResult.to,
