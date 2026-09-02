@@ -39,8 +39,8 @@ export async function sendSms(input: {
   const response = await fetch(`${GATEWAY_URL}/Messages.json`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${input.lovableApiKey}`,
-      "X-Connection-Api-Key": input.twilioApiKey,
+      Authorization: `Bearer ${lovableApiKey}`,
+      "X-Connection-Api-Key": twilioApiKey,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params,
