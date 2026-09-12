@@ -748,55 +748,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      set_lead_outcome: {
-        Args: { _lead_id: string; _outcome: string }
-        Returns: {
-          address1: string | null
-          address2: string | null
-          address3: string | null
-          association: string | null
-          attendee_id: string
-          city: string | null
-          company: string | null
-          country: string | null
-          country_code: string | null
-          credential: string | null
-          demographics: string | null
-          department: string | null
-          email: string | null
-          event_name: string | null
-          fax: string | null
-          first_name: string | null
-          id: string
-          interests: string[]
-          joined_tcpc: boolean
-          last_name: string | null
-          lookup_status: string
-          middle_name: string | null
-          nickname: string | null
-          notes: string | null
-          outcome: string
-          phone: string | null
-          postal_code: string | null
-          prefix: string | null
-          qualifiers: string | null
-          rating: string
-          scanned_at: string
-          scanned_by: string
-          sms_consent: boolean
-          state: string | null
-          suffix: string | null
-          title: string | null
-          updated_at: string
-          website: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "leads"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       submit_public_connect_profile: {
         Args: {
           _bio?: string
