@@ -80,11 +80,13 @@ function LeadPage() {
 
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scannedByName, setScannedByName] = useState<string | null>(null);
   const [rating, setRating] = useState<Rating>("warm");
   const [interests, setInterests] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [outcome, setOutcome] = useState<Outcome>("open");
   const [saving, setSaving] = useState(false);
+
 
   const [showJoin, setShowJoin] = useState(false);
   const [joinName, setJoinName] = useState("");
