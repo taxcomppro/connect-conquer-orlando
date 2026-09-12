@@ -26,6 +26,7 @@ import {
 } from "@/lib/sms.functions";
 import { runSmsTriggers, renderTemplate } from "@/lib/sms-triggers.functions";
 import { PRODUCTS, renderProductMessage } from "@/lib/products";
+import { setLeadOutcome } from "@/lib/lead-outcome.functions";
 
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,7 @@ function LeadPage() {
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
   const doSendSms = useServerFn(sendLeadSms);
   const fireTriggers = useServerFn(runSmsTriggers);
+  const persistOutcome = useServerFn(setLeadOutcome);
 
   useEffect(() => {
     if (!user) return;
@@ -290,22 +292,18 @@ function LeadPage() {
     const previous = outcome;
     setOutcome(option);
     if (!lead) return;
-    const { error } = await supabase
-      .from("leads")
-      .update(
-        option === "sale_closed"
-          ? { outcome: option, joined_tcpc: true }
-          : { outcome: option },
-      )
-      .eq("id", lead.id);
-    if (error) {
+    try {
+      const saved = await persistOutcome({ data: { leadId: lead.id, outcome: option } });
+      setLead((current) =>
+        current
+          ? { ...current, outcome: saved.outcome, joined_tcpc: saved.joined_tcpc }
+          : current,
+      );
+    } catch {
       setOutcome(previous);
       toast.error("Could not save that outcome. Check the connection and try again.");
       return;
     }
-    setLead((current) =>
-      current ? { ...current, outcome: option, joined_tcpc: option === "sale_closed" } : current,
-    );
     toast.success(`Saved — ${OUTCOME_LABEL[option]}.`);
     void fireTriggers({
       data: { leadId: lead.id, event: "outcome_changed", outcome: option },
