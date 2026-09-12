@@ -816,7 +816,7 @@ function LeadPage() {
           <button
             key={option}
             type="button"
-            onClick={() => setOutcome(option)}
+            onClick={() => void chooseOutcome(option)}
             className={`min-h-14 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
               outcome === option
                 ? OUTCOME_TONE[option]
