@@ -14,7 +14,7 @@ export const OUTCOME_LABEL: Record<Outcome, string> = {
   follow_up: "Follow up after show",
   not_a_fit: "Not a fit",
   sale_started: "Sale started",
-  sale_closed: "Sale closed",
+  sale_closed: "Converted to member",
 };
 
 export const OUTCOME_TONE: Record<Outcome, string> = {

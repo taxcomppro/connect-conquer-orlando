@@ -286,6 +286,27 @@ function LeadPage() {
     };
   }, [lead, fetchTemplates, fetchSmsHistory]);
 
+  async function chooseOutcome(option: Outcome) {
+    const previous = outcome;
+    setOutcome(option);
+    if (!lead) return;
+    const patch: Record<string, unknown> = { outcome: option };
+    if (option === "sale_closed") patch['joined_tcpc'] = true;
+    const { error } = await supabase.from("leads").update(patch).eq("id", lead.id);
+    if (error) {
+      setOutcome(previous);
+      toast.error("Could not save that outcome. Check the connection and try again.");
+      return;
+    }
+    setLead((current) =>
+      current ? { ...current, outcome: option, joined_tcpc: option === "sale_closed" } : current,
+    );
+    toast.success(`Saved — ${OUTCOME_LABEL[option]}.`);
+    void fireTriggers({
+      data: { leadId: lead.id, event: "outcome_changed", outcome: option },
+    }).catch(() => undefined);
+  }
+
   function toggleInterest(value: string) {
     setInterests((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
