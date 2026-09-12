@@ -223,6 +223,15 @@ function LeadPage() {
         setJoinPhone(data.phone ?? "");
         setJoinCompany(data.company ?? "");
         setJoinTitle(data.title ?? "");
+
+        if (data.scanned_by) {
+          const { data: staff } = await supabase
+            .from("staff_profiles")
+            .select("display_name")
+            .eq("id", data.scanned_by)
+            .maybeSingle();
+          if (active) setScannedByName(staff?.display_name ?? null);
+        }
       }
       setLoading(false);
     })();
@@ -230,6 +239,7 @@ function LeadPage() {
       active = false;
     };
   }, [attendeeId, user]);
+
 
   const location = useMemo(() => {
     if (!lead) return "";
