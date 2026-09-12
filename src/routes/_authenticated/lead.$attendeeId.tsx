@@ -286,6 +286,32 @@ function LeadPage() {
     };
   }, [lead, fetchTemplates, fetchSmsHistory]);
 
+  async function chooseOutcome(option: Outcome) {
+    const previous = outcome;
+    setOutcome(option);
+    if (!lead) return;
+    const { error } = await supabase
+      .from("leads")
+      .update(
+        option === "sale_closed"
+          ? { outcome: option, joined_tcpc: true }
+          : { outcome: option },
+      )
+      .eq("id", lead.id);
+    if (error) {
+      setOutcome(previous);
+      toast.error("Could not save that outcome. Check the connection and try again.");
+      return;
+    }
+    setLead((current) =>
+      current ? { ...current, outcome: option, joined_tcpc: option === "sale_closed" } : current,
+    );
+    toast.success(`Saved — ${OUTCOME_LABEL[option]}.`);
+    void fireTriggers({
+      data: { leadId: lead.id, event: "outcome_changed", outcome: option },
+    }).catch(() => undefined);
+  }
+
   function toggleInterest(value: string) {
     setInterests((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
@@ -790,7 +816,7 @@ function LeadPage() {
           <button
             key={option}
             type="button"
-            onClick={() => setOutcome(option)}
+            onClick={() => void chooseOutcome(option)}
             className={`min-h-14 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
               outcome === option
                 ? OUTCOME_TONE[option]
