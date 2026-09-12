@@ -290,9 +290,14 @@ function LeadPage() {
     const previous = outcome;
     setOutcome(option);
     if (!lead) return;
-    const patch: Record<string, unknown> = { outcome: option };
-    if (option === "sale_closed") patch['joined_tcpc'] = true;
-    const { error } = await supabase.from("leads").update(patch).eq("id", lead.id);
+    const { error } = await supabase
+      .from("leads")
+      .update(
+        option === "sale_closed"
+          ? { outcome: option, joined_tcpc: true }
+          : { outcome: option },
+      )
+      .eq("id", lead.id);
     if (error) {
       setOutcome(previous);
       toast.error("Could not save that outcome. Check the connection and try again.");
