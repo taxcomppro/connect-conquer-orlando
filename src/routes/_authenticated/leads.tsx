@@ -139,6 +139,9 @@ function LeadsPage() {
         <Button variant="outline" onClick={exportCsv} className="h-11 sm:w-40">
           Export CSV
         </Button>
+        <Button variant="outline" asChild className="h-11 sm:w-40">
+          <Link to="/add-lead">+ Add lead</Link>
+        </Button>
         <Button asChild className="h-11 sm:w-40">
           <Link to="/broadcast">Text all leads</Link>
         </Button>
