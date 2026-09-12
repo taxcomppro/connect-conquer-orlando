@@ -175,8 +175,10 @@ export function toCsv(leads: Lead[]): string {
     "interests",
     "notes",
     "lookup_status",
+    "scanned_by",
     "scanned_at",
   ];
+
 
   const escape = (value: unknown): string => {
     if (value == null) return "";

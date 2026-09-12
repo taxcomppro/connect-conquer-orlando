@@ -80,11 +80,13 @@ function LeadPage() {
 
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scannedByName, setScannedByName] = useState<string | null>(null);
   const [rating, setRating] = useState<Rating>("warm");
   const [interests, setInterests] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [outcome, setOutcome] = useState<Outcome>("open");
   const [saving, setSaving] = useState(false);
+
 
   const [showJoin, setShowJoin] = useState(false);
   const [joinName, setJoinName] = useState("");
@@ -221,6 +223,15 @@ function LeadPage() {
         setJoinPhone(data.phone ?? "");
         setJoinCompany(data.company ?? "");
         setJoinTitle(data.title ?? "");
+
+        if (data.scanned_by) {
+          const { data: staff } = await supabase
+            .from("staff_profiles")
+            .select("display_name")
+            .eq("id", data.scanned_by)
+            .maybeSingle();
+          if (active) setScannedByName(staff?.display_name ?? null);
+        }
       }
       setLoading(false);
     })();
@@ -228,6 +239,7 @@ function LeadPage() {
       active = false;
     };
   }, [attendeeId, user]);
+
 
   const location = useMemo(() => {
     if (!lead) return "";
@@ -483,7 +495,16 @@ function LeadPage() {
           {lead.demographics ? <Row label="Demographics" value={lead.demographics} /> : null}
           {lead.qualifiers ? <Row label="Qualifiers" value={lead.qualifiers} /> : null}
           {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
+          {scannedByName ? (
+            <Row
+              label="Scanned by"
+              value={`${scannedByName} · ${new Date(lead.scanned_at).toLocaleString()}`}
+            />
+          ) : (
+            <Row label="Scanned at" value={new Date(lead.scanned_at).toLocaleString()} />
+          )}
           {lead.lookup_status !== "found" ? (
+
             <p className="pt-1 text-xs text-gold">
               Badge details weren't available yet — the record fills in after the show data sync.
             </p>
