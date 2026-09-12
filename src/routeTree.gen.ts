@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
+import { Route as AuthenticatedAddLeadRouteImport } from './routes/_authenticated/add-lead'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticated/briefing'
@@ -48,6 +49,11 @@ const CardNotFoundRoute = CardNotFoundRouteImport.update({
   id: '/card-not-found',
   path: '/card-not-found',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAddLeadRoute = AuthenticatedAddLeadRouteImport.update({
+  id: '/add-lead',
+  path: '/add-lead',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/add-lead': typeof AuthenticatedAddLeadRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/add-lead': typeof AuthenticatedAddLeadRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/briefing': typeof AuthenticatedBriefingRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/_authenticated/add-lead': typeof AuthenticatedAddLeadRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/briefing': typeof AuthenticatedBriefingRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/add-lead'
     | '/admin'
     | '/automations'
     | '/briefing'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/add-lead'
     | '/admin'
     | '/automations'
     | '/briefing'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/card-not-found'
+    | '/_authenticated/add-lead'
     | '/_authenticated/admin'
     | '/_authenticated/automations'
     | '/_authenticated/briefing'
@@ -308,6 +320,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/card-not-found'
       preLoaderRoute: typeof CardNotFoundRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/add-lead': {
+      id: '/_authenticated/add-lead'
+      path: '/add-lead'
+      fullPath: '/add-lead'
+      preLoaderRoute: typeof AuthenticatedAddLeadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -425,6 +444,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAddLeadRoute: typeof AuthenticatedAddLeadRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedBriefingRoute: typeof AuthenticatedBriefingRoute
@@ -439,6 +459,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAddLeadRoute: AuthenticatedAddLeadRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedBriefingRoute: AuthenticatedBriefingRoute,
