@@ -495,7 +495,16 @@ function LeadPage() {
           {lead.demographics ? <Row label="Demographics" value={lead.demographics} /> : null}
           {lead.qualifiers ? <Row label="Qualifiers" value={lead.qualifiers} /> : null}
           {lead.event_name ? <Row label="Event" value={lead.event_name} /> : null}
+          {scannedByName ? (
+            <Row
+              label="Scanned by"
+              value={`${scannedByName} · ${new Date(lead.scanned_at).toLocaleString()}`}
+            />
+          ) : (
+            <Row label="Scanned at" value={new Date(lead.scanned_at).toLocaleString()} />
+          )}
           {lead.lookup_status !== "found" ? (
+
             <p className="pt-1 text-xs text-gold">
               Badge details weren't available yet — the record fills in after the show data sync.
             </p>
