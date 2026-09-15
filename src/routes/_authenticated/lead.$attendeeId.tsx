@@ -271,13 +271,15 @@ function LeadPage() {
     let active = true;
     void (async () => {
       try {
-        const [{ templates: t }, { messages }] = await Promise.all([
+        const [{ templates: t }, { messages }, { entries }] = await Promise.all([
           fetchTemplates(),
           fetchSmsHistory({ data: { leadId: lead.id } }),
+          fetchThread({ data: { leadId: lead.id, email: lead.email } }),
         ]);
         if (!active) return;
         setTemplates(t ?? []);
         setSmsHistory(messages ?? []);
+        setThread(entries ?? []);
         const defaultTemplate = (t ?? []).find((template) => template.is_default);
         if (defaultTemplate) setSmsBody(defaultTemplate.body);
         setSmsConsent(lead.sms_consent ?? false);
@@ -288,7 +290,7 @@ function LeadPage() {
     return () => {
       active = false;
     };
-  }, [lead, fetchTemplates, fetchSmsHistory]);
+  }, [lead, fetchTemplates, fetchSmsHistory, fetchThread]);
 
   async function chooseOutcome(option: Outcome) {
     const previous = outcome;
