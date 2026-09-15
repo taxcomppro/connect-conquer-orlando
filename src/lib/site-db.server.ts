@@ -119,12 +119,16 @@ export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]
  * membership-tier pipeline board in Field Hub.
  */
 export async function listAllMembers(): Promise<SiteMember[]> {
-  const { rows } = await pool().query(
-    `select ${MEMBER_COLUMNS}
+  const { rows } = await withTimeout(
+    "listAllMembers",
+    8000,
+    pool().query(
+      `select ${MEMBER_COLUMNS}
      from users u
      left join subscriptions s on s."userId" = u.id
      order by u."createdAt" desc nulls last
      limit 5000`,
+    ),
   );
   return rows as SiteMember[];
 }

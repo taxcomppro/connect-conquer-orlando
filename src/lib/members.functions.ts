@@ -31,9 +31,18 @@ export const listMembers = createServerFn({ method: "POST" })
         error: null,
       };
     } catch (error) {
+      // Log the real failure server-side so it's diagnosable in runtime logs,
+      // then return a readable message to the client instead of a bare 500.
+      console.error("[listMembers] membership lookup failed:", error);
+      const detail =
+        error instanceof Error
+          ? `${error.name}: ${error.message}`
+          : typeof error === "string"
+            ? error
+            : JSON.stringify(error);
       return {
         members: [],
-        error: error instanceof Error ? error.message : "Couldn't reach the membership records.",
+        error: `Couldn't reach the membership records. ${detail}`,
       };
     }
   });
