@@ -114,7 +114,7 @@ function DashboardPage() {
           label="Paid members"
           value={loading ? "—" : metrics.paid.toLocaleString()}
           tone="text-go"
-          detail={loading ? undefined : `${metrics.total.toLocaleString()} members total`}
+          detail={loading ? "" : `${metrics.total.toLocaleString()} members total`}
         />
         <Metric
           label="Conversion rate"
