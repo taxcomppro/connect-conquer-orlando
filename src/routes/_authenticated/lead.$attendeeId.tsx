@@ -102,6 +102,7 @@ function LeadPage() {
 
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [smsHistory, setSmsHistory] = useState<SmsMessage[]>([]);
+  const [thread, setThread] = useState<ThreadEntry[]>([]);
   const [smsBody, setSmsBody] = useState("");
   const [smsConsent, setSmsConsent] = useState(false);
   const [sendingSms, setSendingSms] = useState(false);
