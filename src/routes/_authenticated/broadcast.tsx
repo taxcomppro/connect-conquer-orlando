@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { leadName, leadOutcome, type Lead } from "@/lib/leads";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
+import { listMembers, type MemberRow } from "@/lib/members.functions";
+import { normalizeEmail, tierByEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/broadcast")({
   head: () => ({
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/broadcast")({
   component: BroadcastPage,
 });
 
-type Audience = "all" | "consented" | "follow_up" | "hot" | "no_sale";
+type Audience = "all" | "consented" | "follow_up" | "hot" | "no_sale" | Tier | "lead";
 
 const AUDIENCES: Array<{ key: Audience; label: string }> = [
   { key: "consented", label: "Consented only" },
@@ -40,6 +42,7 @@ const AUDIENCES: Array<{ key: Audience; label: string }> = [
   { key: "follow_up", label: "Follow up after show" },
   { key: "hot", label: "Hot leads" },
   { key: "no_sale", label: "No sale yet" },
+  ...TIER_AUDIENCES,
 ];
 
 function BroadcastPage() {
@@ -49,6 +52,7 @@ function BroadcastPage() {
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [audience, setAudience] = useState<Audience>("consented");
   const [body, setBody] = useState("");
@@ -59,14 +63,16 @@ function BroadcastPage() {
     if (!user) return;
     let active = true;
     void (async () => {
-      const [{ data, error }, tpl] = await Promise.all([
+      const [{ data, error }, tpl, memberResult] = await Promise.all([
         supabase.from("leads").select("*").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
+        listMembers().catch(() => ({ members: [] as MemberRow[], error: null })),
       ]);
       if (!active) return;
       if (error) toast.error("Couldn't load leads.");
       setLeads(data ?? []);
       setTemplates((tpl.templates ?? []) as SmsTemplate[]);
+      setMembers(memberResult.members ?? []);
       setLoading(false);
     })();
     return () => {
@@ -74,19 +80,31 @@ function BroadcastPage() {
     };
   }, [user, loadTemplates]);
 
+  const tiers = useMemo(() => tierByEmail(members), [members]);
+
   const recipients = useMemo(() => {
     return leads.filter((lead) => {
       if (!lead.phone) return false;
       if (requireConsent && !lead.sms_consent) return false;
       const outcome = leadOutcome(lead);
+      const tier = tiers.get(normalizeEmail(lead.email));
       if (audience === "consented" && !lead.sms_consent) return false;
       if (audience === "follow_up" && outcome !== "follow_up") return false;
       if (audience === "hot" && lead.rating !== "hot") return false;
       if (audience === "no_sale" && (outcome === "sale_started" || outcome === "sale_closed"))
         return false;
+      if (audience === "lead" && tier) return false;
+      if (
+        (audience === "FREE" ||
+          audience === "VIP" ||
+          audience === "MARKETPLACE" ||
+          audience === "MARKETPLACE_PLUS") &&
+        tier !== audience
+      )
+        return false;
       return true;
     });
-  }, [leads, audience, requireConsent]);
+  }, [leads, audience, requireConsent, tiers]);
 
   const noPhone = leads.filter((l) => !l.phone).length;
 
