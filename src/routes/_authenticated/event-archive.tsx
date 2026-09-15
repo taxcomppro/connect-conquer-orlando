@@ -10,20 +10,20 @@ import { STAGE_LABEL, STAGE_TONE, sessionName, type SignupSession, type Stage } 
 export const Route = createFileRoute("/_authenticated/event-archive")({
   head: () => ({
     meta: [
-      { title: "Sales pipeline — TCPC Field Hub" },
+      { title: "Event archive — TCPC Field Hub" },
       {
         name: "description",
         content:
           "Track every booth signup from badge scan to membership, profile and issued ProConnect card, with rep and DUB attribution.",
       },
-      { property: "og:title", content: "Sales pipeline — TCPC Field Hub" },
+      { property: "og:title", content: "Event archive — TCPC Field Hub" },
       {
         property: "og:description",
         content: "Every booth signup from scan to card, with full attribution and export.",
       },
     ],
   }),
-  component: PipelinePage,
+  component: EventArchivePage,
 });
 
 const BOARD_STAGES: Stage[] = [
@@ -34,7 +34,7 @@ const BOARD_STAGES: Stage[] = [
   "card_issued",
 ];
 
-function PipelinePage() {
+function EventArchivePage() {
   const [sessions, setSessions] = useState<SignupSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -111,11 +111,11 @@ function PipelinePage() {
   }
 
   return (
-    <FieldShell eyebrowRight="Sales pipeline" back={{ to: "/", label: "Back to hub" }}>
+    <FieldShell eyebrowRight="Event archive" back={{ to: "/", label: "Back to hub" }}>
       <PageTitle
-        title="Sales"
-        accent="pipeline"
-        lede="Scan → membership → profile → card. Every step attributed to the rep who started it."
+        title="Event"
+        accent="archive"
+        lede="Historical record of the Orlando forum booth: scan → membership → profile → card, with rep attribution."
       />
 
       <div className="mt-5 grid grid-cols-3 gap-3">
@@ -135,10 +135,10 @@ function PipelinePage() {
       <div className="-mx-5 overflow-x-auto px-5 pb-3 sm:-mx-7 sm:px-7">
         <div className="grid min-w-[1020px] grid-cols-5 gap-3">
           {columns.map(({ stage, sessions: stageSessions }) => (
-            <section key={stage} aria-labelledby={`pipeline-${stage}`}>
+            <section key={stage} aria-labelledby={`archive-${stage}`}>
               <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
                 <span
-                  id={`pipeline-${stage}`}
+                  id={`archive-${stage}`}
                   className={`rounded-full border px-2.5 py-1 text-xs ${STAGE_TONE[stage]}`}
                 >
                   {STAGE_LABEL[stage]}
