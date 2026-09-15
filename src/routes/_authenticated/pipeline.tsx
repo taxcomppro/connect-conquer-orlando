@@ -26,17 +26,17 @@ export const Route = createFileRoute("/_authenticated/pipeline")({
   component: PipelinePage,
 });
 
-const FILTERS: Array<{ key: "all" | Stage; label: string }> = [
-  { key: "all", label: "All" },
-  { key: "signup_sent", label: "Waiting" },
-  { key: "ready_for_card", label: "Ready for card" },
-  { key: "card_issued", label: "Issued" },
+const BOARD_STAGES: Stage[] = [
+  "scanned",
+  "signup_sent",
+  "membership_confirmed",
+  "ready_for_card",
+  "card_issued",
 ];
 
 function PipelinePage() {
   const [sessions, setSessions] = useState<SignupSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | Stage>("all");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -62,16 +62,18 @@ function PipelinePage() {
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return sessions.filter((s) => {
-      if (filter === "ready_for_card" && s.stage !== "ready_for_card") return false;
-      if (filter === "card_issued" && s.stage !== "card_issued") return false;
-      if (filter === "signup_sent" && !["scanned", "signup_sent", "membership_confirmed"].includes(s.stage))
-        return false;
+      if (!BOARD_STAGES.includes(s.stage as Stage)) return false;
       if (!q) return true;
       return [s.full_name, s.email, s.company, s.attendee_id, s.dub_code, s.rep_name]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q));
     });
-  }, [sessions, filter, query]);
+  }, [sessions, query]);
+
+  const columns = useMemo(
+    () => BOARD_STAGES.map((stage) => ({ stage, sessions: visible.filter((session) => session.stage === stage) })),
+    [visible],
+  );
 
   const stats = useMemo(
     () => ({
@@ -122,63 +124,56 @@ function PipelinePage() {
         <Stat label="Cards issued" value={stats.issued} tone="text-go" />
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {FILTERS.map((option) => (
-          <button
-            key={option.key}
-            type="button"
-            onClick={() => setFilter(option.key)}
-            className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-              filter === option.key
-                ? "border-signal-line bg-signal-soft text-signal"
-                : "border-border bg-panel text-muted-foreground"
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
       <Input
-        className="mt-3"
+        className="mt-5"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search name, firm, badge ID, DUB code…"
       />
 
       <SectionLabel>{loading ? "Loading…" : `${visible.length} in pipeline`}</SectionLabel>
-      <div className="space-y-2">
-        {visible.map((session) => (
-          <Link
-            key={session.id}
-            to={
-              session.stage === "ready_for_card" || session.stage === "card_issued"
-                ? "/activate/$sessionId"
-                : "/signup/$sessionId"
-            }
-            params={{ sessionId: session.id }}
-            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-panel p-4 transition-colors hover:bg-panel-hover"
-          >
-            <div className="min-w-0">
-              <div className="truncate font-medium">{sessionName(session)}</div>
-              <div className="truncate text-xs text-muted-foreground">
-                {[session.company, session.rep_name && `Rep: ${session.rep_name}`, session.dub_code]
-                  .filter(Boolean)
-                  .join(" · ")}
+      <div className="-mx-5 overflow-x-auto px-5 pb-3 sm:-mx-7 sm:px-7">
+        <div className="grid min-w-[1020px] grid-cols-5 gap-3">
+          {columns.map(({ stage, sessions: stageSessions }) => (
+            <section key={stage} aria-labelledby={`pipeline-${stage}`}>
+              <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
+                <span
+                  id={`pipeline-${stage}`}
+                  className={`rounded-full border px-2.5 py-1 text-xs ${STAGE_TONE[stage]}`}
+                >
+                  {STAGE_LABEL[stage]}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">{stageSessions.length}</span>
               </div>
-            </div>
-            <span
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${STAGE_TONE[session.stage as Stage]}`}
-            >
-              {STAGE_LABEL[session.stage as Stage]}
-            </span>
-          </Link>
-        ))}
-        {!loading && !visible.length ? (
-          <p className="text-sm text-muted-foreground">
-            Nothing here yet. Start one from a scanned lead.
-          </p>
-        ) : null}
+              <div className="space-y-2">
+                {stageSessions.map((session) => (
+                  <Link
+                    key={session.id}
+                    to={
+                      session.stage === "ready_for_card" || session.stage === "card_issued"
+                        ? "/activate/$sessionId"
+                        : "/signup/$sessionId"
+                    }
+                    params={{ sessionId: session.id }}
+                    className="block min-h-28 rounded-xl border border-border bg-panel p-3 transition-colors hover:bg-panel-hover"
+                  >
+                    <div className="line-clamp-2 font-medium leading-snug">{sessionName(session)}</div>
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {session.company ? <div className="line-clamp-2">{session.company}</div> : null}
+                      {session.rep_name ? <div className="truncate">Rep: {session.rep_name}</div> : null}
+                      {session.dub_code ? <div className="truncate text-gold">{session.dub_code}</div> : null}
+                    </div>
+                  </Link>
+                ))}
+                {!loading && stageSessions.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
+                    No leads in this stage
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
 
       <SectionLabel>Migration</SectionLabel>

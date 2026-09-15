@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -28,5 +30,18 @@ function AuthenticatedLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center border-b border-border bg-background/95 px-4 backdrop-blur md:px-5">
+          <SidebarTrigger aria-label="Toggle navigation" />
+          <div className="ml-3 eyebrow md:hidden">TCPC Field Hub</div>
+        </header>
+        <div className="min-w-0 flex-1">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }

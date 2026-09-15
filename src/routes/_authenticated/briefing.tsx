@@ -12,6 +12,13 @@ export const Route = createFileRoute("/_authenticated/briefing")({
         content:
           "Private schedule, wardrobe, lodging and evening plans for the TCPC IRS Forum team.",
       },
+      { property: "og:title", content: "Orlando Trip Briefing — TCPC Field Hub" },
+      {
+        property: "og:description",
+        content: "Private schedule, wardrobe, lodging and evening plans for the TCPC IRS Forum team.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: TripBriefing,

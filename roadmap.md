@@ -4,6 +4,6 @@
 - [x] Fix dead product/signup links in texts (taxcomppro.com/connect has no sub-pages yet — point links at /connect with ?p=<slug>)
 - [ ] After the forum: scope broad staff SELECT policies to rep-owned rows
 - [x] Fix Tracina Morris sign-in (approved email stored with capital letters; emails now normalized to lowercase)
-- [ ] Add persistent authenticated CRM navigation with mobile access
-- [ ] Add authenticated dashboard with lead and signup KPIs
-- [ ] Convert the sales pipeline list into a stage-based Kanban board
+- [x] Add persistent authenticated CRM navigation with mobile access
+- [x] Add authenticated dashboard with lead and signup KPIs
+- [x] Convert the sales pipeline list into a stage-based Kanban board
