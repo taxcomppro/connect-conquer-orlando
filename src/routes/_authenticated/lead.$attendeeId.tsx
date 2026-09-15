@@ -728,23 +728,54 @@ function LeadPage() {
             </Button>
           </form>
 
-          {smsHistory.length > 0 ? (
-            <div className="mt-5 space-y-2">
-              <div className="eyebrow">Sent messages</div>
-              {smsHistory.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="rounded-xl border border-border bg-muted p-3 text-sm"
-                >
-                  <p className="whitespace-pre-wrap">{msg.body}</p>
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="capitalize">{msg.status}</span>
-                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
-                  </div>
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">SMS follow-up</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No mobile number on this badge — many list an office landline. Add one to text them.
+          </p>
+          <Button type="button" variant="outline" onClick={startEditing} className="mt-3 h-11">
+            Edit contact details
+          </Button>
+        </div>
+      )}
+
+      {thread.length > 0 ? (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">Communication history</div>
+          <div className="mt-3 space-y-2">
+            {thread.map((entry) => (
+              <div
+                key={`${entry.channel}-${entry.id}`}
+                className="rounded-xl border border-border bg-muted p-3 text-sm"
+              >
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span
+                    className={`rounded-full border px-2 py-0.5 ${
+                      entry.channel === "email"
+                        ? "border-go-line bg-go-soft text-go"
+                        : "border-signal-line bg-signal-soft text-signal"
+                    }`}
+                  >
+                    {entry.channel === "email" ? "Email" : "Text"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {new Date(entry.sentAt).toLocaleString()}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ) : null}
+                {entry.subject ? <p className="mt-2 font-medium">{entry.subject}</p> : null}
+                <p className="mt-1 whitespace-pre-wrap">{entry.body}</p>
+                <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span className="capitalize">{entry.status}</span>
+                  <span className="truncate">{entry.target}</span>
+                </div>
+                {entry.error ? <p className="mt-1 text-xs text-gold">{entry.error}</p> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
