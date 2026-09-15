@@ -364,6 +364,8 @@ function LeadPage() {
       toast.success("Text sent.");
       const { messages } = await fetchSmsHistory({ data: { leadId: lead.id } });
       setSmsHistory(messages ?? []);
+      const { entries } = await fetchThread({ data: { leadId: lead.id, email: lead.email } });
+      setThread(entries ?? []);
       if (smsConsent) setLead({ ...lead, sms_consent: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Text failed.");
