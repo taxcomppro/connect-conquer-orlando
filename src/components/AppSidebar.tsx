@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV_ITEMS = [
-  { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
   { label: "Scan", to: "/scan", icon: ScanLine },
   { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
