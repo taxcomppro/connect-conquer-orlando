@@ -6,6 +6,7 @@ import {
   Megaphone,
   MessagesSquare,
   Network,
+  ScanLine,
   Settings,
   Users,
 } from "lucide-react";
