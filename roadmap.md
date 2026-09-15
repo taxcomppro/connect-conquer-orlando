@@ -7,3 +7,4 @@
 - [x] Add persistent authenticated CRM navigation with mobile access
 - [x] Add authenticated dashboard with lead and signup KPIs
 - [x] Convert the sales pipeline list into a stage-based Kanban board
+- [x] Membership-tier pipeline board (Lead/Free/VIP/Marketplace/Marketplace+) with booth pipeline moved to Event Archive
