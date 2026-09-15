@@ -223,6 +223,65 @@ export type Database = {
           },
         ]
       }
+      email_messages: {
+        Row: {
+          body: string
+          contact_email: string
+          created_at: string
+          error: string | null
+          from_email: string
+          id: string
+          lead_id: string | null
+          provider_id: string | null
+          sent_at: string
+          sent_by: string | null
+          status: string
+          subject: string
+          to_email: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          contact_email: string
+          created_at?: string
+          error?: string | null
+          from_email: string
+          id?: string
+          lead_id?: string | null
+          provider_id?: string | null
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+          subject: string
+          to_email: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          contact_email?: string
+          created_at?: string
+          error?: string | null
+          from_email?: string
+          id?: string
+          lead_id?: string | null
+          provider_id?: string | null
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          to_email?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_submissions: {
         Row: {
           attendee_id: string

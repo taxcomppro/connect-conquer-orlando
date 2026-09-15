@@ -25,6 +25,7 @@ import {
   type SmsMessage,
 } from "@/lib/sms.functions";
 import { runSmsTriggers, renderTemplate } from "@/lib/sms-triggers.functions";
+import { getContactThread, type ThreadEntry } from "@/lib/email.functions";
 import { PRODUCTS, renderProductMessage } from "@/lib/products";
 import { setLeadOutcome } from "@/lib/lead-outcome.functions";
 
@@ -102,6 +103,7 @@ function LeadPage() {
 
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [smsHistory, setSmsHistory] = useState<SmsMessage[]>([]);
+  const [thread, setThread] = useState<ThreadEntry[]>([]);
   const [smsBody, setSmsBody] = useState("");
   const [smsConsent, setSmsConsent] = useState(false);
   const [sendingSms, setSendingSms] = useState(false);
@@ -113,6 +115,7 @@ function LeadPage() {
 
   const fetchTemplates = useServerFn(listSmsTemplates);
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
+  const fetchThread = useServerFn(getContactThread);
   const doSendSms = useServerFn(sendLeadSms);
   const fireTriggers = useServerFn(runSmsTriggers);
   const persistOutcome = useServerFn(setLeadOutcome);
@@ -269,13 +272,15 @@ function LeadPage() {
     let active = true;
     void (async () => {
       try {
-        const [{ templates: t }, { messages }] = await Promise.all([
+        const [{ templates: t }, { messages }, { entries }] = await Promise.all([
           fetchTemplates(),
           fetchSmsHistory({ data: { leadId: lead.id } }),
+          fetchThread({ data: { leadId: lead.id, email: lead.email } }),
         ]);
         if (!active) return;
         setTemplates(t ?? []);
         setSmsHistory(messages ?? []);
+        setThread(entries ?? []);
         const defaultTemplate = (t ?? []).find((template) => template.is_default);
         if (defaultTemplate) setSmsBody(defaultTemplate.body);
         setSmsConsent(lead.sms_consent ?? false);
@@ -286,7 +291,7 @@ function LeadPage() {
     return () => {
       active = false;
     };
-  }, [lead, fetchTemplates, fetchSmsHistory]);
+  }, [lead, fetchTemplates, fetchSmsHistory, fetchThread]);
 
   async function chooseOutcome(option: Outcome) {
     const previous = outcome;
@@ -359,6 +364,8 @@ function LeadPage() {
       toast.success("Text sent.");
       const { messages } = await fetchSmsHistory({ data: { leadId: lead.id } });
       setSmsHistory(messages ?? []);
+      const { entries } = await fetchThread({ data: { leadId: lead.id, email: lead.email } });
+      setThread(entries ?? []);
       if (smsConsent) setLead({ ...lead, sms_consent: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Text failed.");
@@ -728,23 +735,6 @@ function LeadPage() {
             </Button>
           </form>
 
-          {smsHistory.length > 0 ? (
-            <div className="mt-5 space-y-2">
-              <div className="eyebrow">Sent messages</div>
-              {smsHistory.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="rounded-xl border border-border bg-muted p-3 text-sm"
-                >
-                  <p className="whitespace-pre-wrap">{msg.body}</p>
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="capitalize">{msg.status}</span>
-                    <span>{new Date(msg.sent_at).toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
@@ -757,6 +747,42 @@ function LeadPage() {
           </Button>
         </div>
       )}
+
+      {thread.length > 0 ? (
+        <div className="mt-8 rounded-2xl border border-border bg-panel p-5">
+          <div className="eyebrow">Communication history</div>
+          <div className="mt-3 space-y-2">
+            {thread.map((entry) => (
+              <div
+                key={`${entry.channel}-${entry.id}`}
+                className="rounded-xl border border-border bg-muted p-3 text-sm"
+              >
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span
+                    className={`rounded-full border px-2 py-0.5 ${
+                      entry.channel === "email"
+                        ? "border-go-line bg-go-soft text-go"
+                        : "border-signal-line bg-signal-soft text-signal"
+                    }`}
+                  >
+                    {entry.channel === "email" ? "Email" : "Text"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {new Date(entry.sentAt).toLocaleString()}
+                  </span>
+                </div>
+                {entry.subject ? <p className="mt-2 font-medium">{entry.subject}</p> : null}
+                <p className="mt-1 whitespace-pre-wrap">{entry.body}</p>
+                <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span className="capitalize">{entry.status}</span>
+                  <span className="truncate">{entry.target}</span>
+                </div>
+                {entry.error ? <p className="mt-1 text-xs text-gold">{entry.error}</p> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <SectionLabel>How hot is this lead?</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
