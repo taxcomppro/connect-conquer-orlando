@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
+import { Route as HubRouteImport } from './routes/hub'
 import { Route as AuthenticatedAddLeadRouteImport } from './routes/_authenticated/add-lead'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
@@ -53,6 +54,11 @@ const AuthRoute = AuthRouteImport.update({
 const CardNotFoundRoute = CardNotFoundRouteImport.update({
   id: '/card-not-found',
   path: '/card-not-found',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubRoute = HubRouteImport.update({
+  id: '/hub',
+  path: '/hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAddLeadRoute = AuthenticatedAddLeadRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/hub': typeof HubRoute
   '/add-lead': typeof AuthenticatedAddLeadRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/hub': typeof HubRoute
   '/add-lead': typeof AuthenticatedAddLeadRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/automations': typeof AuthenticatedAutomationsRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
+  '/hub': typeof HubRoute
   '/_authenticated/add-lead': typeof AuthenticatedAddLeadRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/hub'
     | '/add-lead'
     | '/admin'
     | '/automations'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/card-not-found'
+    | '/hub'
     | '/add-lead'
     | '/admin'
     | '/automations'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/card-not-found'
+    | '/hub'
     | '/_authenticated/add-lead'
     | '/_authenticated/admin'
     | '/_authenticated/automations'
@@ -347,6 +359,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CardNotFoundRoute: typeof CardNotFoundRoute
+  HubRoute: typeof HubRoute
   CTokenRoute: typeof CTokenRoute
   JoinSessionIdRoute: typeof JoinSessionIdRoute
   PSlugRoute: typeof PSlugRoute
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/card-not-found'
       fullPath: '/card-not-found'
       preLoaderRoute: typeof CardNotFoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub': {
+      id: '/hub'
+      path: '/hub'
+      fullPath: '/hub'
+      preLoaderRoute: typeof HubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/add-lead': {
@@ -586,6 +606,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CardNotFoundRoute: CardNotFoundRoute,
+  HubRoute: HubRoute,
   CTokenRoute: CTokenRoute,
   JoinSessionIdRoute: JoinSessionIdRoute,
   PSlugRoute: PSlugRoute,
