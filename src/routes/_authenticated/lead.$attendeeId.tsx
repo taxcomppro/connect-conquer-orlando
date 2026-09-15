@@ -115,6 +115,7 @@ function LeadPage() {
 
   const fetchTemplates = useServerFn(listSmsTemplates);
   const fetchSmsHistory = useServerFn(getLeadSmsHistory);
+  const fetchThread = useServerFn(getContactThread);
   const doSendSms = useServerFn(sendLeadSms);
   const fireTriggers = useServerFn(runSmsTriggers);
   const persistOutcome = useServerFn(setLeadOutcome);
