@@ -23,7 +23,10 @@ export type ThreadEntry = {
   sentAt: string;
 };
 
-function fillPlaceholders(text: string, contact: { name?: string | null; email: string }): string {
+function fillPlaceholders(
+  text: string,
+  contact: { name?: string | null | undefined; email: string },
+): string {
   const parts = (contact.name ?? "").trim().split(/\s+/).filter(Boolean);
   const first = parts[0] ?? "there";
   const last = parts.length > 1 ? parts[parts.length - 1]! : "";
