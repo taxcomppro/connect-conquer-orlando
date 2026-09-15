@@ -15,6 +15,10 @@ export const Route = createFileRoute("/_authenticated/add-lead")({
     meta: [
       { title: "Add Lead Manually — TCPC Lead Scanner" },
       { name: "description", content: "Manually add a booth lead without scanning a badge." },
+      { property: "og:title", content: "Add Lead Manually — TCPC Lead Scanner" },
+      { property: "og:description", content: "Manually add a booth lead without scanning a badge." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AddLeadPage,

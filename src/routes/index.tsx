@@ -17,6 +17,8 @@ export const Route = createFileRoute("/")({
         content:
           "Scan badges, qualify leads and sign up new TCPC members from Booth 540 in Orlando.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Hub,
