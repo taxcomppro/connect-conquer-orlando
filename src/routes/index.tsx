@@ -5,17 +5,17 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TCPC Field Hub — IRS Forum Orlando, Booth 540" },
+      { title: "Field Hub — Member CRM" },
       {
         name: "description",
         content:
-          "The Tax Compliance Pro booth team hub for the IRS Nationwide Tax Forum in Orlando: badge scanning, lead qualification, TCPC join flow, demos and the trip briefing.",
+          "The Tax Compliance Pro member CRM: leads from the IRS Nationwide Tax Forum, membership tiers, follow-up texting and conversion tracking.",
       },
-      { property: "og:title", content: "TCPC Field Hub — IRS Forum Orlando, Booth 540" },
+      { property: "og:title", content: "Field Hub — Member CRM" },
       {
         property: "og:description",
         content:
-          "Scan badges, qualify leads and sign up new TCPC members from Booth 540 in Orlando.",
+          "Track TCPC leads and members from first scan to paid membership.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -79,11 +79,11 @@ function Hub() {
   const { isAdmin } = useIsAdmin();
 
   return (
-    <FieldShell eyebrowRight="IRS Nationwide Tax Forum · Orlando">
+    <FieldShell eyebrowRight="Tax Compliance Pro">
       <PageTitle
         title="Field Hub —"
-        accent="Booth 540"
-        lede="Everything the floor team needs in one place. Scan a badge, qualify the lead, close the TCPC join before they walk away."
+        accent="Member CRM"
+        lede="Every lead and member in one place. From the first badge scan in Orlando to paid membership and beyond."
       />
 
       <SectionLabel>Two tracks: capture every lead, close the ones that buy</SectionLabel>

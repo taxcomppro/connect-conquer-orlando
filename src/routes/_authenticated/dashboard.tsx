@@ -9,12 +9,12 @@ import type { Lead } from "@/lib/leads";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — TCPC Field Hub" },
+      { title: "Dashboard — Field Hub Member CRM" },
       {
         name: "description",
-        content: "Monitor booth lead volume, conversions and sales pipeline progress in TCPC Field Hub.",
+        content: "Monitor lead volume, membership conversions and pipeline progress in Field Hub.",
       },
-      { property: "og:title", content: "Dashboard — TCPC Field Hub" },
+      { property: "og:title", content: "Dashboard — Field Hub Member CRM" },
       {
         property: "og:description",
         content: "A live view of booth leads, conversions and signup progress.",

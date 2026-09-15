@@ -36,7 +36,7 @@ function AuthenticatedLayout() {
       <SidebarInset>
         <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center border-b border-border bg-background/95 px-4 backdrop-blur md:px-5">
           <SidebarTrigger aria-label="Toggle navigation" />
-          <div className="ml-3 eyebrow md:hidden">TCPC Field Hub</div>
+          <div className="ml-3 eyebrow md:hidden">Field Hub · Member CRM</div>
         </header>
         <div className="min-w-0 flex-1">
           <Outlet />
