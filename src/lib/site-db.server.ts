@@ -23,8 +23,38 @@ function pool(): Pool {
       "SITE_DATABASE_URL is not set — the read-only connection to the main site's database isn't configured yet.",
     );
   }
-  _pool = new Pool({ connectionString, max: 3, ssl: { rejectUnauthorized: false } });
+  _pool = new Pool({
+    connectionString,
+    max: 3,
+    ssl: { rejectUnauthorized: false },
+    // Hard limits so a hung connection surfaces as an error instead of an opaque timeout.
+    connectionTimeoutMillis: 8000,
+    idleTimeoutMillis: 10000,
+    query_timeout: 8000,
+    statement_timeout: 8000,
+  });
+  _pool.on("error", (error) => {
+    console.error("[site-db] idle pool client error:", error);
+  });
   return _pool;
+}
+
+/** Rejects if the database doesn't answer within `ms`, so callers never hang. */
+async function withTimeout<T>(label: string, ms: number, work: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`${label} timed out after ${ms}ms — the main site's database did not respond.`)),
+          ms,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export type SiteMember = {

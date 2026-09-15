@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { FieldShell, PageTitle, Panel, SectionLabel } from "@/components/FieldShell";
 import { supabase } from "@/integrations/supabase/client";
-import { STAGE_LABEL, STAGE_TONE, type Stage } from "@/lib/connect";
-import type { Lead } from "@/lib/leads";
+import { listMembers, type MemberRow } from "@/lib/members.functions";
+import type { Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -12,12 +12,12 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { title: "Dashboard — Field Hub Member CRM" },
       {
         name: "description",
-        content: "Monitor lead volume, membership conversions and pipeline progress in Field Hub.",
+        content: "Monitor free and paid membership totals, conversion rate and new leads in Field Hub.",
       },
       { property: "og:title", content: "Dashboard — Field Hub Member CRM" },
       {
         property: "og:description",
-        content: "A live view of booth leads, conversions and signup progress.",
+        content: "A live view of membership tiers, paid conversion rate and new leads captured today.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -26,19 +26,16 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-const ACTIVE_STAGES: Stage[] = [
-  "scanned",
-  "signup_sent",
-  "membership_confirmed",
-  "ready_for_card",
-  "card_issued",
+const PAID_TIERS: { tier: Tier; label: string; tone: string }[] = [
+  { tier: "VIP", label: "VIP", tone: "border-gold/50 bg-gold/10 text-gold" },
+  { tier: "MARKETPLACE", label: "Marketplace", tone: "border-go-line bg-go-soft text-go" },
+  { tier: "MARKETPLACE_PLUS", label: "Marketplace+", tone: "border-go-line bg-go-soft text-go" },
 ];
 
-type DashboardSession = { id: string; stage: Stage };
-
 function DashboardPage() {
-  const [leads, setLeads] = useState<Array<Pick<Lead, "id" | "outcome" | "scanned_at">>>([]);
-  const [sessions, setSessions] = useState<DashboardSession[]>([]);
+  const [leads, setLeads] = useState<Array<{ id: string; scanned_at: string }>>([]);
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [memberError, setMemberError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
 
@@ -46,15 +43,19 @@ function DashboardPage() {
     let active = true;
 
     async function load() {
-      const [leadResult, sessionResult] = await Promise.all([
-        supabase.from("leads").select("id,outcome,scanned_at"),
-        supabase.from("signup_sessions").select("id,stage"),
+      const [leadResult, memberResult] = await Promise.all([
+        supabase.from("leads").select("id,scanned_at"),
+        listMembers().catch((error: unknown) => ({
+          members: [] as MemberRow[],
+          error: error instanceof Error ? error.message : "Couldn't load membership records.",
+        })),
       ]);
       if (!active) return;
 
-      setLoadFailed(Boolean(leadResult.error || sessionResult.error));
+      setLoadFailed(Boolean(leadResult.error));
       setLeads(leadResult.data ?? []);
-      setSessions((sessionResult.data ?? []) as DashboardSession[]);
+      setMembers(memberResult.members);
+      setMemberError(memberResult.error);
       setLoading(false);
     }
 
@@ -67,71 +68,76 @@ function DashboardPage() {
   }, []);
 
   const metrics = useMemo(() => {
-    const total = leads.length;
-    const converted = leads.filter((lead) => lead.outcome === "sale_closed").length;
+    const free = members.filter((m) => m.tier === "FREE").length;
+    const paid = members.filter((m) => m.tier !== "FREE").length;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return {
-      total,
-      converted,
-      conversionRate: total ? (converted / total) * 100 : 0,
-      today: leads.filter((lead) => new Date(lead.scanned_at).getTime() >= today.getTime()).length,
-    };
-  }, [leads]);
-
-  const stageCounts = useMemo(
-    () =>
-      ACTIVE_STAGES.map((stage) => ({
-        stage,
-        count: sessions.filter((session) => session.stage === stage).length,
+      free,
+      paid,
+      total: members.length,
+      conversionRate: members.length ? (paid / members.length) * 100 : 0,
+      newLeadsToday: leads.filter(
+        (lead) => new Date(lead.scanned_at).getTime() >= today.getTime(),
+      ).length,
+      byTier: PAID_TIERS.map((entry) => ({
+        ...entry,
+        count: members.filter((m) => m.tier === entry.tier).length,
       })),
-    [sessions],
-  );
+    };
+  }, [leads, members]);
 
   return (
-    <FieldShell eyebrowRight="Live booth overview">
+    <FieldShell eyebrowRight="Membership overview">
       <PageTitle
         title="Field Hub"
         accent="dashboard"
-        lede="Lead capture, conversion and card activation progress at a glance."
+        lede="Free and paid membership totals, paid conversion rate and new leads captured today."
       />
 
       {loadFailed ? (
         <Panel className="mt-6 border-destructive/50 text-sm text-destructive">
-          The latest dashboard totals could not be loaded. We’ll try again automatically.
+          The latest lead totals could not be loaded. We’ll try again automatically.
         </Panel>
       ) : null}
 
+      {memberError ? (
+        <div className="mt-6 rounded-xl border border-gold/50 bg-gold/10 p-4 text-sm text-gold">
+          Membership records are unavailable right now. {memberError}
+        </div>
+      ) : null}
+
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Total leads" value={loading ? "—" : metrics.total.toLocaleString()} />
+        <Metric label="Free members" value={loading ? "—" : metrics.free.toLocaleString()} />
+        <Metric
+          label="Paid members"
+          value={loading ? "—" : metrics.paid.toLocaleString()}
+          tone="text-go"
+          detail={loading ? undefined : `${metrics.total.toLocaleString()} members total`}
+        />
         <Metric
           label="Conversion rate"
           value={loading ? "—" : `${metrics.conversionRate.toFixed(1)}%`}
-          tone="text-go"
-          detail={loading ? "Loading conversions…" : `${metrics.converted.toLocaleString()} converted`}
-        />
-        <Metric
-          label="Scanned today"
-          value={loading ? "—" : metrics.today.toLocaleString()}
-          tone="text-signal"
-        />
-        <Metric
-          label="In pipeline"
-          value={loading ? "—" : sessions.length.toLocaleString()}
           tone="text-gold"
+          detail="Paid ÷ all members"
+        />
+        <Metric
+          label="New leads today"
+          value={loading ? "—" : metrics.newLeadsToday.toLocaleString()}
+          tone="text-signal"
         />
       </div>
 
-      <SectionLabel>Leads by stage</SectionLabel>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {stageCounts.map(({ stage, count }) => (
-          <Link key={stage} to="/pipeline" className="group block">
+      <SectionLabel>Paid tiers</SectionLabel>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {metrics.byTier.map((entry) => (
+          <Link key={entry.tier} to="/pipeline" className="group block">
             <Panel className="h-full transition-colors group-hover:bg-panel-hover">
-              <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${STAGE_TONE[stage]}`}>
-                {STAGE_LABEL[stage]}
+              <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${entry.tone}`}>
+                {entry.label}
               </span>
-              <div className="mt-4 font-display text-3xl">{loading ? "—" : count}</div>
+              <div className="mt-4 font-display text-3xl">{loading ? "—" : entry.count}</div>
               <div className="mt-1 text-xs text-muted-foreground">View in pipeline →</div>
             </Panel>
           </Link>
