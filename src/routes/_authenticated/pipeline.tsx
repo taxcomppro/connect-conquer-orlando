@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
 import { listMembers, type MemberRow } from "@/lib/members.functions";
+import { normalizeEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
@@ -27,8 +30,6 @@ export const Route = createFileRoute("/_authenticated/pipeline")({
   }),
   component: PipelinePage,
 });
-
-type Tier = MemberRow["tier"];
 
 const TIER_COLUMNS: { key: "lead" | Tier; label: string; tone: string; paid: boolean }[] = [
   { key: "lead", label: "Lead", tone: "border-border bg-panel text-muted-foreground", paid: false },
@@ -54,6 +55,7 @@ type Card = {
   email: string | null;
   status: string | null;
   attendeeId: string | null;
+  leadId: string | null;
 };
 
 function PipelinePage() {
@@ -62,6 +64,8 @@ function PipelinePage() {
   const [memberError, setMemberError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Record<string, true>>({});
+  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -85,40 +89,40 @@ function PipelinePage() {
   }, []);
 
   const columns = useMemo(() => {
-    const memberEmails = new Set(
-      members.map((m) => (m.email ?? "").trim().toLowerCase()).filter(Boolean),
-    );
+    const memberEmails = new Set(members.map((m) => normalizeEmail(m.email)).filter(Boolean));
     const leadByEmail = new Map<string, Lead>();
     for (const lead of leads) {
-      const email = (lead.email ?? "").trim().toLowerCase();
+      const email = normalizeEmail(lead.email);
       if (email && !leadByEmail.has(email)) leadByEmail.set(email, lead);
     }
 
     const leadCards: Card[] = leads
       .filter((lead) => {
-        const email = (lead.email ?? "").trim().toLowerCase();
+        const email = normalizeEmail(lead.email);
         return !email || !memberEmails.has(email);
       })
       .map((lead) => ({
-        id: lead.id,
+        id: `lead:${lead.id}`,
         name: leadName(lead),
         email: lead.email,
         status: null,
         attendeeId: lead.attendee_id,
+        leadId: lead.id,
       }));
 
     const byTier = (tier: Tier): Card[] =>
       members
         .filter((m) => m.tier === tier)
         .map((m) => {
-          const email = (m.email ?? "").trim().toLowerCase();
+          const email = normalizeEmail(m.email);
           const lead = email ? leadByEmail.get(email) : undefined;
           return {
-            id: m.userId,
+            id: `member:${m.userId}`,
             name: m.name || m.email || "Member",
             email: m.email,
             status: m.subscriptionStatus,
             attendeeId: lead?.attendee_id ?? null,
+            leadId: lead?.id ?? null,
           };
         });
 
@@ -132,6 +136,36 @@ function PipelinePage() {
     }));
   }, [leads, members, query]);
 
+  const allCards = useMemo(() => columns.flatMap((column) => column.cards), [columns]);
+
+  const selectedContacts = useMemo<ComposeContact[]>(
+    () =>
+      allCards
+        .filter((card) => selected[card.id])
+        .map((card) => ({
+          id: card.id,
+          name: card.name,
+          email: card.email,
+          leadId: card.leadId,
+        })),
+    [allCards, selected],
+  );
+
+  function toggleCard(id: string) {
+    setSelected((current) => {
+      const next = { ...current };
+      if (next[id]) delete next[id];
+      else next[id] = true;
+      return next;
+    });
+  }
+
+  function selectSegment(key: Tier | "lead") {
+    const column = columns.find((c) => c.key === key);
+    if (!column) return;
+    setSelected(Object.fromEntries(column.cards.map((card) => [card.id, true as const])));
+  }
+
   const stats = useMemo(() => {
     const paid = members.filter((m) => m.tier !== "FREE").length;
     const free = members.filter((m) => m.tier === "FREE").length;
@@ -143,7 +177,7 @@ function PipelinePage() {
   }, [members]);
 
   return (
-    <FieldShell eyebrowRight="Membership pipeline" back={{ to: "/", label: "Back to hub" }}>
+    <FieldShell eyebrowRight="Membership pipeline">
       <PageTitle
         title="Membership"
         accent="pipeline"
@@ -162,6 +196,51 @@ function PipelinePage() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search name or email…"
       />
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="eyebrow">Select</span>
+        {TIER_AUDIENCES.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => selectSegment(option.key)}
+            className="rounded-full border border-border bg-panel px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {option.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setSelected(Object.fromEntries(allCards.map((c) => [c.id, true as const])))}
+          className="rounded-full border border-border bg-panel px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Everyone
+        </button>
+        {selectedContacts.length > 0 ? (
+          <>
+            <Button
+              className="h-9"
+              onClick={() => setComposerOpen(true)}
+            >
+              Message selected ({selectedContacts.length})
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelected({});
+                setComposerOpen(false);
+              }}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Clear
+            </button>
+          </>
+        ) : null}
+      </div>
+
+      {composerOpen && selectedContacts.length > 0 ? (
+        <MessageComposer contacts={selectedContacts} onClose={() => setComposerOpen(false)} />
+      ) : null}
 
       {memberError ? (
         <div className="mt-5 rounded-xl border border-gold/50 bg-gold/10 p-4 text-sm text-gold">
@@ -187,7 +266,13 @@ function PipelinePage() {
               </div>
               <div className="space-y-2">
                 {column.cards.map((card) => (
-                  <MemberCard key={`${column.key}-${card.id}`} card={card} showStatus={column.paid} />
+                  <MemberCard
+                    key={card.id}
+                    card={card}
+                    showStatus={column.paid}
+                    selected={Boolean(selected[card.id])}
+                    onToggle={() => toggleCard(card.id)}
+                  />
                 ))}
                 {!loading && column.cards.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
@@ -203,8 +288,18 @@ function PipelinePage() {
   );
 }
 
-function MemberCard({ card, showStatus }: { card: Card; showStatus: boolean }) {
-  const body = (
+function MemberCard({
+  card,
+  showStatus,
+  selected,
+  onToggle,
+}: {
+  card: Card;
+  showStatus: boolean;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const details = (
     <>
       <div className="line-clamp-2 font-medium leading-snug">{card.name}</div>
       <div className="mt-2 space-y-1 text-xs text-muted-foreground">
@@ -214,19 +309,32 @@ function MemberCard({ card, showStatus }: { card: Card; showStatus: boolean }) {
     </>
   );
 
-  if (card.attendeeId) {
-    return (
-      <Link
-        to="/lead/$attendeeId"
-        params={{ attendeeId: card.attendeeId }}
-        className="block min-h-24 rounded-xl border border-border bg-panel p-3 transition-colors hover:bg-panel-hover"
-      >
-        {body}
-      </Link>
-    );
-  }
-
-  return <div className="min-h-24 rounded-xl border border-border bg-panel p-3">{body}</div>;
+  return (
+    <div
+      className={`flex min-h-24 gap-2 rounded-xl border bg-panel p-3 transition-colors ${
+        selected ? "border-signal-line bg-signal-soft" : "border-border"
+      }`}
+    >
+      <input
+        type="checkbox"
+        className="mt-1 size-4 shrink-0"
+        checked={selected}
+        onChange={onToggle}
+        aria-label={`Select ${card.name}`}
+      />
+      {card.attendeeId ? (
+        <Link
+          to="/lead/$attendeeId"
+          params={{ attendeeId: card.attendeeId }}
+          className="min-w-0 flex-1 hover:text-signal"
+        >
+          {details}
+        </Link>
+      ) : (
+        <div className="min-w-0 flex-1">{details}</div>
+      )}
+    </div>
+  );
 }
 
 function Stat({ label, value, tone = "" }: { label: string; value: number | string; tone?: string }) {
