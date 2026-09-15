@@ -28,7 +28,9 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
+import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
+import { Route as ApiPublicSyncSiteConversionsRouteImport } from './routes/api/public/sync-site-conversions'
 import { Route as ApiPublicWebhooksMembershipRouteImport } from './routes/api/public/webhooks/membership'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 
@@ -130,11 +132,23 @@ const AuthenticatedSignupSessionIdRoute =
     path: '/signup/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiInternalSyncSiteConversionsRoute =
+  ApiInternalSyncSiteConversionsRouteImport.update({
+    id: '/api/internal/sync-site-conversions',
+    path: '/api/internal/sync-site-conversions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEnvCheckRoute = ApiPublicEnvCheckRouteImport.update({
   id: '/api/public/env-check',
   path: '/api/public/env-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSyncSiteConversionsRoute =
+  ApiPublicSyncSiteConversionsRouteImport.update({
+    id: '/api/public/sync-site-conversions',
+    path: '/api/public/sync-site-conversions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWebhooksMembershipRoute =
   ApiPublicWebhooksMembershipRouteImport.update({
     id: '/api/public/webhooks/membership',
@@ -166,7 +180,9 @@ export interface FileRoutesByFullPath {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
+  '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
+  '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -189,7 +205,9 @@ export interface FileRoutesByTo {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
+  '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
+  '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -214,7 +232,9 @@ export interface FileRoutesById {
   '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
+  '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
+  '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -239,7 +259,9 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
+    | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
+    | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -262,7 +284,9 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
+    | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
+    | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   id:
@@ -286,7 +310,9 @@ export interface FileRouteTypes {
     | '/_authenticated/activate/$sessionId'
     | '/_authenticated/lead/$attendeeId'
     | '/_authenticated/signup/$sessionId'
+    | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
+    | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -299,7 +325,9 @@ export interface RootRouteChildren {
   CTokenRoute: typeof CTokenRoute
   JoinSessionIdRoute: typeof JoinSessionIdRoute
   PSlugRoute: typeof PSlugRoute
+  ApiInternalSyncSiteConversionsRoute: typeof ApiInternalSyncSiteConversionsRoute
   ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
+  ApiPublicSyncSiteConversionsRoute: typeof ApiPublicSyncSiteConversionsRoute
   ApiPublicWebhooksMembershipRoute: typeof ApiPublicWebhooksMembershipRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
@@ -439,11 +467,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSignupSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/internal/sync-site-conversions': {
+      id: '/api/internal/sync-site-conversions'
+      path: '/api/internal/sync-site-conversions'
+      fullPath: '/api/internal/sync-site-conversions'
+      preLoaderRoute: typeof ApiInternalSyncSiteConversionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/env-check': {
       id: '/api/public/env-check'
       path: '/api/public/env-check'
       fullPath: '/api/public/env-check'
       preLoaderRoute: typeof ApiPublicEnvCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sync-site-conversions': {
+      id: '/api/public/sync-site-conversions'
+      path: '/api/public/sync-site-conversions'
+      fullPath: '/api/public/sync-site-conversions'
+      preLoaderRoute: typeof ApiPublicSyncSiteConversionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/webhooks/membership': {
@@ -504,7 +546,9 @@ const rootRouteChildren: RootRouteChildren = {
   CTokenRoute: CTokenRoute,
   JoinSessionIdRoute: JoinSessionIdRoute,
   PSlugRoute: PSlugRoute,
+  ApiInternalSyncSiteConversionsRoute: ApiInternalSyncSiteConversionsRoute,
   ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
+  ApiPublicSyncSiteConversionsRoute: ApiPublicSyncSiteConversionsRoute,
   ApiPublicWebhooksMembershipRoute: ApiPublicWebhooksMembershipRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
