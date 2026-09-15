@@ -20,6 +20,7 @@ import { Route as AuthenticatedBriefingRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedBroadcastRouteImport } from './routes/_authenticated/broadcast'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
+import { Route as AuthenticatedEventArchiveRouteImport } from './routes/_authenticated/event-archive'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
@@ -90,6 +91,12 @@ const AuthenticatedDubRoute = AuthenticatedDubRouteImport.update({
   path: '/dub',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEventArchiveRoute =
+  AuthenticatedEventArchiveRouteImport.update({
+    id: '/event-archive',
+    path: '/event-archive',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/broadcast': typeof AuthenticatedBroadcastRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/dub': typeof AuthenticatedDubRoute
+  '/event-archive': typeof AuthenticatedEventArchiveRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -204,6 +212,7 @@ export interface FileRoutesByTo {
   '/broadcast': typeof AuthenticatedBroadcastRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/dub': typeof AuthenticatedDubRoute
+  '/event-archive': typeof AuthenticatedEventArchiveRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/broadcast': typeof AuthenticatedBroadcastRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/dub': typeof AuthenticatedDubRoute
+  '/_authenticated/event-archive': typeof AuthenticatedEventArchiveRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/broadcast'
     | '/dashboard'
     | '/dub'
+    | '/event-archive'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/broadcast'
     | '/dashboard'
     | '/dub'
+    | '/event-archive'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/broadcast'
     | '/_authenticated/dashboard'
     | '/_authenticated/dub'
+    | '/_authenticated/event-archive'
     | '/_authenticated/leads'
     | '/_authenticated/pipeline'
     | '/_authenticated/scan'
@@ -421,6 +434,13 @@ declare module '@tanstack/react-router' {
       path: '/dub'
       fullPath: '/dub'
       preLoaderRoute: typeof AuthenticatedDubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/event-archive': {
+      id: '/_authenticated/event-archive'
+      path: '/event-archive'
+      fullPath: '/event-archive'
+      preLoaderRoute: typeof AuthenticatedEventArchiveRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leads': {
@@ -532,6 +552,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBroadcastRoute: typeof AuthenticatedBroadcastRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDubRoute: typeof AuthenticatedDubRoute
+  AuthenticatedEventArchiveRoute: typeof AuthenticatedEventArchiveRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
@@ -548,6 +569,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBroadcastRoute: AuthenticatedBroadcastRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDubRoute: AuthenticatedDubRoute,
+  AuthenticatedEventArchiveRoute: AuthenticatedEventArchiveRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,

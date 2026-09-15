@@ -83,3 +83,18 @@ export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]
   );
   return rows as SiteMember[];
 }
+
+/**
+ * Every member on the main site, newest first. Read-only. Used by the
+ * membership-tier pipeline board in Field Hub.
+ */
+export async function listAllMembers(): Promise<SiteMember[]> {
+  const { rows } = await pool().query(
+    `select ${MEMBER_COLUMNS}
+     from users u
+     left join subscriptions s on s."userId" = u.id
+     order by u."createdAt" desc nulls last
+     limit 5000`,
+  );
+  return rows as SiteMember[];
+}

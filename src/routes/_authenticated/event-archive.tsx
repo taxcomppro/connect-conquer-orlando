@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STAGE_LABEL, STAGE_TONE, sessionName, type SignupSession, type Stage } from "@/lib/connect";
 
-export const Route = createFileRoute("/_authenticated/pipeline")({
+export const Route = createFileRoute("/_authenticated/event-archive")({
   head: () => ({
     meta: [
       { title: "Sales pipeline — TCPC Field Hub" },
