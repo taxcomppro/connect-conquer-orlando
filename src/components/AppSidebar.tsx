@@ -25,9 +25,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Leads", to: "/leads", icon: Users },
   { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
+  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Scan", to: "/scan", icon: ScanLine },
+  { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
   { label: "Automations", to: "/automations", icon: MessagesSquare },
   { label: "DUB", to: "/dub", icon: Network },
