@@ -25,6 +25,7 @@ import {
   type SmsMessage,
 } from "@/lib/sms.functions";
 import { runSmsTriggers, renderTemplate } from "@/lib/sms-triggers.functions";
+import { getContactThread, type ThreadEntry } from "@/lib/email.functions";
 import { PRODUCTS, renderProductMessage } from "@/lib/products";
 import { setLeadOutcome } from "@/lib/lead-outcome.functions";
 
