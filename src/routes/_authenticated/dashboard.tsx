@@ -109,7 +109,7 @@ function DashboardPage() {
           label="Conversion rate"
           value={loading ? "—" : `${metrics.conversionRate.toFixed(1)}%`}
           tone="text-go"
-          detail={loading ? undefined : `${metrics.converted.toLocaleString()} converted`}
+          detail={loading ? "Loading conversions…" : `${metrics.converted.toLocaleString()} converted`}
         />
         <Metric
           label="Scanned today"
