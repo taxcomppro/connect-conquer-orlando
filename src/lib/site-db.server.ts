@@ -15,6 +15,11 @@ import { Pool } from "pg";
 
 let _pool: Pool | undefined;
 
+const CONNECTION_TIMEOUT_MS = 8_000;
+const MEMBER_CACHE_MS = 30_000;
+let memberCache: { members: SiteMember[]; loadedAt: number } | undefined;
+let memberRequest: Promise<SiteMember[]> | undefined;
+
 function pool(): Pool {
   if (_pool) return _pool;
   const connectionString = process.env["SITE_DATABASE_URL"];
@@ -25,13 +30,16 @@ function pool(): Pool {
   }
   _pool = new Pool({
     connectionString,
-    max: 3,
+    // Serverless instances should hold at most one database connection. A
+    // larger per-instance pool can exhaust the database when Vercel scales.
+    max: 1,
     ssl: { rejectUnauthorized: false },
-    // Hard limits so a hung connection surfaces as an error instead of an opaque timeout.
-    connectionTimeoutMillis: 8000,
-    idleTimeoutMillis: 10000,
-    query_timeout: 8000,
-    statement_timeout: 8000,
+    connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
+    idleTimeoutMillis: 10_000,
+    query_timeout: CONNECTION_TIMEOUT_MS,
+    statement_timeout: CONNECTION_TIMEOUT_MS,
+    keepAlive: true,
+    allowExitOnIdle: true,
   });
   _pool.on("error", (error) => {
     console.error("[site-db] idle pool client error:", error);
@@ -39,22 +47,32 @@ function pool(): Pool {
   return _pool;
 }
 
-/** Rejects if the database doesn't answer within `ms`, so callers never hang. */
-async function withTimeout<T>(label: string, ms: number, work: Promise<T>): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
+async function resetPool(failedPool: Pool) {
+  if (_pool === failedPool) _pool = undefined;
   try {
-    return await Promise.race([
-      work,
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new Error(`${label} timed out after ${ms}ms — the main site's database did not respond.`)),
-          ms,
-        );
-      }),
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
+    await failedPool.end();
+  } catch (error) {
+    console.error("[site-db] failed to close unhealthy pool:", error);
   }
+}
+
+/** Runs a read and retries once with a fresh pool after a connection failure. */
+async function queryWithRetry<T>(label: string, text: string, values: unknown[] = []): Promise<T[]> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const activePool = pool();
+    try {
+      const { rows } = await activePool.query(text, values);
+      return rows as T[];
+    } catch (error) {
+      lastError = error;
+      console.error(`[site-db] ${label} attempt ${attempt} failed:`, error);
+      await resetPool(activePool);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(`${label} failed after retrying.`);
 }
 
 export type SiteMember = {
@@ -83,7 +101,8 @@ export async function findSiteMemberByEmail(rawEmail: string): Promise<SiteMembe
   const email = rawEmail.trim().toLowerCase();
   if (!email) return null;
 
-  const { rows } = await pool().query(
+  const rows = await queryWithRetry<SiteMember>(
+    "findSiteMemberByEmail",
     `select ${MEMBER_COLUMNS}
      from users u
      left join subscriptions s on s."userId" = u.id
@@ -91,7 +110,7 @@ export async function findSiteMemberByEmail(rawEmail: string): Promise<SiteMembe
      limit 1`,
     [email],
   );
-  return (rows[0] as SiteMember) ?? null;
+  return rows[0] ?? null;
 }
 
 /**
@@ -102,7 +121,8 @@ export async function findSiteMemberByEmail(rawEmail: string): Promise<SiteMembe
  * ever creating a Stripe Checkout Session.
  */
 export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]> {
-  const { rows } = await pool().query(
+  return queryWithRetry<SiteMember>(
+    "findRecentUpgrades",
     `select ${MEMBER_COLUMNS}
      from users u
      join subscriptions s on s."userId" = u.id
@@ -111,7 +131,6 @@ export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]
      limit 200`,
     [sinceIso],
   );
-  return rows as SiteMember[];
 }
 
 /**
@@ -119,16 +138,33 @@ export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]
  * membership-tier pipeline board in Field Hub.
  */
 export async function listAllMembers(): Promise<SiteMember[]> {
-  const { rows } = await withTimeout(
+  if (memberCache && Date.now() - memberCache.loadedAt < MEMBER_CACHE_MS) {
+    return memberCache.members;
+  }
+  if (memberRequest) return memberRequest;
+
+  memberRequest = queryWithRetry<SiteMember>(
     "listAllMembers",
-    8000,
-    pool().query(
-      `select ${MEMBER_COLUMNS}
+    `select ${MEMBER_COLUMNS}
      from users u
      left join subscriptions s on s."userId" = u.id
      order by u."createdAt" desc nulls last
      limit 5000`,
-    ),
-  );
-  return rows as SiteMember[];
+  )
+    .then((members) => {
+      memberCache = { members, loadedAt: Date.now() };
+      return members;
+    })
+    .catch((error) => {
+      if (memberCache) {
+        console.error("[site-db] serving cached membership records after refresh failed:", error);
+        return memberCache.members;
+      }
+      throw error;
+    })
+    .finally(() => {
+      memberRequest = undefined;
+    });
+
+  return memberRequest;
 }
