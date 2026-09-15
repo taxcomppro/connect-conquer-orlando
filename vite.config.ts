@@ -20,6 +20,10 @@ const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_34mrQPvDDmwq7F-OBkIAFg_7A0LhAGy";
 
 export default defineConfig({
+  // `pg` needs a Node server function on Vercel. Keep Lovable's normal
+  // preview target elsewhere, but explicitly select Vercel's Node runtime
+  // when Vercel builds this deployment.
+  nitro: process.env["VERCEL"] ? { preset: "vercel" } : undefined,
   vite: {
     define: {
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(SUPABASE_URL),
