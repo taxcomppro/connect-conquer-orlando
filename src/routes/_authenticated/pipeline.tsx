@@ -3,171 +3,195 @@ import { useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { STAGE_LABEL, STAGE_TONE, sessionName, type SignupSession, type Stage } from "@/lib/connect";
+import { leadName, type Lead } from "@/lib/leads";
+import { listMembers, type MemberRow } from "@/lib/members.functions";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
     meta: [
-      { title: "Sales pipeline — TCPC Field Hub" },
+      { title: "Membership pipeline — TCPC Field Hub" },
       {
         name: "description",
         content:
-          "Track every booth signup from badge scan to membership, profile and issued ProConnect card, with rep and DUB attribution.",
+          "Track every contact from lead to free member to paid VIP, Marketplace and Marketplace+ membership.",
       },
-      { property: "og:title", content: "Sales pipeline — TCPC Field Hub" },
+      { property: "og:title", content: "Membership pipeline — TCPC Field Hub" },
       {
         property: "og:description",
-        content: "Every booth signup from scan to card, with full attribution and export.",
+        content: "Convert free members to paid: leads, free, VIP, Marketplace and Marketplace+.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PipelinePage,
 });
 
-const BOARD_STAGES: Stage[] = [
-  "scanned",
-  "signup_sent",
-  "membership_confirmed",
-  "ready_for_card",
-  "card_issued",
+type Tier = MemberRow["tier"];
+
+const TIER_COLUMNS: { key: "lead" | Tier; label: string; tone: string; paid: boolean }[] = [
+  { key: "lead", label: "Lead", tone: "border-border bg-panel text-muted-foreground", paid: false },
+  { key: "FREE", label: "Free", tone: "border-signal-line bg-signal-soft text-signal", paid: false },
+  { key: "VIP", label: "VIP", tone: "border-gold/50 bg-gold/10 text-gold", paid: true },
+  {
+    key: "MARKETPLACE",
+    label: "Marketplace",
+    tone: "border-go-line bg-go-soft text-go",
+    paid: true,
+  },
+  {
+    key: "MARKETPLACE_PLUS",
+    label: "Marketplace+",
+    tone: "border-go-line bg-go-soft text-go",
+    paid: true,
+  },
 ];
 
+type Card = {
+  id: string;
+  name: string;
+  email: string | null;
+  status: string | null;
+  attendeeId: string | null;
+};
+
 function PipelinePage() {
-  const [sessions, setSessions] = useState<SignupSession[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [memberError, setMemberError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     let active = true;
-    async function load() {
-      const { data } = await supabase
-        .from("signup_sessions")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (active) {
-        setSessions(data ?? []);
-        setLoading(false);
-      }
-    }
-    void load();
-    const timer = window.setInterval(load, 8000);
+    void (async () => {
+      const [leadResult, memberResult] = await Promise.all([
+        supabase.from("leads").select("*").order("scanned_at", { ascending: false }),
+        listMembers().catch((error: unknown) => ({
+          members: [] as MemberRow[],
+          error: error instanceof Error ? error.message : "Couldn't load membership records.",
+        })),
+      ]);
+      if (!active) return;
+      setLeads(leadResult.data ?? []);
+      setMembers(memberResult.members);
+      setMemberError(memberResult.error);
+      setLoading(false);
+    })();
     return () => {
       active = false;
-      window.clearInterval(timer);
     };
   }, []);
 
-  const visible = useMemo(() => {
+  const columns = useMemo(() => {
+    const memberEmails = new Set(
+      members.map((m) => (m.email ?? "").trim().toLowerCase()).filter(Boolean),
+    );
+    const leadByEmail = new Map<string, Lead>();
+    for (const lead of leads) {
+      const email = (lead.email ?? "").trim().toLowerCase();
+      if (email && !leadByEmail.has(email)) leadByEmail.set(email, lead);
+    }
+
+    const leadCards: Card[] = leads
+      .filter((lead) => {
+        const email = (lead.email ?? "").trim().toLowerCase();
+        return !email || !memberEmails.has(email);
+      })
+      .map((lead) => ({
+        id: lead.id,
+        name: leadName(lead),
+        email: lead.email,
+        status: null,
+        attendeeId: lead.attendee_id,
+      }));
+
+    const byTier = (tier: Tier): Card[] =>
+      members
+        .filter((m) => m.tier === tier)
+        .map((m) => {
+          const email = (m.email ?? "").trim().toLowerCase();
+          const lead = email ? leadByEmail.get(email) : undefined;
+          return {
+            id: m.userId,
+            name: m.name || m.email || "Member",
+            email: m.email,
+            status: m.subscriptionStatus,
+            attendeeId: lead?.attendee_id ?? null,
+          };
+        });
+
     const q = query.trim().toLowerCase();
-    return sessions.filter((s) => {
-      if (!BOARD_STAGES.includes(s.stage as Stage)) return false;
-      if (!q) return true;
-      return [s.full_name, s.email, s.company, s.attendee_id, s.dub_code, s.rep_name]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(q));
-    });
-  }, [sessions, query]);
+    const match = (card: Card) =>
+      !q || [card.name, card.email].filter(Boolean).some((v) => String(v).toLowerCase().includes(q));
 
-  const columns = useMemo(
-    () => BOARD_STAGES.map((stage) => ({ stage, sessions: visible.filter((session) => session.stage === stage) })),
-    [visible],
-  );
+    return TIER_COLUMNS.map((column) => ({
+      ...column,
+      cards: (column.key === "lead" ? leadCards : byTier(column.key)).filter(match),
+    }));
+  }, [leads, members, query]);
 
-  const stats = useMemo(
-    () => ({
-      total: sessions.length,
-      ready: sessions.filter((s) => s.stage === "ready_for_card").length,
-      issued: sessions.filter((s) => s.stage === "card_issued").length,
-    }),
-    [sessions],
-  );
-
-  async function exportMigrationBundle() {
-    const [{ data: profiles }, { data: cards }, { data: events }] = await Promise.all([
-      supabase.from("connect_profiles").select("*"),
-      supabase.from("card_tokens").select("*"),
-      supabase.from("signup_events").select("*"),
-    ]);
-
-    const bundle = {
-      exportedAt: new Date().toISOString(),
-      schemaVersion: 1,
-      source: "tcpc-field-hub",
-      signupSessions: sessions,
-      connectProfiles: profiles ?? [],
-      cardTokens: cards ?? [],
-      signupEvents: events ?? [],
+  const stats = useMemo(() => {
+    const paid = members.filter((m) => m.tier !== "FREE").length;
+    const free = members.filter((m) => m.tier === "FREE").length;
+    return {
+      free,
+      paid,
+      rate: members.length ? Math.round((paid / members.length) * 100) : 0,
     };
-
-    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `tcpc-field-hub-migration-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  }, [members]);
 
   return (
-    <FieldShell eyebrowRight="Sales pipeline" back={{ to: "/", label: "Back to hub" }}>
+    <FieldShell eyebrowRight="Membership pipeline" back={{ to: "/", label: "Back to hub" }}>
       <PageTitle
-        title="Sales"
+        title="Membership"
         accent="pipeline"
-        lede="Scan → membership → profile → card. Every step attributed to the rep who started it."
+        lede="Leads who never signed up, free members to convert, and every paid tier — ongoing."
       />
 
       <div className="mt-5 grid grid-cols-3 gap-3">
-        <Stat label="In pipeline" value={stats.total} />
-        <Stat label="Ready for card" value={stats.ready} tone="text-gold" />
-        <Stat label="Cards issued" value={stats.issued} tone="text-go" />
+        <Stat label="Free members" value={stats.free} />
+        <Stat label="Paid members" value={stats.paid} tone="text-go" />
+        <Stat label="Paid share" value={`${stats.rate}%`} tone="text-gold" />
       </div>
 
       <Input
         className="mt-5"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search name, firm, badge ID, DUB code…"
+        placeholder="Search name or email…"
       />
 
-      <SectionLabel>{loading ? "Loading…" : `${visible.length} in pipeline`}</SectionLabel>
+      {memberError ? (
+        <div className="mt-5 rounded-xl border border-gold/50 bg-gold/10 p-4 text-sm text-gold">
+          Membership records are unavailable right now, so only leads are shown. {memberError}
+        </div>
+      ) : null}
+
+      <SectionLabel>{loading ? "Loading…" : "By membership tier"}</SectionLabel>
       <div className="-mx-5 overflow-x-auto px-5 pb-3 sm:-mx-7 sm:px-7">
         <div className="grid min-w-[1020px] grid-cols-5 gap-3">
-          {columns.map(({ stage, sessions: stageSessions }) => (
-            <section key={stage} aria-labelledby={`pipeline-${stage}`}>
+          {columns.map((column) => (
+            <section key={column.key} aria-labelledby={`tier-${column.key}`}>
               <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
                 <span
-                  id={`pipeline-${stage}`}
-                  className={`rounded-full border px-2.5 py-1 text-xs ${STAGE_TONE[stage]}`}
+                  id={`tier-${column.key}`}
+                  className={`rounded-full border px-2.5 py-1 text-xs ${column.tone}`}
                 >
-                  {STAGE_LABEL[stage]}
+                  {column.label}
                 </span>
-                <span className="font-mono text-xs text-muted-foreground">{stageSessions.length}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {column.cards.length}
+                </span>
               </div>
               <div className="space-y-2">
-                {stageSessions.map((session) => (
-                  <Link
-                    key={session.id}
-                    to={
-                      session.stage === "ready_for_card" || session.stage === "card_issued"
-                        ? "/activate/$sessionId"
-                        : "/signup/$sessionId"
-                    }
-                    params={{ sessionId: session.id }}
-                    className="block min-h-28 rounded-xl border border-border bg-panel p-3 transition-colors hover:bg-panel-hover"
-                  >
-                    <div className="line-clamp-2 font-medium leading-snug">{sessionName(session)}</div>
-                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      {session.company ? <div className="line-clamp-2">{session.company}</div> : null}
-                      {session.rep_name ? <div className="truncate">Rep: {session.rep_name}</div> : null}
-                      {session.dub_code ? <div className="truncate text-gold">{session.dub_code}</div> : null}
-                    </div>
-                  </Link>
+                {column.cards.map((card) => (
+                  <MemberCard key={`${column.key}-${card.id}`} card={card} showStatus={column.paid} />
                 ))}
-                {!loading && stageSessions.length === 0 ? (
+                {!loading && column.cards.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-                    No leads in this stage
+                    Nobody in this tier
                   </div>
                 ) : null}
               </div>
@@ -175,22 +199,37 @@ function PipelinePage() {
           ))}
         </div>
       </div>
-
-      <SectionLabel>Migration</SectionLabel>
-      <div className="rounded-2xl border border-border bg-panel p-5">
-        <p className="text-sm text-muted-foreground">
-          Exports every signup, profile, card token and event as one JSON file with stable IDs —
-          the handoff package for loading into the main site after the show.
-        </p>
-        <Button variant="outline" onClick={exportMigrationBundle} className="mt-4 h-12 w-full">
-          Download migration bundle
-        </Button>
-      </div>
     </FieldShell>
   );
 }
 
-function Stat({ label, value, tone = "" }: { label: string; value: number; tone?: string }) {
+function MemberCard({ card, showStatus }: { card: Card; showStatus: boolean }) {
+  const body = (
+    <>
+      <div className="line-clamp-2 font-medium leading-snug">{card.name}</div>
+      <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+        {card.email ? <div className="truncate">{card.email}</div> : null}
+        {showStatus && card.status ? <div className="truncate text-go">{card.status}</div> : null}
+      </div>
+    </>
+  );
+
+  if (card.attendeeId) {
+    return (
+      <Link
+        to="/lead/$attendeeId"
+        params={{ attendeeId: card.attendeeId }}
+        className="block min-h-24 rounded-xl border border-border bg-panel p-3 transition-colors hover:bg-panel-hover"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return <div className="min-h-24 rounded-xl border border-border bg-panel p-3">{body}</div>;
+}
+
+function Stat({ label, value, tone = "" }: { label: string; value: number | string; tone?: string }) {
   return (
     <div className="rounded-xl border border-border bg-panel p-4">
       <div className="eyebrow">{label}</div>

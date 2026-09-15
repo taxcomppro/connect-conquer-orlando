@@ -76,6 +76,19 @@ function AdminPanel() {
               </p>
               <div className="mt-4 text-sm text-gold">Open settings →</div>
             </Link>
+
+            <Link
+              to="/event-archive"
+              className="rounded-2xl border border-border bg-panel p-5 transition-transform hover:-translate-y-0.5"
+            >
+              <div className="text-2xl">🗄️</div>
+              <div className="mt-3 font-display text-xl">Event Archive</div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The Orlando forum booth pipeline — badge scans through card issuance, kept as a
+                historical record with its migration export.
+              </p>
+              <div className="mt-4 text-sm text-signal">Open archive →</div>
+            </Link>
           </div>
         </>
       )}
