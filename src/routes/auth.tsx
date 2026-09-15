@@ -118,7 +118,7 @@ function AuthPage() {
   }
 
   return (
-    <FieldShell eyebrowRight="Booth 540 · Orlando">
+    <FieldShell eyebrowRight="Field Hub · Member CRM">
       <div className="mx-auto max-w-md">
         <PageTitle
           title="Booth staff"
