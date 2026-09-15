@@ -54,8 +54,13 @@ function DashboardPage() {
 
       setLoadFailed(Boolean(leadResult.error));
       setLeads(leadResult.data ?? []);
-      setMembers(memberResult.members);
-      setMemberError(memberResult.error);
+      if (!memberResult.error) {
+        setMembers(memberResult.members);
+        setMemberError(null);
+      } else {
+        // Keep the last successful totals visible during a temporary outage.
+        setMemberError(memberResult.error);
+      }
       setLoading(false);
     }
 
