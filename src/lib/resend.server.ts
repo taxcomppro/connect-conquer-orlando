@@ -48,9 +48,7 @@ export async function sendEmail(input: {
   if (!text && !html) throw new Error("A message body is required.");
 
   const key = await resendKey();
-  const from = input.from?.trim() || (await import("./env.server")).readEnv
-    ? input.from?.trim() || DEFAULT_FROM
-    : DEFAULT_FROM;
+  const from = input.from?.trim() || DEFAULT_FROM;
 
   const payload: Record<string, unknown> = {
     from,
