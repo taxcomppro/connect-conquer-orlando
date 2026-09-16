@@ -48,7 +48,8 @@ export async function sendEmail(input: {
   if (!text && !html) throw new Error("A message body is required.");
 
   const key = await resendKey();
-  const from = input.from?.trim() || DEFAULT_FROM;
+  // Always send from the shared inbox, whoever triggered the send.
+  const from = DEFAULT_FROM;
 
   const payload: Record<string, unknown> = {
     from,
