@@ -9,12 +9,12 @@ import type { Tier } from "@/lib/audience";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Field Hub Member CRM" },
+      { title: "Dashboard — Membership Hub" },
       {
         name: "description",
-        content: "Monitor free and paid membership totals, conversion rate and new leads in Field Hub.",
+        content: "Monitor free and paid membership totals, conversion rate and new leads in Membership Hub.",
       },
-      { property: "og:title", content: "Dashboard — Field Hub Member CRM" },
+      { property: "og:title", content: "Dashboard — Membership Hub" },
       {
         property: "og:description",
         content: "A live view of membership tiers, paid conversion rate and new leads captured today.",
@@ -96,7 +96,7 @@ function DashboardPage() {
   return (
     <FieldShell eyebrowRight="Membership overview">
       <PageTitle
-        title="Field Hub"
+        title="Membership Hub"
         accent="dashboard"
         lede="Free and paid membership totals, paid conversion rate and new leads captured today."
       />

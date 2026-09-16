@@ -20,7 +20,7 @@ function NotFoundComponent() {
         <h1 className="font-display text-7xl font-medium text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          That screen isn't part of the field hub.
+          That screen isn't part of Membership Hub.
         </p>
         <div className="mt-6">
           <Link
@@ -81,11 +81,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
       },
-      { title: "TCPC Lead Scanner — Field Hub" },
+      { title: "Membership Hub — Tax Compliance Pro" },
       { name: "author", content: "Tax Compliance Pro" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "TCP Scan" },
+      { name: "apple-mobile-web-app-title", content: "Membership Hub" },
       { name: "theme-color", content: "#000000" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

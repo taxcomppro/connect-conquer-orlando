@@ -33,12 +33,12 @@ function AuthenticatedLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="min-w-0 max-w-full overflow-x-hidden">
+      <SidebarInset className="w-0 min-w-0 max-w-full flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center border-b border-border bg-background/95 px-4 backdrop-blur md:px-5">
           <SidebarTrigger aria-label="Toggle navigation" />
-          <div className="ml-3 eyebrow md:hidden">Field Hub · Member CRM</div>
+          <div className="ml-3 eyebrow md:hidden">Membership Hub</div>
         </header>
-        <div className="min-w-0 max-w-full flex-1 overflow-x-hidden">
+        <div className="w-full min-w-0 max-w-full flex-1 overflow-x-hidden">
           <Outlet />
         </div>
       </SidebarInset>

@@ -17,13 +17,13 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Booth Staff Sign In — TCPC Field Hub" },
+      { title: "Staff Sign In — Membership Hub" },
       {
         name: "description",
         content:
           "Approved booth staff sign in with a one-time email link to capture and qualify leads at the IRS Nationwide Tax Forum.",
       },
-      { property: "og:title", content: "Booth Staff Sign In — TCPC Field Hub" },
+      { property: "og:title", content: "Staff Sign In — Membership Hub" },
       {
         property: "og:description",
         content: "Passwordless sign in for Tax Compliance Pro booth staff at the IRS Forum in Orlando.",
@@ -118,7 +118,7 @@ function AuthPage() {
   }
 
   return (
-    <FieldShell eyebrowRight="Field Hub · Member CRM">
+    <FieldShell eyebrowRight="Membership Hub">
       <div className="mx-auto max-w-md">
         <PageTitle
           title="Booth staff"
@@ -131,7 +131,7 @@ function AuthPage() {
             <p className="eyebrow">Link sent</p>
             <p className="text-sm text-muted-foreground">
               We emailed a sign-in link to <span className="text-foreground">{sentTo}</span>. Open it
-              on this device to land straight in the Field Hub.
+              on this device to land straight in Membership Hub.
             </p>
             <Button
               type="button"
