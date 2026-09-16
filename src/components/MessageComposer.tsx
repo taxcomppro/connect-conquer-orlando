@@ -251,7 +251,7 @@ export function MessageComposer({
           </label>
           <p className="mt-2 text-xs text-muted-foreground">
             Merge fields: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{company}}"},{" "}
-            {"{{rep_name}}"}, {"{{unsubscribe_url}}"}. Replies go to jennifer@taxcomppro.com ·{" "}
+            {"{{unsubscribe_url}}"}. Emails send from and reply to info@taxcomppro.com ·{" "}
             {emailable.length} of {contacts.length} selected have an email address.
           </p>
           <Button
