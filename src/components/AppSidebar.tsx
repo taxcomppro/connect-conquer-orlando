@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
-  BriefcaseBusiness,
   LayoutDashboard,
   Megaphone,
   MessagesSquare,
@@ -31,7 +30,6 @@ const NAV_ITEMS = [
   { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
   { label: "Automations", to: "/automations", icon: MessagesSquare },
-  { label: "Briefing", to: "/briefing", icon: BriefcaseBusiness },
   { label: "Admin", to: "/admin", icon: Settings },
 ] as const;
 
