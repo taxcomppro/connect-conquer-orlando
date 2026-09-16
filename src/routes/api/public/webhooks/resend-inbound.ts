@@ -68,10 +68,10 @@ export const Route = createFileRoute("/api/public/webhooks/resend-inbound")({
           provider_id: emailId,
         });
 
-        const forwardTo = process.env["FORWARD_REPLIES_TO"];
+        const forwardTo = process.env["REPLY_FORWARDING_EMAIL"];
         if (forwardTo) {
           await resend.emails.send({
-            from: "Field Hub <replies@reply.taxcomppro.com>",
+            from: "Field Hub <info@replies.taxcomppro.com>",
             to: forwardTo,
             subject: `[Reply] ${subject}`,
             html: `<p>Reply from ${fromAddress}:</p>${bodyHtml}`,
