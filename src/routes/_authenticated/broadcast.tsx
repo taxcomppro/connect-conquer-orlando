@@ -10,8 +10,14 @@ import { Button } from "@/components/ui/button";
 import { leadName, leadOutcome, type Lead } from "@/lib/leads";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
-import { normalizeEmail, tierByEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
+import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import {
+  normalizeEmail,
+  tierByEmail,
+  TIER_AUDIENCES,
+  UNLISTED_AUDIENCE,
+  type Tier,
+} from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/broadcast")({
   head: () => ({
