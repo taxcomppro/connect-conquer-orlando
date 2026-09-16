@@ -207,6 +207,27 @@ export function MessageComposer({
       ) : (
         <div className="mt-4">
           <SectionLabel>Email</SectionLabel>
+          {emailTemplates.length > 0 ? (
+            <select
+              className="mb-3 h-10 w-full rounded-md border border-border bg-panel px-3 text-sm"
+              value=""
+              onChange={(e) => {
+                const template = emailTemplates.find((t) => t.id === e.target.value);
+                if (template) {
+                  setSubject(template.subject);
+                  setEmailBody(template.html_body);
+                  setEmailIsHtml(true);
+                }
+              }}
+            >
+              <option value="">Start from a template…</option>
+              {emailTemplates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
           <input
             className="h-10 w-full rounded-md border border-border bg-panel px-3 text-sm"
             value={subject}
@@ -214,15 +235,24 @@ export function MessageComposer({
             placeholder="Subject line"
           />
           <textarea
-            className="mt-3 min-h-40 w-full rounded-md border border-border bg-panel px-3 py-2 text-sm"
+            className="mt-3 min-h-40 w-full rounded-md border border-border bg-panel px-3 py-2 text-sm font-mono"
             value={emailBody}
             onChange={(e) => setEmailBody(e.target.value)}
             placeholder="Hi {{first_name}}, …"
           />
+          <label className="mt-3 flex items-start gap-3 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={emailIsHtml}
+              onChange={(e) => setEmailIsHtml(e.target.checked)}
+            />
+            <span>Body is HTML (send exactly as written).</span>
+          </label>
           <p className="mt-2 text-xs text-muted-foreground">
-            Placeholders: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}. Replies go to
-            jennifer@taxcomppro.com · {emailable.length} of {contacts.length} selected have an email
-            address.
+            Merge fields: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{company}}"},{" "}
+            {"{{rep_name}}"}, {"{{unsubscribe_url}}"}. Replies go to jennifer@taxcomppro.com ·{" "}
+            {emailable.length} of {contacts.length} selected have an email address.
           </p>
           <Button
             className="mt-4 h-11 w-full"
