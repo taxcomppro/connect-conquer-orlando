@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
-import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe, fetchUnlistedSafe } from "@/lib/members-client";
 import { normalizeEmail, TIER_AUDIENCES, UNLISTED_AUDIENCE, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({

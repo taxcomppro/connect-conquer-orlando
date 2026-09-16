@@ -45,10 +45,7 @@ function DashboardPage() {
     async function load() {
       const [leadResult, memberResult] = await Promise.all([
         supabase.from("leads").select("id,scanned_at").neq("outcome", "archived"),
-        listMembers().catch((error: unknown) => ({
-          members: [] as MemberRow[],
-          error: error instanceof Error ? error.message : "Couldn't load membership records.",
-        })),
+        fetchMembersSafe(),
       ]);
       if (!active) return;
 
