@@ -755,7 +755,11 @@ function LeadPage() {
             {thread.map((entry) => (
               <div
                 key={`${entry.channel}-${entry.id}`}
-                className="rounded-xl border border-border bg-muted p-3 text-sm"
+                className={`rounded-xl border bg-muted p-3 text-sm sm:max-w-[85%] ${
+                  entry.direction === "inbound"
+                    ? "border-border border-l-2 border-l-signal sm:mr-auto"
+                    : "border-border border-r-2 border-r-go sm:ml-auto"
+                }`}
               >
                 <div className="flex items-center justify-between gap-3 text-xs">
                   <span
@@ -766,6 +770,7 @@ function LeadPage() {
                     }`}
                   >
                     {entry.channel === "email" ? "Email" : "Text"}
+                    {entry.direction === "inbound" ? " · Received" : " · Sent"}
                   </span>
                   <span className="text-muted-foreground">
                     {new Date(entry.sentAt).toLocaleString()}

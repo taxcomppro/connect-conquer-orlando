@@ -10,8 +10,14 @@ import { Button } from "@/components/ui/button";
 import { leadName, leadOutcome, type Lead } from "@/lib/leads";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
-import { normalizeEmail, tierByEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
+import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import {
+  normalizeEmail,
+  tierByEmail,
+  TIER_AUDIENCES,
+  UNLISTED_AUDIENCE,
+  type Tier,
+} from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/broadcast")({
   head: () => ({
@@ -34,7 +40,15 @@ export const Route = createFileRoute("/_authenticated/broadcast")({
   component: BroadcastPage,
 });
 
-type Audience = "all" | "consented" | "follow_up" | "hot" | "no_sale" | Tier | "lead";
+type Audience =
+  | "all"
+  | "consented"
+  | "follow_up"
+  | "hot"
+  | "no_sale"
+  | Tier
+  | "lead"
+  | typeof UNLISTED_AUDIENCE;
 
 const AUDIENCES: Array<{ key: Audience; label: string }> = [
   { key: "consented", label: "Consented only" },
@@ -58,21 +72,26 @@ function BroadcastPage() {
   const [body, setBody] = useState("");
   const [requireConsent, setRequireConsent] = useState(true);
   const [sending, setSending] = useState(false);
+  const [unlistedEmails, setUnlistedEmails] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) return;
     let active = true;
     void (async () => {
-      const [{ data, error }, tpl, memberResult] = await Promise.all([
+      const [{ data, error }, tpl, memberResult, unlistedResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
         listMembers().catch(() => ({ members: [] as MemberRow[], error: null })),
+        listUnactivatedSellers().catch(() => ({ members: [] as MemberRow[], error: null })),
       ]);
       if (!active) return;
       if (error) toast.error("Couldn't load leads.");
       setLeads(data ?? []);
       setTemplates((tpl.templates ?? []) as SmsTemplate[]);
       setMembers(memberResult.members ?? []);
+      setUnlistedEmails(
+        new Set((unlistedResult.members ?? []).map((m) => normalizeEmail(m.email)).filter(Boolean)),
+      );
       setLoading(false);
     })();
     return () => {
@@ -94,6 +113,8 @@ function BroadcastPage() {
       if (audience === "no_sale" && (outcome === "sale_started" || outcome === "sale_closed"))
         return false;
       if (audience === "lead" && tier) return false;
+      if (audience === UNLISTED_AUDIENCE && !unlistedEmails.has(normalizeEmail(lead.email)))
+        return false;
       if (
         (audience === "FREE" ||
           audience === "VIP" ||
@@ -104,7 +125,7 @@ function BroadcastPage() {
         return false;
       return true;
     });
-  }, [leads, audience, requireConsent, tiers]);
+  }, [leads, audience, requireConsent, tiers, unlistedEmails]);
 
   const noPhone = leads.filter((l) => !l.phone).length;
 
