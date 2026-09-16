@@ -6,7 +6,7 @@ export type Lead = Tables<"leads">;
 export const RATINGS = ["hot", "warm", "cold"] as const;
 export type Rating = (typeof RATINGS)[number];
 
-export const OUTCOMES = ["open", "follow_up", "not_a_fit", "sale_started", "sale_closed"] as const;
+export const OUTCOMES = ["open", "follow_up", "not_a_fit", "sale_started", "sale_closed", "archived"] as const;
 export type Outcome = (typeof OUTCOMES)[number];
 
 export const OUTCOME_LABEL: Record<Outcome, string> = {
@@ -15,6 +15,7 @@ export const OUTCOME_LABEL: Record<Outcome, string> = {
   not_a_fit: "Not a fit",
   sale_started: "Sale started",
   sale_closed: "Converted to member",
+  archived: "Archived",
 };
 
 export const OUTCOME_TONE: Record<Outcome, string> = {
@@ -23,6 +24,7 @@ export const OUTCOME_TONE: Record<Outcome, string> = {
   not_a_fit: "border-border bg-muted text-muted-foreground",
   sale_started: "border-signal-line bg-signal-soft text-signal",
   sale_closed: "border-go-line bg-go-soft text-go",
+  archived: "border-border bg-muted text-muted-foreground line-through",
 };
 
 export function leadOutcome(lead: Pick<Lead, "outcome">): Outcome {
