@@ -46,3 +46,29 @@ export const listMembers = createServerFn({ method: "POST" })
       };
     }
   });
+
+/** Staff-only: Marketplace members who have never posted a listing. */
+export const listUnactivatedSellers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async (): Promise<{ members: MemberRow[]; error: string | null }> => {
+    try {
+      const { listUnactivatedSellers: query } = await import("@/lib/site-db.server");
+      const members = await query();
+      return {
+        members: members.map((m) => ({
+          userId: m.userId,
+          email: m.email,
+          name: m.name,
+          tier: m.tier,
+          subscriptionStatus: m.subscriptionStatus,
+          subscriptionPlan: m.subscriptionPlan,
+          currentPeriodEnd: m.currentPeriodEnd,
+        })),
+        error: null,
+      };
+    } catch (error) {
+      console.error("[listUnactivatedSellers] lookup failed:", error);
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      return { members: [], error: `Couldn't reach the membership records. ${detail}` };
+    }
+  });

@@ -171,3 +171,23 @@ export async function listAllMembers(): Promise<SiteMember[]> {
 
   return memberRequest;
 }
+
+/**
+ * Marketplace / Marketplace+ members who have never created a single
+ * marketplace_listings row — they pay for seller access but have
+ * nothing listed yet. Used for the activation-nudge audience.
+ */
+export async function listUnactivatedSellers(): Promise<SiteMember[]> {
+  return queryWithRetry<SiteMember>(
+    "listUnactivatedSellers",
+    `select ${MEMBER_COLUMNS}
+     from users u
+     left join subscriptions s on s."userId" = u.id
+     where u.tier in ('MARKETPLACE', 'MARKETPLACE_PLUS')
+       and not exists (
+         select 1 from marketplace_listings ml where ml."userId" = u.id
+       )
+     order by u."createdAt" desc nulls last
+     limit 500`,
+  );
+}
