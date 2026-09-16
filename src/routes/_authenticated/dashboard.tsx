@@ -169,17 +169,27 @@ function Metric({
   value,
   tone = "text-foreground",
   detail,
+  segment,
 }: {
   label: string;
   value: string;
   tone?: string;
   detail?: string;
+  segment?: string;
 }) {
-  return (
-    <Panel className="min-h-28">
+  const body = (
+    <Panel className="h-full min-h-28 transition-colors group-hover:bg-panel-hover">
       <div className="eyebrow">{label}</div>
       <div className={`mt-2 font-display text-3xl ${tone}`}>{value}</div>
       {detail ? <div className="mt-1 text-xs text-muted-foreground">{detail}</div> : null}
     </Panel>
+  );
+
+  if (!segment) return body;
+
+  return (
+    <Link to="/segment/$segment" params={{ segment }} className="group block">
+      {body}
+    </Link>
   );
 }
