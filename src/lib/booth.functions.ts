@@ -28,24 +28,19 @@ function text(value: unknown, max = 300): string | null {
   return trimmed ? trimmed : null;
 }
 
+/**
+ * These signup routines are reachable by customers on their own device, but the
+ * call always happens here on the server with privileged credentials. The
+ * database routines themselves are NOT executable by anonymous callers, so the
+ * unguessable session id validated above is the only entry point.
+ */
 async function publicRpc<T>(name: string, body: Record<string, unknown>): Promise<T | null> {
-  // Fall back to the build-time public values so the booth flow keeps working
-  // even if the server env is missing the runtime pair.
-  const url = process.env["SUPABASE_URL"] || import.meta.env["VITE_SUPABASE_URL"];
-  const key =
-    process.env["SUPABASE_PUBLISHABLE_KEY"] || import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
-  if (!url || !key) throw new Error("The signup service is not configured.");
-
-  const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
-    method: "POST",
-    headers: { apikey: key, "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || "The signup service could not complete the request.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin as any).rpc(name, body);
+  if (error) {
+    throw new Error(error.message || "The signup service could not complete the request.");
   }
-  return (await response.json()) as T | null;
+  return (data ?? null) as T | null;
 }
 
 /** Public: minimal prefill for the customer's own device. Guarded by the unguessable session id. */
