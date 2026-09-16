@@ -108,7 +108,7 @@ function SegmentPage() {
     let active = true;
     void (async () => {
       const [leadResult, memberResult] = await Promise.all([
-        supabase.from("leads").select("*").order("scanned_at", { ascending: false }),
+        supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         listMembers().catch((error: unknown) => ({
           members: [] as MemberRow[],
           error: error instanceof Error ? error.message : "Couldn't load membership records.",
