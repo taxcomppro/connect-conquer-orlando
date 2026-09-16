@@ -72,21 +72,39 @@ export const sendBulkEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: {
-      contacts: Array<{ email: string; name?: string | null; leadId?: string | null }>;
+      contacts: Array<{
+        email: string;
+        name?: string | null;
+        leadId?: string | null;
+        company?: string | null;
+      }>;
       subject: string;
       body: string;
+      isHtml?: boolean | undefined;
     }) => {
       const subject = input.subject.trim();
       const body = input.body.trim();
       if (!subject) throw new Error("Add a subject line first.");
       if (!body) throw new Error("Write a message first.");
       if (!input.contacts?.length) throw new Error("No contacts selected.");
-      return { contacts: input.contacts.slice(0, 500), subject, body };
+      return {
+        contacts: input.contacts.slice(0, 500),
+        subject,
+        body,
+        isHtml: Boolean(input.isHtml),
+      };
     },
   )
   .handler(async ({ data, context }): Promise<BulkEmailResult> => {
     const { supabase, userId } = context;
     const { sendEmail, textToHtml, DEFAULT_FROM } = await import("./resend.server");
+
+    const { data: staff } = await supabase
+      .from("staff_profiles")
+      .select("display_name")
+      .eq("id", userId)
+      .maybeSingle();
+    const repName = staff?.display_name ?? null;
 
     const result: BulkEmailResult = { sent: 0, failed: 0, skipped: 0, errors: [] };
 
@@ -99,15 +117,18 @@ export const sendBulkEmail = createServerFn({ method: "POST" })
         continue;
       }
 
-      const subject = fillPlaceholders(data.subject, { name: contact.name, email });
-      const body = fillPlaceholders(data.body, { name: contact.name, email });
+      const merge = { name: contact.name, email, company: contact.company, repName };
+      const subject = fillPlaceholders(data.subject, merge);
+      const body = fillPlaceholders(data.body, merge);
+      const html = data.isHtml ? body : textToHtml(body);
+      const text = data.isHtml ? htmlToText(body) : body;
 
       try {
         const sent = await sendEmail({
           to: email,
           subject,
-          text: body,
-          html: textToHtml(body),
+          text,
+          html,
         });
         await supabase.from("email_messages").insert({
           lead_id: contact.leadId ?? null,
