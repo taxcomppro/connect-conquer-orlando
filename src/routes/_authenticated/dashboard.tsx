@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { FieldShell, PageTitle, Panel, SectionLabel } from "@/components/FieldShell";
 import { supabase } from "@/integrations/supabase/client";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe } from "@/lib/members-client";
 import type { Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -45,10 +46,7 @@ function DashboardPage() {
     async function load() {
       const [leadResult, memberResult] = await Promise.all([
         supabase.from("leads").select("id,scanned_at").neq("outcome", "archived"),
-        listMembers().catch((error: unknown) => ({
-          members: [] as MemberRow[],
-          error: error instanceof Error ? error.message : "Couldn't load membership records.",
-        })),
+        fetchMembersSafe(),
       ]);
       if (!active) return;
 

@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
-import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe, fetchUnlistedSafe } from "@/lib/members-client";
 import { normalizeEmail, TIER_AUDIENCES, UNLISTED_AUDIENCE, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
@@ -71,22 +72,22 @@ function PipelinePage() {
   useEffect(() => {
     let active = true;
     void (async () => {
-      const [leadResult, memberResult, unlistedResult] = await Promise.all([
-        supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
-        listMembers().catch((error: unknown) => ({
-          members: [] as MemberRow[],
-          error: error instanceof Error ? error.message : "Couldn't load membership records.",
-        })),
-        listUnactivatedSellers().catch(() => ({ members: [] as MemberRow[], error: null })),
-      ]);
+      // Leads render as soon as they're back — members fill in (or error) independently.
+      void supabase
+        .from("leads")
+        .select("*")
+        .neq("outcome", "archived")
+        .order("scanned_at", { ascending: false })
+        .then((leadResult) => {
+          if (!active) return;
+          setLeads(leadResult.data ?? []);
+          setLoading(false);
+        });
+      const [memberResult, unlisted] = await Promise.all([fetchMembersSafe(), fetchUnlistedSafe()]);
       if (!active) return;
-      setLeads(leadResult.data ?? []);
       setMembers(memberResult.members);
       setMemberError(memberResult.error);
-      setUnlistedEmails(
-        new Set(unlistedResult.members.map((m) => normalizeEmail(m.email)).filter(Boolean)),
-      );
-      setLoading(false);
+      setUnlistedEmails(new Set(unlisted.map((m) => normalizeEmail(m.email)).filter(Boolean)));
     })();
     return () => {
       active = false;
