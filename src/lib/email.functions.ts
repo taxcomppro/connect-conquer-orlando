@@ -185,6 +185,7 @@ export const getContactThread = createServerFn({ method: "POST" })
         entries.push({
           id: message.id,
           channel: "sms",
+          direction: message.direction === "inbound" ? "inbound" : "outbound",
           subject: null,
           body: message.body,
           status: message.status,
