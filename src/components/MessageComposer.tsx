@@ -7,12 +7,14 @@ import { SectionLabel } from "@/components/FieldShell";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
 import { sendBulkEmail } from "@/lib/email.functions";
+import { listEmailTemplates, type EmailTemplate } from "@/lib/email-templates.functions";
 
 export type ComposeContact = {
   id: string;
   name: string;
   email: string | null;
   leadId: string | null;
+  company?: string | null;
 };
 
 export function MessageComposer({
@@ -25,15 +27,18 @@ export function MessageComposer({
   onSent?: () => void;
 }) {
   const loadTemplates = useServerFn(listSmsTemplates);
+  const loadEmailTemplates = useServerFn(listEmailTemplates);
   const runBulkSms = useServerFn(sendBulkSms);
   const runBulkEmail = useServerFn(sendBulkEmail);
 
   const [tab, setTab] = useState<"sms" | "email">("sms");
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [smsBody, setSmsBody] = useState("");
   const [requireConsent, setRequireConsent] = useState(true);
   const [subject, setSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [emailIsHtml, setEmailIsHtml] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -45,11 +50,17 @@ export function MessageComposer({
       } catch {
         // templates are optional
       }
+      try {
+        const { templates: t } = await loadEmailTemplates();
+        if (active) setEmailTemplates((t ?? []) as EmailTemplate[]);
+      } catch {
+        // templates are optional
+      }
     })();
     return () => {
       active = false;
     };
-  }, [loadTemplates]);
+  }, [loadTemplates, loadEmailTemplates]);
 
   const textable = contacts.filter((c) => c.leadId);
   const emailable = contacts.filter((c) => (c.email ?? "").includes("@"));
@@ -89,9 +100,11 @@ export function MessageComposer({
             email: c.email!,
             name: c.name,
             leadId: c.leadId,
+            company: c.company ?? null,
           })),
           subject,
           body: emailBody,
+          isHtml: emailIsHtml,
         },
       });
       toast.success(
@@ -194,6 +207,27 @@ export function MessageComposer({
       ) : (
         <div className="mt-4">
           <SectionLabel>Email</SectionLabel>
+          {emailTemplates.length > 0 ? (
+            <select
+              className="mb-3 h-10 w-full rounded-md border border-border bg-panel px-3 text-sm"
+              value=""
+              onChange={(e) => {
+                const template = emailTemplates.find((t) => t.id === e.target.value);
+                if (template) {
+                  setSubject(template.subject);
+                  setEmailBody(template.html_body);
+                  setEmailIsHtml(true);
+                }
+              }}
+            >
+              <option value="">Start from a template…</option>
+              {emailTemplates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
           <input
             className="h-10 w-full rounded-md border border-border bg-panel px-3 text-sm"
             value={subject}
@@ -201,15 +235,24 @@ export function MessageComposer({
             placeholder="Subject line"
           />
           <textarea
-            className="mt-3 min-h-40 w-full rounded-md border border-border bg-panel px-3 py-2 text-sm"
+            className="mt-3 min-h-40 w-full rounded-md border border-border bg-panel px-3 py-2 text-sm font-mono"
             value={emailBody}
             onChange={(e) => setEmailBody(e.target.value)}
             placeholder="Hi {{first_name}}, …"
           />
+          <label className="mt-3 flex items-start gap-3 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={emailIsHtml}
+              onChange={(e) => setEmailIsHtml(e.target.checked)}
+            />
+            <span>Body is HTML (send exactly as written).</span>
+          </label>
           <p className="mt-2 text-xs text-muted-foreground">
-            Placeholders: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}. Replies go to
-            jennifer@taxcomppro.com · {emailable.length} of {contacts.length} selected have an email
-            address.
+            Merge fields: {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{company}}"},{" "}
+            {"{{rep_name}}"}, {"{{unsubscribe_url}}"}. Replies go to jennifer@taxcomppro.com ·{" "}
+            {emailable.length} of {contacts.length} selected have an email address.
           </p>
           <Button
             className="mt-4 h-11 w-full"

@@ -282,6 +282,39 @@ export type Database = {
           },
         ]
       }
+      email_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          html_body: string
+          id: string
+          is_default: boolean
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          html_body: string
+          id?: string
+          is_default?: boolean
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          html_body?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       join_submissions: {
         Row: {
           attendee_id: string
