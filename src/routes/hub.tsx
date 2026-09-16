@@ -150,7 +150,7 @@ function Hub() {
       </div>
 
       <Link
-        to="/briefing"
+        to="/event-archive"
         className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-gold/40 bg-gold/10 p-4 transition-colors hover:bg-gold/15"
       >
         <div>
