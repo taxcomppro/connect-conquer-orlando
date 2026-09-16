@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { FieldShell, PageTitle, SectionLabel, Panel } from "@/components/FieldShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ type Stat = { key: string; shortLink: string; clicks: number; leads: number; sal
 
 function DubPage() {
   const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
   const status = useServerFn(dubStatus);
   const saveBoothLink = useServerFn(ensureBoothLink);
   const saveSellerLink = useServerFn(ensureSellerLink);
@@ -56,6 +58,7 @@ function DubPage() {
   const [stats, setStats] = useState<Stat[]>([]);
 
   useEffect(() => {
+    if (adminLoading || !isAdmin) return;
     let active = true;
     async function load() {
       const [{ data: settings }, { data: people }, conn] = await Promise.all([
@@ -80,7 +83,7 @@ function DubPage() {
     return () => {
       active = false;
     };
-  }, [status]);
+  }, [adminLoading, isAdmin, status]);
 
 
   async function savePooled() {
@@ -151,8 +154,29 @@ function DubPage() {
   const owners = staff.filter((s) => !s.commission_eligible);
   const sellers = staff.filter((s) => s.commission_eligible);
 
+  if (adminLoading) {
+    return (
+      <FieldShell back={{ to: "/admin", label: "Back to Admin" }} eyebrowRight="Admin only">
+        <p className="mt-8 text-sm text-muted-foreground">Checking your access…</p>
+      </FieldShell>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <FieldShell back={{ to: "/", label: "Back to Membership Hub" }} eyebrowRight="Admin only">
+        <Panel className="mt-8">
+          <div className="font-display text-xl">Admins only</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            DUB attribution is managed from the Admin panel.
+          </p>
+        </Panel>
+      </FieldShell>
+    );
+  }
+
   return (
-    <FieldShell back={{ to: "/", label: "Back to hub" }} eyebrowRight={user?.email ?? undefined}>
+    <FieldShell back={{ to: "/admin", label: "Back to Admin" }} eyebrowRight={user?.email ?? undefined}>
       <PageTitle
         title="Dub"
         accent="attribution"
