@@ -31,6 +31,7 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
 import { Route as AuthenticatedContactEmailRouteImport } from './routes/_authenticated/contact.$email'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
+import { Route as AuthenticatedSegmentSegmentRouteImport } from './routes/_authenticated/segment.$segment'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
@@ -152,6 +153,12 @@ const AuthenticatedLeadAttendeeIdRoute =
     path: '/lead/$attendeeId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSegmentSegmentRoute =
+  AuthenticatedSegmentSegmentRouteImport.update({
+    id: '/segment/$segment',
+    path: '/segment/$segment',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSignupSessionIdRoute =
   AuthenticatedSignupSessionIdRouteImport.update({
     id: '/signup/$sessionId',
@@ -209,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
@@ -269,6 +278,7 @@ export interface FileRoutesById {
   '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
   '/_authenticated/contact/$email': typeof AuthenticatedContactEmailRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
+  '/_authenticated/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/contact/$email'
     | '/lead/$attendeeId'
+    | '/segment/$segment'
     | '/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/activate/$sessionId'
     | '/contact/$email'
     | '/lead/$attendeeId'
+    | '/segment/$segment'
     | '/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
@@ -359,6 +371,7 @@ export interface FileRouteTypes {
     | '/_authenticated/activate/$sessionId'
     | '/_authenticated/contact/$email'
     | '/_authenticated/lead/$attendeeId'
+    | '/_authenticated/segment/$segment'
     | '/_authenticated/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
@@ -539,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadAttendeeIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/segment/$segment': {
+      id: '/_authenticated/segment/$segment'
+      path: '/segment/$segment'
+      fullPath: '/segment/$segment'
+      preLoaderRoute: typeof AuthenticatedSegmentSegmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/signup/$sessionId': {
       id: '/_authenticated/signup/$sessionId'
       path: '/signup/$sessionId'
@@ -599,6 +619,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivateSessionIdRoute: typeof AuthenticatedActivateSessionIdRoute
   AuthenticatedContactEmailRoute: typeof AuthenticatedContactEmailRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
+  AuthenticatedSegmentSegmentRoute: typeof AuthenticatedSegmentSegmentRoute
   AuthenticatedSignupSessionIdRoute: typeof AuthenticatedSignupSessionIdRoute
 }
 
@@ -617,6 +638,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivateSessionIdRoute: AuthenticatedActivateSessionIdRoute,
   AuthenticatedContactEmailRoute: AuthenticatedContactEmailRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
+  AuthenticatedSegmentSegmentRoute: AuthenticatedSegmentSegmentRoute,
   AuthenticatedSignupSessionIdRoute: AuthenticatedSignupSessionIdRoute,
 }
 

@@ -114,36 +114,48 @@ function DashboardPage() {
       ) : null}
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Free members" value={loading ? "—" : metrics.free.toLocaleString()} />
+        <Metric
+          label="Free members"
+          value={loading ? "—" : metrics.free.toLocaleString()}
+          segment="free"
+        />
         <Metric
           label="Paid members"
           value={loading ? "—" : metrics.paid.toLocaleString()}
           tone="text-go"
           detail={loading ? "" : `${metrics.total.toLocaleString()} members total`}
+          segment="paid"
         />
         <Metric
           label="Conversion rate"
           value={loading ? "—" : `${metrics.conversionRate.toFixed(1)}%`}
           tone="text-gold"
           detail="Paid ÷ all members"
+          segment="all"
         />
         <Metric
           label="New leads today"
           value={loading ? "—" : metrics.newLeadsToday.toLocaleString()}
           tone="text-signal"
+          segment="lead"
         />
       </div>
 
       <SectionLabel>Paid tiers</SectionLabel>
       <div className="grid gap-3 sm:grid-cols-3">
         {metrics.byTier.map((entry) => (
-          <Link key={entry.tier} to="/pipeline" className="group block">
+          <Link
+            key={entry.tier}
+            to="/segment/$segment"
+            params={{ segment: entry.tier }}
+            className="group block"
+          >
             <Panel className="h-full transition-colors group-hover:bg-panel-hover">
               <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${entry.tone}`}>
                 {entry.label}
               </span>
               <div className="mt-4 font-display text-3xl">{loading ? "—" : entry.count}</div>
-              <div className="mt-1 text-xs text-muted-foreground">View in pipeline →</div>
+              <div className="mt-1 text-xs text-muted-foreground">View &amp; message this group →</div>
             </Panel>
           </Link>
         ))}
