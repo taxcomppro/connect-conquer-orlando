@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe } from "@/lib/members-client";
 import { normalizeEmail, type Tier } from "@/lib/audience";
 
 type SegmentKey = "lead" | "free" | "paid" | "all" | "VIP" | "MARKETPLACE" | "MARKETPLACE_PLUS";
@@ -109,10 +110,7 @@ function SegmentPage() {
     void (async () => {
       const [leadResult, memberResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
-        listMembers().catch((error: unknown) => ({
-          members: [] as MemberRow[],
-          error: error instanceof Error ? error.message : "Couldn't load membership records.",
-        })),
+        fetchMembersSafe(),
       ]);
       if (!active) return;
       setLeads(leadResult.data ?? []);

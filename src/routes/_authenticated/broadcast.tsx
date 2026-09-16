@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { leadName, leadOutcome, type Lead } from "@/lib/leads";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
-import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe, fetchUnlistedSafe } from "@/lib/members-client";
 import {
   normalizeEmail,
   tierByEmail,
@@ -81,8 +82,8 @@ function BroadcastPage() {
       const [{ data, error }, tpl, memberResult, unlistedResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
-        listMembers().catch(() => ({ members: [] as MemberRow[], error: null })),
-        listUnactivatedSellers().catch(() => ({ members: [] as MemberRow[], error: null })),
+        fetchMembersSafe(),
+        fetchUnlistedSafe(),
       ]);
       if (!active) return;
       if (error) toast.error("Couldn't load leads.");
@@ -90,7 +91,7 @@ function BroadcastPage() {
       setTemplates((tpl.templates ?? []) as SmsTemplate[]);
       setMembers(memberResult.members ?? []);
       setUnlistedEmails(
-        new Set((unlistedResult.members ?? []).map((m) => normalizeEmail(m.email)).filter(Boolean)),
+        new Set(unlistedResult.map((m) => normalizeEmail(m.email)).filter(Boolean)),
       );
       setLoading(false);
     })();
