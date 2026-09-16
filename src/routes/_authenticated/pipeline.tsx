@@ -249,8 +249,8 @@ function PipelinePage() {
       ) : null}
 
       <SectionLabel>{loading ? "Loading…" : "By membership tier"}</SectionLabel>
-      <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-3 [scrollbar-gutter:stable]">
-        <div className="grid min-w-[1020px] grid-cols-5 gap-3">
+      <div className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain pb-3 [scrollbar-gutter:stable]">
+        <div className="grid min-w-[820px] grid-cols-5 gap-3 xl:min-w-0">
           {columns.map((column) => (
             <section key={column.key} aria-labelledby={`tier-${column.key}`}>
               <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
