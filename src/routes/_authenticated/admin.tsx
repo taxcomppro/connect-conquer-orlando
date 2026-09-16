@@ -6,13 +6,13 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin panel — TCPC Field Hub" },
+      { title: "Admin Panel — Membership Hub" },
       {
         name: "description",
         content:
           "Admin-only controls for the TCPC booth: auto-send text rules and referral link attribution settings.",
       },
-      { property: "og:title", content: "Admin panel — TCPC Field Hub" },
+      { property: "og:title", content: "Admin Panel — Membership Hub" },
       {
         property: "og:description",
         content: "Manage booth text rules and referral attribution from one admin panel.",
@@ -28,7 +28,7 @@ function AdminPanel() {
   const { isAdmin, loading } = useIsAdmin();
 
   return (
-    <FieldShell eyebrowRight="Admin only" back={{ to: "/", label: "Back to Field Hub" }}>
+    <FieldShell eyebrowRight="Admin only" back={{ to: "/", label: "Back to Membership Hub" }}>
       <PageTitle
         title="Admin"
         accent="Panel"
@@ -44,7 +44,7 @@ function AdminPanel() {
             This area is limited to booth admins. Head back to the hub to keep scanning.
           </p>
           <Link to="/" className="mt-4 inline-block text-sm text-signal">
-            Back to Field Hub →
+            Back to Membership Hub →
           </Link>
         </div>
       ) : (

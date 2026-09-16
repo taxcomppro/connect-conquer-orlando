@@ -5,13 +5,13 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 export const Route = createFileRoute("/hub")({
   head: () => ({
     meta: [
-      { title: "Field Hub — Member CRM" },
+      { title: "Membership Hub — Tax Compliance Pro" },
       {
         name: "description",
         content:
           "The Tax Compliance Pro member CRM: leads from the IRS Nationwide Tax Forum, membership tiers, follow-up texting and conversion tracking.",
       },
-      { property: "og:title", content: "Field Hub — Member CRM" },
+      { property: "og:title", content: "Membership Hub — Tax Compliance Pro" },
       {
         property: "og:description",
         content:
@@ -81,8 +81,8 @@ function Hub() {
   return (
     <FieldShell eyebrowRight="Tax Compliance Pro">
       <PageTitle
-        title="Field Hub —"
-        accent="Member CRM"
+        title="Membership"
+        accent="Hub"
         lede="Every lead and member in one place. From the first badge scan in Orlando to paid membership and beyond."
       />
 

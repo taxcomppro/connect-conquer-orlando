@@ -24,13 +24,13 @@ import {
 export const Route = createFileRoute("/_authenticated/activate/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Card activation station — TCPC Field Hub" },
+      { title: "Card Activation Station — Membership Hub" },
       {
         name: "description",
         content:
           "Re-verify membership, mint the permanent card address, write the NFC card and verify the read-back before handing it over.",
       },
-      { property: "og:title", content: "Card activation station — TCPC Field Hub" },
+      { property: "og:title", content: "Card Activation Station — Membership Hub" },
       {
         property: "og:description",
         content: "Write and verify a ProConnect NFC card at the booth activation station.",

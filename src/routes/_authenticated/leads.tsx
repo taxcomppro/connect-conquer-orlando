@@ -118,7 +118,7 @@ function LeadsPage() {
           Scan a badge →
         </Link>
       }
-      back={{ to: "/", label: "Field Hub" }}
+      back={{ to: "/", label: "Membership Hub" }}
     >
       <PageTitle title="Booth" accent="leads" />
 

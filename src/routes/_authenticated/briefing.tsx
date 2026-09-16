@@ -6,13 +6,13 @@ import { FieldShell, PageTitle, SectionLabel } from "@/components/FieldShell";
 export const Route = createFileRoute("/_authenticated/briefing")({
   head: () => ({
     meta: [
-      { title: "Orlando Trip Briefing — TCPC Field Hub" },
+      { title: "Orlando Trip Briefing — Membership Hub" },
       {
         name: "description",
         content:
           "Private schedule, wardrobe, lodging and evening plans for the TCPC IRS Forum team.",
       },
-      { property: "og:title", content: "Orlando Trip Briefing — TCPC Field Hub" },
+      { property: "og:title", content: "Orlando Trip Briefing — Membership Hub" },
       {
         property: "og:description",
         content: "Private schedule, wardrobe, lodging and evening plans for the TCPC IRS Forum team.",
@@ -74,7 +74,7 @@ const EVENINGS = [
 
 function TripBriefing() {
   return (
-    <FieldShell eyebrowRight="Private team briefing" back={{ to: "/", label: "Field Hub" }}>
+    <FieldShell eyebrowRight="Private team briefing" back={{ to: "/", label: "Membership Hub" }}>
       <PageTitle
         title="Orlando trip"
         accent="briefing."
@@ -162,7 +162,7 @@ function TripBriefing() {
 
       <div className="mt-10 text-center">
         <Link to="/" className="eyebrow hover:text-foreground">
-          Back to Field Hub →
+          Back to Membership Hub →
         </Link>
       </div>
     </FieldShell>

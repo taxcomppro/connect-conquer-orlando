@@ -180,7 +180,7 @@ export function MessageComposer({
             <span>Only text contacts who gave texting consent.</span>
           </label>
           <p className="mt-2 text-xs text-muted-foreground">
-            {textable.length} of {contacts.length} selected have a Field Hub lead record and can be
+            {textable.length} of {contacts.length} selected have a Membership Hub lead record and can be
             texted · {smsBody.length}/1600 characters.
           </p>
           <Button
