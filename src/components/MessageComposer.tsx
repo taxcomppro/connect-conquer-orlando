@@ -7,12 +7,14 @@ import { SectionLabel } from "@/components/FieldShell";
 import { listSmsTemplates, type SmsTemplate } from "@/lib/sms.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
 import { sendBulkEmail } from "@/lib/email.functions";
+import { listEmailTemplates, type EmailTemplate } from "@/lib/email-templates.functions";
 
 export type ComposeContact = {
   id: string;
   name: string;
   email: string | null;
   leadId: string | null;
+  company?: string | null;
 };
 
 export function MessageComposer({
