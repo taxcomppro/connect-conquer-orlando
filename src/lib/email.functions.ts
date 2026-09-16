@@ -15,6 +15,7 @@ export type BulkEmailResult = {
 export type ThreadEntry = {
   id: string;
   channel: "sms" | "email";
+  direction: "inbound" | "outbound";
   subject: string | null;
   body: string;
   status: string;
