@@ -206,11 +206,12 @@ export const getContactThread = createServerFn({ method: "POST" })
         entries.push({
           id: message.id,
           channel: "email",
+          direction: message.direction === "inbound" ? "inbound" : "outbound",
           subject: message.subject,
           body: message.body,
           status: message.status,
           error: message.error,
-          target: message.to_email,
+          target: message.to_email ?? message.contact_email,
           sentAt: message.sent_at,
         });
       }
