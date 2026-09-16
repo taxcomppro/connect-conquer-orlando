@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Megaphone,
   MessagesSquare,
-  Network,
   ScanLine,
   Settings,
   Users,
@@ -14,6 +13,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -28,11 +28,9 @@ import {
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
-  { label: "Scan", to: "/scan", icon: ScanLine },
   { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
   { label: "Automations", to: "/automations", icon: MessagesSquare },
-  { label: "DUB", to: "/dub", icon: Network },
   { label: "Briefing", to: "/briefing", icon: BriefcaseBusiness },
   { label: "Admin", to: "/admin", icon: Settings },
 ] as const;
@@ -81,6 +79,22 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/scan" || pathname.startsWith("/scan/")}
+              tooltip="Scan"
+            >
+              <Link to="/scan" onClick={() => setOpenMobile(false)}>
+                <ScanLine aria-hidden="true" />
+                <span>Scan</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
