@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   component: LeadsPage,
 });
 
-type Filter = "all" | "hot" | "warm" | "cold" | "follow_up" | "not_a_fit" | "sales";
+type Filter = "all" | "hot" | "warm" | "cold" | "follow_up" | "not_a_fit" | "sales" | "archived";
 
 function LeadsPage() {
   const { user } = useAuth();
@@ -79,6 +79,11 @@ function LeadsPage() {
     const query = search.trim().toLowerCase();
     return leads.filter((lead) => {
       const outcome = leadOutcome(lead);
+      if (filter === "archived") {
+        if (outcome !== "archived") return false;
+      } else if (outcome === "archived") {
+        return false;
+      }
       if (filter === "follow_up" && outcome !== "follow_up") return false;
       if (filter === "not_a_fit" && outcome !== "not_a_fit") return false;
       if (filter === "sales" && outcome !== "sale_started" && outcome !== "sale_closed")
@@ -109,6 +114,7 @@ function LeadsPage() {
     { key: "follow_up", label: "Follow up" },
     { key: "not_a_fit", label: "Not a fit" },
     { key: "sales", label: "Sales" },
+    { key: "archived", label: "Archived" },
   ];
 
   return (

@@ -1,0 +1,2 @@
+ALTER TABLE public.leads DROP CONSTRAINT leads_outcome_check;
+ALTER TABLE public.leads ADD CONSTRAINT leads_outcome_check CHECK (outcome IN ('open', 'follow_up', 'not_a_fit', 'sale_started', 'sale_closed', 'archived'));

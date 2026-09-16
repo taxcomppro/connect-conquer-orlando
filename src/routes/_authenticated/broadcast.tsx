@@ -64,7 +64,7 @@ function BroadcastPage() {
     let active = true;
     void (async () => {
       const [{ data, error }, tpl, memberResult] = await Promise.all([
-        supabase.from("leads").select("*").order("scanned_at", { ascending: false }),
+        supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
         listMembers().catch(() => ({ members: [] as MemberRow[], error: null })),
       ]);
