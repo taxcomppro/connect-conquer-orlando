@@ -40,7 +40,15 @@ export const Route = createFileRoute("/_authenticated/broadcast")({
   component: BroadcastPage,
 });
 
-type Audience = "all" | "consented" | "follow_up" | "hot" | "no_sale" | Tier | "lead";
+type Audience =
+  | "all"
+  | "consented"
+  | "follow_up"
+  | "hot"
+  | "no_sale"
+  | Tier
+  | "lead"
+  | typeof UNLISTED_AUDIENCE;
 
 const AUDIENCES: Array<{ key: Audience; label: string }> = [
   { key: "consented", label: "Consented only" },
