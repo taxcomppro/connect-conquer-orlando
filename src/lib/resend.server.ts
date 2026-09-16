@@ -4,14 +4,14 @@
  * Required secret: RESEND_API_KEY (a Resend API key with send access on a
  * verified taxcomppro.com sending domain).
  *
- * Every send uses a reply-to of jennifer@taxcomppro.com so replies land in
- * the normal inbox instead of a dead address.
+ * Every send comes from and replies to info@taxcomppro.com, regardless of
+ * which team member triggered it.
  */
 
 const RESEND_API = "https://api.resend.com";
 
-export const DEFAULT_FROM = "Tax Compliance Pro <jennifer@taxcomppro.com>";
-export const REPLY_TO = "jennifer@taxcomppro.com";
+export const DEFAULT_FROM = "Tax Compliance Pro <info@taxcomppro.com>";
+export const REPLY_TO = "info@taxcomppro.com";
 
 export type EmailSendResult = {
   id: string;
@@ -48,7 +48,8 @@ export async function sendEmail(input: {
   if (!text && !html) throw new Error("A message body is required.");
 
   const key = await resendKey();
-  const from = input.from?.trim() || DEFAULT_FROM;
+  // Always send from the shared inbox, whoever triggered the send.
+  const from = DEFAULT_FROM;
 
   const payload: Record<string, unknown> = {
     from,
