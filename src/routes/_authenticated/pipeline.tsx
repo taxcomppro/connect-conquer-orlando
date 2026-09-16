@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
-import { normalizeEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
+import { listMembers, listUnactivatedSellers, type MemberRow } from "@/lib/members.functions";
+import { normalizeEmail, TIER_AUDIENCES, UNLISTED_AUDIENCE, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
@@ -66,21 +66,26 @@ function PipelinePage() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Record<string, true>>({});
   const [composerOpen, setComposerOpen] = useState(false);
+  const [unlistedEmails, setUnlistedEmails] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let active = true;
     void (async () => {
-      const [leadResult, memberResult] = await Promise.all([
+      const [leadResult, memberResult, unlistedResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         listMembers().catch((error: unknown) => ({
           members: [] as MemberRow[],
           error: error instanceof Error ? error.message : "Couldn't load membership records.",
         })),
+        listUnactivatedSellers().catch(() => ({ members: [] as MemberRow[], error: null })),
       ]);
       if (!active) return;
       setLeads(leadResult.data ?? []);
       setMembers(memberResult.members);
       setMemberError(memberResult.error);
+      setUnlistedEmails(
+        new Set(unlistedResult.members.map((m) => normalizeEmail(m.email)).filter(Boolean)),
+      );
       setLoading(false);
     })();
     return () => {
@@ -160,7 +165,17 @@ function PipelinePage() {
     });
   }
 
-  function selectSegment(key: Tier | "lead") {
+  function selectSegment(key: Tier | "lead" | typeof UNLISTED_AUDIENCE) {
+    if (key === UNLISTED_AUDIENCE) {
+      setSelected(
+        Object.fromEntries(
+          allCards
+            .filter((card) => unlistedEmails.has(normalizeEmail(card.email)))
+            .map((card) => [card.id, true as const]),
+        ),
+      );
+      return;
+    }
     const column = columns.find((c) => c.key === key);
     if (!column) return;
     setSelected(Object.fromEntries(column.cards.map((card) => [card.id, true as const])));
