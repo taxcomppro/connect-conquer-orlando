@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,54 @@ const BOARD_STAGES: Stage[] = [
   "membership_confirmed",
   "ready_for_card",
   "card_issued",
+];
+
+const SCHEDULE = [
+  {
+    label: "Set-Up",
+    day: "Monday",
+    time: "1:00 – 6:00 PM",
+    note: "Everyone arrives at different times—head to Booth 540 when you land.",
+  },
+  { label: "Show Floor — Day 1", day: "Tuesday", time: "11:00 AM – 6:00 PM" },
+  { label: "Show Floor — Day 2", day: "Wednesday", time: "10:00 AM – 2:30 PM" },
+  { label: "Dismantle", day: "Wednesday", time: "2:30 – 4:30 PM" },
+];
+
+const WARDROBE = [
+  {
+    day: "Monday",
+    occasion: "Arrival & Set-Up",
+    attire: "Team T-shirt—comfortable for travel and setting up the booth.",
+  },
+  {
+    day: "Tuesday",
+    occasion: "Show Floor — Day 1",
+    attire: "Polo shirt—your choice of black or white.",
+  },
+  {
+    day: "Wednesday",
+    occasion: "Show Floor — Day 2",
+    attire: "Atlas AI jersey—to match the baseball-themed demo room.",
+  },
+];
+
+const EVENINGS = [
+  {
+    day: "Monday",
+    plan: "Q&A Kickback",
+    detail: "At the house—a chance to get everyone up to speed before the show.",
+  },
+  {
+    day: "Tuesday",
+    plan: "Hotel Mixer",
+    detail: "After the forum wraps—mix and mingle with fellow attendees at the hotel.",
+  },
+  {
+    day: "Wednesday",
+    plan: "Blue Martini Mixer",
+    detail: "Business mixer at Blue Martini in Orlando.",
+  },
 ];
 
 function EventArchivePage() {
