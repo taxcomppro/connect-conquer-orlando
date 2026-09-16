@@ -8,3 +8,5 @@
 - [x] Add authenticated dashboard with lead and signup KPIs
 - [x] Convert the sales pipeline list into a stage-based Kanban board
 - [x] Membership-tier pipeline board (Lead/Free/VIP/Marketplace/Marketplace+) with booth pipeline moved to Event Archive
+- [x] Fix Pipeline horizontal clipping inside the authenticated sidebar layout
+- [x] Rename current CRM branding to Membership Hub while preserving historical event wording
