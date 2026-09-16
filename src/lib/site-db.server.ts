@@ -173,6 +173,19 @@ export async function listAllMembers(): Promise<SiteMember[]> {
 }
 
 /**
+ * Every member's email as a lowercase set, for cheaply checking
+ * "has this lead already created a site account?" without a separate
+ * database round-trip per lead.
+ */
+export async function listAllMemberEmails(): Promise<Set<string>> {
+  const rows = await queryWithRetry<{ email: string }>(
+    "listAllMemberEmails",
+    `select lower(email) as email from users where email is not null`,
+  );
+  return new Set(rows.map((row) => row.email));
+}
+
+/**
  * Marketplace / Marketplace+ members who have never created a single
  * marketplace_listings row — they pay for seller access but have
  * nothing listed yet. Used for the activation-nudge audience.
