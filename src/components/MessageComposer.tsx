@@ -100,9 +100,11 @@ export function MessageComposer({
             email: c.email!,
             name: c.name,
             leadId: c.leadId,
+            company: c.company ?? null,
           })),
           subject,
           body: emailBody,
+          isHtml: emailIsHtml,
         },
       });
       toast.success(
