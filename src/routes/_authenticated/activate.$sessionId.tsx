@@ -271,13 +271,13 @@ function ActivatePage() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Set this to the Field Hub published domain. After the show, migrate each card by
+            Set this to the Membership Hub published domain. After the show, migrate each card by
             setting its override target URL on the main site.
           </p>
           {usingMainSiteBase ? (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
               <strong>Do not write cards to www.taxcomppro.com/connect</strong> unless the main site
-              is already redirecting that path to Field Hub. During the show, use the Field Hub
+              is already redirecting that path to Membership Hub. During the show, use the Membership Hub
               domain so taps resolve here.
             </div>
           ) : null}
