@@ -23,18 +23,44 @@ export type ThreadEntry = {
   sentAt: string;
 };
 
+export const UNSUBSCRIBE_BASE = "https://www.taxcomppro.com/unsubscribe";
+
 function fillPlaceholders(
   text: string,
-  contact: { name?: string | null | undefined; email: string },
+  contact: {
+    name?: string | null | undefined;
+    email: string;
+    company?: string | null | undefined;
+    repName?: string | null | undefined;
+  },
 ): string {
   const parts = (contact.name ?? "").trim().split(/\s+/).filter(Boolean);
   const first = parts[0] ?? "there";
   const last = parts.length > 1 ? parts[parts.length - 1]! : "";
+  const unsubscribe = `${UNSUBSCRIBE_BASE}?email=${encodeURIComponent(contact.email)}`;
   return text
     .replace(/\{\{\s*first_name\s*\}\}/gi, first)
     .replace(/\{\{\s*last_name\s*\}\}/gi, last)
     .replace(/\{\{\s*full_name\s*\}\}/gi, (contact.name ?? "").trim() || first)
+    .replace(/\{\{\s*company\s*\}\}/gi, (contact.company ?? "").trim())
+    .replace(/\{\{\s*rep_name\s*\}\}/gi, (contact.repName ?? "").trim() || "Tax Compliance Pro")
+    .replace(/\{\{\s*unsubscribe_url\s*\}\}/gi, unsubscribe)
     .replace(/\{\{\s*email\s*\}\}/gi, contact.email);
+}
+
+/** Rough HTML → plain text fallback so every email carries a text part. */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|h[1-6]|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /**
