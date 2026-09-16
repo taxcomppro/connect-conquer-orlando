@@ -184,26 +184,47 @@ function ContactActivityPage() {
 
       <SectionLabel>{loading ? "Loading activity…" : `Activity (${timeline.length})`}</SectionLabel>
       <div className="space-y-2">
-        {timeline.map((entry) => (
-          <Panel key={entry.id}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className={`rounded-full border px-2.5 py-1 text-xs ${KIND_TONE[entry.kind]}`}>
-                {KIND_LABEL[entry.kind]}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground">{when(entry.at)}</span>
-            </div>
-            <div className="mt-2 text-sm font-medium">{entry.title}</div>
-            {entry.detail ? (
-              <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">
-                {entry.detail}
-              </p>
-            ) : null}
-            {entry.status ? (
-              <div className="mt-2 font-mono text-xs text-muted-foreground">{entry.status}</div>
-            ) : null}
-            {entry.error ? <div className="mt-1 text-xs text-gold">{entry.error}</div> : null}
-          </Panel>
-        ))}
+        {timeline.map((entry) => {
+          const isMessage = entry.kind === "sms" || entry.kind === "email";
+          const inbound = entry.direction === "inbound";
+          const align = !isMessage
+            ? ""
+            : inbound
+              ? "sm:mr-auto sm:max-w-[85%]"
+              : "sm:ml-auto sm:max-w-[85%]";
+          return (
+            <Panel
+              key={entry.id}
+              className={`${align} ${
+                isMessage
+                  ? inbound
+                    ? "border-l-2 border-l-signal"
+                    : "border-r-2 border-r-go"
+                  : ""
+              }`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span
+                  className={`rounded-full border px-2.5 py-1 text-xs ${KIND_TONE[entry.kind]}`}
+                >
+                  {KIND_LABEL[entry.kind]}
+                  {isMessage ? (inbound ? " · Received" : " · Sent") : ""}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">{when(entry.at)}</span>
+              </div>
+              <div className="mt-2 text-sm font-medium">{entry.title}</div>
+              {entry.detail ? (
+                <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">
+                  {entry.detail}
+                </p>
+              ) : null}
+              {entry.status ? (
+                <div className="mt-2 font-mono text-xs text-muted-foreground">{entry.status}</div>
+              ) : null}
+              {entry.error ? <div className="mt-1 text-xs text-gold">{entry.error}</div> : null}
+            </Panel>
+          );
+        })}
         {!loading && timeline.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border px-3 py-8 text-center text-sm text-muted-foreground">
             No activity recorded for this contact yet.
