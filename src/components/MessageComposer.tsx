@@ -27,15 +27,18 @@ export function MessageComposer({
   onSent?: () => void;
 }) {
   const loadTemplates = useServerFn(listSmsTemplates);
+  const loadEmailTemplates = useServerFn(listEmailTemplates);
   const runBulkSms = useServerFn(sendBulkSms);
   const runBulkEmail = useServerFn(sendBulkEmail);
 
   const [tab, setTab] = useState<"sms" | "email">("sms");
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [smsBody, setSmsBody] = useState("");
   const [requireConsent, setRequireConsent] = useState(true);
   const [subject, setSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [emailIsHtml, setEmailIsHtml] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -47,11 +50,17 @@ export function MessageComposer({
       } catch {
         // templates are optional
       }
+      try {
+        const { templates: t } = await loadEmailTemplates();
+        if (active) setEmailTemplates((t ?? []) as EmailTemplate[]);
+      } catch {
+        // templates are optional
+      }
     })();
     return () => {
       active = false;
     };
-  }, [loadTemplates]);
+  }, [loadTemplates, loadEmailTemplates]);
 
   const textable = contacts.filter((c) => c.leadId);
   const emailable = contacts.filter((c) => (c.email ?? "").includes("@"));
