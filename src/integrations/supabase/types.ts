@@ -228,8 +228,9 @@ export type Database = {
           body: string
           contact_email: string
           created_at: string
+          direction: string
           error: string | null
-          from_email: string
+          from_email: string | null
           id: string
           lead_id: string | null
           provider_id: string | null
@@ -237,15 +238,16 @@ export type Database = {
           sent_by: string | null
           status: string
           subject: string
-          to_email: string
+          to_email: string | null
           updated_at: string
         }
         Insert: {
           body: string
           contact_email: string
           created_at?: string
+          direction?: string
           error?: string | null
-          from_email: string
+          from_email?: string | null
           id?: string
           lead_id?: string | null
           provider_id?: string | null
@@ -253,15 +255,16 @@ export type Database = {
           sent_by?: string | null
           status?: string
           subject: string
-          to_email: string
+          to_email?: string | null
           updated_at?: string
         }
         Update: {
           body?: string
           contact_email?: string
           created_at?: string
+          direction?: string
           error?: string | null
-          from_email?: string
+          from_email?: string | null
           id?: string
           lead_id?: string | null
           provider_id?: string | null
@@ -269,7 +272,7 @@ export type Database = {
           sent_by?: string | null
           status?: string
           subject?: string
-          to_email?: string
+          to_email?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -639,11 +642,13 @@ export type Database = {
       sms_messages: {
         Row: {
           body: string
+          contact_phone: string | null
           created_at: string
+          direction: string
           error: string | null
           from_number: string
           id: string
-          lead_id: string
+          lead_id: string | null
           sent_at: string
           sent_by: string | null
           status: string
@@ -654,11 +659,13 @@ export type Database = {
         }
         Insert: {
           body: string
+          contact_phone?: string | null
           created_at?: string
+          direction?: string
           error?: string | null
           from_number: string
           id?: string
-          lead_id: string
+          lead_id?: string | null
           sent_at?: string
           sent_by?: string | null
           status?: string
@@ -669,11 +676,13 @@ export type Database = {
         }
         Update: {
           body?: string
+          contact_phone?: string | null
           created_at?: string
+          direction?: string
           error?: string | null
           from_number?: string
           id?: string
-          lead_id?: string
+          lead_id?: string | null
           sent_at?: string
           sent_by?: string | null
           status?: string
