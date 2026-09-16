@@ -72,21 +72,26 @@ function BroadcastPage() {
   const [body, setBody] = useState("");
   const [requireConsent, setRequireConsent] = useState(true);
   const [sending, setSending] = useState(false);
+  const [unlistedEmails, setUnlistedEmails] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) return;
     let active = true;
     void (async () => {
-      const [{ data, error }, tpl, memberResult] = await Promise.all([
+      const [{ data, error }, tpl, memberResult, unlistedResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
         listMembers().catch(() => ({ members: [] as MemberRow[], error: null })),
+        listUnactivatedSellers().catch(() => ({ members: [] as MemberRow[], error: null })),
       ]);
       if (!active) return;
       if (error) toast.error("Couldn't load leads.");
       setLeads(data ?? []);
       setTemplates((tpl.templates ?? []) as SmsTemplate[]);
       setMembers(memberResult.members ?? []);
+      setUnlistedEmails(
+        new Set((unlistedResult.members ?? []).map((m) => normalizeEmail(m.email)).filter(Boolean)),
+      );
       setLoading(false);
     })();
     return () => {
@@ -108,6 +113,8 @@ function BroadcastPage() {
       if (audience === "no_sale" && (outcome === "sale_started" || outcome === "sale_closed"))
         return false;
       if (audience === "lead" && tier) return false;
+      if (audience === UNLISTED_AUDIENCE && !unlistedEmails.has(normalizeEmail(lead.email)))
+        return false;
       if (
         (audience === "FREE" ||
           audience === "VIP" ||
