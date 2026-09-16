@@ -125,7 +125,7 @@ function BroadcastPage() {
         return false;
       return true;
     });
-  }, [leads, audience, requireConsent, tiers]);
+  }, [leads, audience, requireConsent, tiers, unlistedEmails]);
 
   const noPhone = leads.filter((l) => !l.phone).length;
 
