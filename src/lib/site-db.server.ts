@@ -84,12 +84,15 @@ export type SiteMember = {
   subscriptionStatus: string | null;
   subscriptionPlan: string | null;
   currentPeriodEnd: string | null;
+  createdAt: string | null;
+  subscriptionUpdatedAt: string | null;
 };
 
 const MEMBER_COLUMNS = `
   u.id as "userId", u.email, u.name, u.tier, u."stripeCustomerId",
+  u."createdAt" as "createdAt",
   s.status as "subscriptionStatus", s.plan as "subscriptionPlan",
-  s."currentPeriodEnd"
+  s."currentPeriodEnd", s."updatedAt" as "subscriptionUpdatedAt"
 `;
 
 /**

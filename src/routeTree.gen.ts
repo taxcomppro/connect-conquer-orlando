@@ -29,6 +29,7 @@ import { Route as CTokenRouteImport } from './routes/c.$token'
 import { Route as JoinSessionIdRouteImport } from './routes/join.$sessionId'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
+import { Route as AuthenticatedContactEmailRouteImport } from './routes/_authenticated/contact.$email'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
@@ -139,6 +140,12 @@ const AuthenticatedActivateSessionIdRoute =
     path: '/activate/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContactEmailRoute =
+  AuthenticatedContactEmailRouteImport.update({
+    id: '/contact/$email',
+    path: '/contact/$email',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLeadAttendeeIdRoute =
   AuthenticatedLeadAttendeeIdRouteImport.update({
     id: '/lead/$attendeeId',
@@ -200,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/_authenticated/contact/$email': typeof AuthenticatedContactEmailRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/activate/$sessionId'
+    | '/contact/$email'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/activate/$sessionId'
+    | '/contact/$email'
     | '/lead/$attendeeId'
     | '/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
@@ -345,6 +357,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/_authenticated/activate/$sessionId'
+    | '/_authenticated/contact/$email'
     | '/_authenticated/lead/$attendeeId'
     | '/_authenticated/signup/$sessionId'
     | '/api/internal/sync-site-conversions'
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivateSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contact/$email': {
+      id: '/_authenticated/contact/$email'
+      path: '/contact/$email'
+      fullPath: '/contact/$email'
+      preLoaderRoute: typeof AuthenticatedContactEmailRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/lead/$attendeeId': {
       id: '/_authenticated/lead/$attendeeId'
       path: '/lead/$attendeeId'
@@ -577,6 +597,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedActivateSessionIdRoute: typeof AuthenticatedActivateSessionIdRoute
+  AuthenticatedContactEmailRoute: typeof AuthenticatedContactEmailRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
   AuthenticatedSignupSessionIdRoute: typeof AuthenticatedSignupSessionIdRoute
 }
@@ -594,6 +615,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedActivateSessionIdRoute: AuthenticatedActivateSessionIdRoute,
+  AuthenticatedContactEmailRoute: AuthenticatedContactEmailRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
   AuthenticatedSignupSessionIdRoute: AuthenticatedSignupSessionIdRoute,
 }

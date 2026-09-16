@@ -322,7 +322,15 @@ function MemberCard({
         onChange={onToggle}
         aria-label={`Select ${card.name}`}
       />
-      {card.attendeeId ? (
+      {card.email ? (
+        <Link
+          to="/contact/$email"
+          params={{ email: encodeURIComponent(card.email) }}
+          className="min-w-0 flex-1 hover:text-signal"
+        >
+          {details}
+        </Link>
+      ) : card.attendeeId ? (
         <Link
           to="/lead/$attendeeId"
           params={{ attendeeId: card.attendeeId }}
