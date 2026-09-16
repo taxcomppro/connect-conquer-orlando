@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { FieldShell, PageTitle, Panel, SectionLabel } from "@/components/FieldShell";
 import { supabase } from "@/integrations/supabase/client";
-import { listMembers, type MemberRow } from "@/lib/members.functions";
+import type { MemberRow } from "@/lib/members.functions";
+import { fetchMembersSafe } from "@/lib/members-client";
 import type { Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
