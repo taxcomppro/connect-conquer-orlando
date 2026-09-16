@@ -33,6 +33,7 @@ import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedSegmentSegmentRouteImport } from './routes/_authenticated/segment.$segment'
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 import { Route as ApiInternalAutomationLeadSignupNudgeRouteImport } from './routes/api/internal/automation-lead-signup-nudge'
+import { Route as ApiInternalAutomationUpgradeFollowupRouteImport } from './routes/api/internal/automation-upgrade-followup'
 import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 import { Route as ApiPublicSyncSiteConversionsRouteImport } from './routes/api/public/sync-site-conversions'
@@ -168,6 +169,12 @@ const ApiInternalAutomationLeadSignupNudgeRoute =
     path: '/api/internal/automation-lead-signup-nudge',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiInternalAutomationUpgradeFollowupRoute =
+  ApiInternalAutomationUpgradeFollowupRouteImport.update({
+    id: '/api/internal/automation-upgrade-followup',
+    path: '/api/internal/automation-upgrade-followup',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiInternalSyncSiteConversionsRoute =
   ApiInternalSyncSiteConversionsRouteImport.update({
     id: '/api/internal/sync-site-conversions',
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
+  '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -265,6 +273,7 @@ export interface FileRoutesByTo {
   '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
+  '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -299,6 +308,7 @@ export interface FileRoutesById {
   '/_authenticated/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
+  '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/segment/$segment'
     | '/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
+    | '/api/internal/automation-upgrade-followup'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/segment/$segment'
     | '/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
+    | '/api/internal/automation-upgrade-followup'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -398,6 +410,7 @@ export interface FileRouteTypes {
     | '/_authenticated/segment/$segment'
     | '/_authenticated/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
+    | '/api/internal/automation-upgrade-followup'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -417,6 +430,7 @@ export interface RootRouteChildren {
   JoinSessionIdRoute: typeof JoinSessionIdRoute
   PSlugRoute: typeof PSlugRoute
   ApiInternalAutomationLeadSignupNudgeRoute: typeof ApiInternalAutomationLeadSignupNudgeRoute
+  ApiInternalAutomationUpgradeFollowupRoute: typeof ApiInternalAutomationUpgradeFollowupRoute
   ApiInternalSyncSiteConversionsRoute: typeof ApiInternalSyncSiteConversionsRoute
   ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
   ApiPublicSyncSiteConversionsRoute: typeof ApiPublicSyncSiteConversionsRoute
@@ -596,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalAutomationLeadSignupNudgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/internal/automation-upgrade-followup': {
+      id: '/api/internal/automation-upgrade-followup'
+      path: '/api/internal/automation-upgrade-followup'
+      fullPath: '/api/internal/automation-upgrade-followup'
+      preLoaderRoute: typeof ApiInternalAutomationUpgradeFollowupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/internal/sync-site-conversions': {
       id: '/api/internal/sync-site-conversions'
       path: '/api/internal/sync-site-conversions'
@@ -698,6 +719,8 @@ const rootRouteChildren: RootRouteChildren = {
   PSlugRoute: PSlugRoute,
   ApiInternalAutomationLeadSignupNudgeRoute:
     ApiInternalAutomationLeadSignupNudgeRoute,
+  ApiInternalAutomationUpgradeFollowupRoute:
+    ApiInternalAutomationUpgradeFollowupRoute,
   ApiInternalSyncSiteConversionsRoute: ApiInternalSyncSiteConversionsRoute,
   ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
   ApiPublicSyncSiteConversionsRoute: ApiPublicSyncSiteConversionsRoute,
