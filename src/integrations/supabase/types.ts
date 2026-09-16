@@ -44,6 +44,27 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_sends: {
+        Row: {
+          contact_email: string
+          id: string
+          rule: string
+          sent_at: string
+        }
+        Insert: {
+          contact_email: string
+          id?: string
+          rule: string
+          sent_at?: string
+        }
+        Update: {
+          contact_email?: string
+          id?: string
+          rule?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       booth_settings: {
         Row: {
           created_at: string

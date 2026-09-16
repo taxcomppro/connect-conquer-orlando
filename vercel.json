@@ -3,6 +3,9 @@
   "framework": null,
   "buildCommand": "bun run build",
   "crons": [
-    { "path": "/api/internal/sync-site-conversions", "schedule": "*/15 * * * *" }
+    { "path": "/api/internal/sync-site-conversions", "schedule": "*/15 * * * *" },
+    { "path": "/api/internal/automation-lead-signup-nudge", "schedule": "0 */6 * * *" },
+    { "path": "/api/internal/automation-upgrade-followup", "schedule": "0 9 * * *" },
+    { "path": "/api/internal/automation-welcome-on-upgrade", "schedule": "*/15 * * * *" }
   ]
 }
