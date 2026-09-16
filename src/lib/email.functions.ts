@@ -15,6 +15,7 @@ export type BulkEmailResult = {
 export type ThreadEntry = {
   id: string;
   channel: "sms" | "email";
+  direction: "inbound" | "outbound";
   subject: string | null;
   body: string;
   status: string;
@@ -184,6 +185,7 @@ export const getContactThread = createServerFn({ method: "POST" })
         entries.push({
           id: message.id,
           channel: "sms",
+          direction: message.direction === "inbound" ? "inbound" : "outbound",
           subject: null,
           body: message.body,
           status: message.status,
@@ -204,11 +206,12 @@ export const getContactThread = createServerFn({ method: "POST" })
         entries.push({
           id: message.id,
           channel: "email",
+          direction: message.direction === "inbound" ? "inbound" : "outbound",
           subject: message.subject,
           body: message.body,
           status: message.status,
           error: message.error,
-          target: message.to_email,
+          target: message.to_email ?? message.contact_email,
           sentAt: message.sent_at,
         });
       }

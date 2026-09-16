@@ -7,6 +7,7 @@ export type ActivityKind = "email" | "sms" | "lead" | "signup" | "membership";
 export type ActivityEntry = {
   id: string;
   kind: ActivityKind;
+  direction?: "inbound" | "outbound";
   title: string;
   detail: string | null;
   status: string | null;
@@ -204,23 +205,45 @@ export const getContactActivity = createServerFn({ method: "POST" })
         }
       }
 
-      // Texts.
-      if (lead) {
-        const { data: sms } = await supabase
-          .from("sms_messages")
-          .select("*")
-          .eq("lead_id", lead["id"])
-          .order("sent_at", { ascending: false });
-        for (const message of sms ?? []) {
-          timeline.push({
-            id: `sms:${message.id}`,
-            kind: "sms",
-            title: `Text to ${message.to_number}`,
-            detail: message.body,
-            status: message.status,
-            error: message.error,
-            at: message.sent_at,
-          });
+      // Texts — sent by staff (matched by lead) and replies (matched by phone).
+      {
+        const phone = (lead?.["phone"] ?? "").trim();
+        const seen = new Set<string>();
+        const batches: Array<Record<string, any>[]> = [];
+        if (lead) {
+          const { data: sms } = await supabase
+            .from("sms_messages")
+            .select("*")
+            .eq("lead_id", lead["id"])
+            .order("sent_at", { ascending: false });
+          batches.push(sms ?? []);
+        }
+        if (phone) {
+          const { data: replies } = await supabase
+            .from("sms_messages")
+            .select("*")
+            .eq("contact_phone", phone)
+            .order("sent_at", { ascending: false });
+          batches.push(replies ?? []);
+        }
+        for (const batch of batches) {
+          for (const message of batch) {
+            if (seen.has(message["id"])) continue;
+            seen.add(message["id"]);
+            const inbound = message["direction"] === "inbound";
+            timeline.push({
+              id: `sms:${message["id"]}`,
+              kind: "sms",
+              direction: inbound ? "inbound" : "outbound",
+              title: inbound
+                ? `Text reply from ${message["from_number"]}`
+                : `Text to ${message["to_number"]}`,
+              detail: message["body"],
+              status: message["status"],
+              error: message["error"],
+              at: message["sent_at"],
+            });
+          }
         }
       }
 
@@ -232,10 +255,14 @@ export const getContactActivity = createServerFn({ method: "POST" })
           .ilike("contact_email", email)
           .order("sent_at", { ascending: false });
         for (const message of emails ?? []) {
+          const inbound = message.direction === "inbound";
           timeline.push({
             id: `email:${message.id}`,
             kind: "email",
-            title: message.subject || `Email to ${message.to_email}`,
+            direction: inbound ? "inbound" : "outbound",
+            title:
+              message.subject ||
+              (inbound ? `Email reply from ${email}` : `Email to ${message.to_email ?? email}`),
             detail: message.body,
             status: message.status,
             error: message.error,
