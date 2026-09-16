@@ -15,12 +15,12 @@ export const Route = createFileRoute("/_authenticated/event-archive")({
       {
         name: "description",
         content:
-          "Track every booth signup from badge scan to membership, profile and issued ProConnect card, with rep and DUB attribution.",
+          "Track every booth signup from badge scan to membership, profile and issued ProConnect card, with rep and DUB attribution, plus the Orlando trip briefing.",
       },
       { property: "og:title", content: "Event Archive — Membership Hub" },
       {
         property: "og:description",
-        content: "Every booth signup from scan to card, with full attribution and export.",
+        content: "Every booth signup from scan to card, full attribution, and the archived team trip briefing.",
       },
     ],
   }),
@@ -223,6 +223,81 @@ function EventArchivePage() {
             </section>
           ))}
         </div>
+      </div>
+
+      <SectionLabel>Trip briefing</SectionLabel>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {SCHEDULE.map((item) => (
+          <InfoCard key={`${item.day}-${item.label}`} title={item.label} eyebrow={item.day}>
+            <div className="font-display text-xl">{item.time}</div>
+            {item.note ? <p className="mt-2 text-sm text-muted-foreground">{item.note}</p> : null}
+          </InfoCard>
+        ))}
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <InfoCard title="Booth Assignment" eyebrow="Exhibit floor">
+          <div className="font-display text-2xl text-signal">540</div>
+        </InfoCard>
+        <InfoCard title="Bonaire 6 (Classroom)" eyebrow="Baseball-themed demo room">
+          <div className="font-display text-lg">Wednesday, September 2</div>
+          <div className="mt-1 text-sm text-muted-foreground">10:00 AM – 12:00 PM</div>
+        </InfoCard>
+      </div>
+
+      <div className="mt-3 rounded-2xl border border-border bg-panel p-5 sm:p-6">
+        <div className="eyebrow">Veranda Palms Resort · Kissimmee</div>
+        <h2 className="mt-2 font-display text-2xl">Team house</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          12 bedrooms · 15 beds · 11 baths · pool and spa
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <BriefItem
+            label="Location"
+            value="Kissimmee, Florida · exact address is in the team travel confirmation"
+          />
+          <BriefItem label="Check-in" value="Sunday, August 30 · 4:00 PM" />
+          <BriefItem label="Check-out" value="Thursday, September 3 · 10:00 AM" />
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <InfoCard title="Parking" eyebrow="At the house">
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>2 garage spaces and 3 driveway spaces</li>
+            <li>No street, sidewalk or grass parking</li>
+            <li>Overflow parking is at the clubhouse, first-come, first-served</li>
+          </ul>
+        </InfoCard>
+        <InfoCard title="House Rules" eyebrow="Please review">
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>No smoking anywhere inside the house</li>
+            <li>Grill use is $100 with propane included; notify the host first</li>
+            <li>No parties or outside events; keep team activities respectful of the property</li>
+          </ul>
+        </InfoCard>
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {WARDROBE.map((item) => (
+          <InfoCard key={item.day} title={item.occasion} eyebrow={item.day}>
+            <p className="text-sm text-muted-foreground">{item.attire}</p>
+          </InfoCard>
+        ))}
+      </div>
+
+      <div className="mt-3 rounded-xl border border-gold/40 bg-gold/10 p-4">
+        <div className="eyebrow text-gold">Evening dress code</div>
+        <p className="mt-2 text-sm">
+          Business casual for every outing. For men: no hats, tank tops or open-toed shoes.
+        </p>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {EVENINGS.map((item) => (
+          <InfoCard key={item.day} title={item.plan} eyebrow={item.day}>
+            <p className="text-sm text-muted-foreground">{item.detail}</p>
+          </InfoCard>
+        ))}
       </div>
 
       <SectionLabel>Migration</SectionLabel>
