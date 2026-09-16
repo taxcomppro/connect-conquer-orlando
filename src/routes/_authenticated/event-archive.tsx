@@ -322,3 +322,30 @@ function Stat({ label, value, tone = "" }: { label: string; value: number; tone?
     </div>
   );
 }
+
+function InfoCard({
+  title,
+  eyebrow,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-border bg-panel p-4">
+      <div className="eyebrow">{eyebrow}</div>
+      <h2 className="mt-1 font-display text-lg">{title}</h2>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+function BriefItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-background/50 p-3">
+      <div className="eyebrow">{label}</div>
+      <div className="mt-1 text-sm">{value}</div>
+    </div>
+  );
+}
