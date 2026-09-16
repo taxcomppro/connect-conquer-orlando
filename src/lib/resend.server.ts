@@ -13,7 +13,7 @@ const RESEND_API = "https://api.resend.com";
 export const DEFAULT_FROM = "Tax Compliance Pro <info@taxcomppro.com>";
 // Replies land on the dedicated receiving subdomain so the inbound webhook can
 // log them; they are forwarded on to the real inbox automatically.
-export const REPLY_TO = "replies@reply.taxcomppro.com";
+export const REPLY_TO = "info@replies.taxcomppro.com";
 
 export type EmailSendResult = {
   id: string;
