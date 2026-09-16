@@ -34,6 +34,7 @@ import { Route as AuthenticatedSegmentSegmentRouteImport } from './routes/_authe
 import { Route as AuthenticatedSignupSessionIdRouteImport } from './routes/_authenticated/signup.$sessionId'
 import { Route as ApiInternalAutomationLeadSignupNudgeRouteImport } from './routes/api/internal/automation-lead-signup-nudge'
 import { Route as ApiInternalAutomationUpgradeFollowupRouteImport } from './routes/api/internal/automation-upgrade-followup'
+import { Route as ApiInternalAutomationWelcomeOnUpgradeRouteImport } from './routes/api/internal/automation-welcome-on-upgrade'
 import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 import { Route as ApiPublicSyncSiteConversionsRouteImport } from './routes/api/public/sync-site-conversions'
@@ -175,6 +176,12 @@ const ApiInternalAutomationUpgradeFollowupRoute =
     path: '/api/internal/automation-upgrade-followup',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiInternalAutomationWelcomeOnUpgradeRoute =
+  ApiInternalAutomationWelcomeOnUpgradeRouteImport.update({
+    id: '/api/internal/automation-welcome-on-upgrade',
+    path: '/api/internal/automation-welcome-on-upgrade',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiInternalSyncSiteConversionsRoute =
   ApiInternalSyncSiteConversionsRouteImport.update({
     id: '/api/internal/sync-site-conversions',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
+  '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
+  '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -309,6 +318,7 @@ export interface FileRoutesById {
   '/_authenticated/signup/$sessionId': typeof AuthenticatedSignupSessionIdRoute
   '/api/internal/automation-lead-signup-nudge': typeof ApiInternalAutomationLeadSignupNudgeRoute
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
+  '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
     | '/api/internal/automation-upgrade-followup'
+    | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
     | '/api/internal/automation-upgrade-followup'
+    | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -411,6 +423,7 @@ export interface FileRouteTypes {
     | '/_authenticated/signup/$sessionId'
     | '/api/internal/automation-lead-signup-nudge'
     | '/api/internal/automation-upgrade-followup'
+    | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
@@ -431,6 +444,7 @@ export interface RootRouteChildren {
   PSlugRoute: typeof PSlugRoute
   ApiInternalAutomationLeadSignupNudgeRoute: typeof ApiInternalAutomationLeadSignupNudgeRoute
   ApiInternalAutomationUpgradeFollowupRoute: typeof ApiInternalAutomationUpgradeFollowupRoute
+  ApiInternalAutomationWelcomeOnUpgradeRoute: typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   ApiInternalSyncSiteConversionsRoute: typeof ApiInternalSyncSiteConversionsRoute
   ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
   ApiPublicSyncSiteConversionsRoute: typeof ApiPublicSyncSiteConversionsRoute
@@ -617,6 +631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalAutomationUpgradeFollowupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/internal/automation-welcome-on-upgrade': {
+      id: '/api/internal/automation-welcome-on-upgrade'
+      path: '/api/internal/automation-welcome-on-upgrade'
+      fullPath: '/api/internal/automation-welcome-on-upgrade'
+      preLoaderRoute: typeof ApiInternalAutomationWelcomeOnUpgradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/internal/sync-site-conversions': {
       id: '/api/internal/sync-site-conversions'
       path: '/api/internal/sync-site-conversions'
@@ -721,6 +742,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiInternalAutomationLeadSignupNudgeRoute,
   ApiInternalAutomationUpgradeFollowupRoute:
     ApiInternalAutomationUpgradeFollowupRoute,
+  ApiInternalAutomationWelcomeOnUpgradeRoute:
+    ApiInternalAutomationWelcomeOnUpgradeRoute,
   ApiInternalSyncSiteConversionsRoute: ApiInternalSyncSiteConversionsRoute,
   ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
   ApiPublicSyncSiteConversionsRoute: ApiPublicSyncSiteConversionsRoute,
