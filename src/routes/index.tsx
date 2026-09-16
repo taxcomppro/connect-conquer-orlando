@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /**
- * Field Hub now opens on the membership pipeline. The old event-briefing hub
+ * Membership Hub now opens on the membership pipeline. The old event-briefing hub
  * still lives at /hub, and Scan / Leads stay reachable from the sidebar.
  */
 export const Route = createFileRoute("/")({
@@ -10,13 +10,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Field Hub — Member CRM" },
+      { title: "Membership Hub — Tax Compliance Pro" },
       {
         name: "description",
         content:
           "The Tax Compliance Pro member CRM: membership tiers, leads, follow-up texting and email, and conversion tracking.",
       },
-      { property: "og:title", content: "Field Hub — Member CRM" },
+      { property: "og:title", content: "Membership Hub — Tax Compliance Pro" },
       {
         property: "og:description",
         content: "Track TCPC leads and members from first scan to paid membership.",

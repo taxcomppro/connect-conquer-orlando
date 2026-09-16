@@ -16,16 +16,16 @@ import { normalizeEmail, tierByEmail, TIER_AUDIENCES, type Tier } from "@/lib/au
 export const Route = createFileRoute("/_authenticated/broadcast")({
   head: () => ({
     meta: [
-      { title: "Text all leads — TCPC Field Hub" },
+      { title: "Text All Leads — Membership Hub" },
       {
         name: "description",
         content:
           "Send one follow-up text to every badge scanned at Booth 540, with consent checks and per-lead personalization.",
       },
-      { property: "og:title", content: "Text all leads — TCPC Field Hub" },
+      { property: "og:title", content: "Text All Leads — Membership Hub" },
       {
         property: "og:description",
-        content: "Bulk follow-up texting for booth leads captured in Field Hub.",
+        content: "Bulk follow-up texting for booth leads captured in Membership Hub.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -141,7 +141,7 @@ function BroadcastPage() {
       <PageTitle
         title="Text"
         accent="all leads"
-        lede="One message, every booth lead. Field Hub personalizes each text and logs it on the lead record."
+        lede="One message, every booth lead. Membership Hub personalizes each text and logs it on the lead record."
       />
 
       <Panel className="mt-6">

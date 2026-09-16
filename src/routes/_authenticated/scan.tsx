@@ -215,7 +215,7 @@ function ScanPage() {
           My leads →
         </Link>
       }
-      back={{ to: "/", label: "Field Hub" }}
+      back={{ to: "/", label: "Membership Hub" }}
     >
       <PageTitle
         title="Scan a"

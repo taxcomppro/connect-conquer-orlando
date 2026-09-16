@@ -21,7 +21,7 @@ export function FieldShell({
 }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-5 pb-24 sm:px-7">
-      <Eyebrow left="Tax Compliance Pro · Field Hub" right={eyebrowRight} />
+      <Eyebrow left="Tax Compliance Pro · Membership Hub" right={eyebrowRight} />
       {back ? (
         <Link
           to={back.to}

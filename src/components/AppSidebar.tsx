@@ -53,8 +53,8 @@ export function AppSidebar() {
             T
           </span>
           <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <span className="block truncate font-display text-base">Field Hub</span>
-            <span className="eyebrow block truncate">Member CRM</span>
+            <span className="block truncate font-display text-base">Membership Hub</span>
+            <span className="eyebrow block truncate">Tax Compliance Pro</span>
           </span>
         </Link>
       </SidebarHeader>

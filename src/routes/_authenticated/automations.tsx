@@ -22,16 +22,16 @@ import { OUTCOMES, OUTCOME_LABEL } from "@/lib/leads";
 export const Route = createFileRoute("/_authenticated/automations")({
   head: () => ({
     meta: [
-      { title: "Auto-send text rules — TCPC Field Hub" },
+      { title: "Auto-send Text Rules — Membership Hub" },
       {
         name: "description",
         content:
           "Set up automatic follow-up texts that fire when a badge is scanned, an outcome changes, or an attendee joins TCPC.",
       },
-      { property: "og:title", content: "Auto-send text rules — TCPC Field Hub" },
+      { property: "og:title", content: "Auto-send Text Rules — Membership Hub" },
       {
         property: "og:description",
-        content: "Automatic booth follow-up texts triggered by lead activity in Field Hub.",
+        content: "Automatic booth follow-up texts triggered by lead activity in Membership Hub.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -159,11 +159,11 @@ function AutomationsPage() {
   }
 
   return (
-    <FieldShell back={{ to: "/", label: "Field Hub" }}>
+    <FieldShell back={{ to: "/", label: "Membership Hub" }}>
       <PageTitle
         title="Auto-send"
         accent="text rules"
-        lede="Pick a moment in the booth flow and Field Hub sends the matching text on its own — once per lead, from the booth number."
+        lede="Pick a moment in the booth flow and Membership Hub sends the matching text on its own — once per lead, from the booth number."
       />
 
       <Panel className="mt-6">

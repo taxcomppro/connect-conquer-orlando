@@ -23,13 +23,13 @@ import { useCardBase } from "@/hooks/useCardBase";
 export const Route = createFileRoute("/_authenticated/signup/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Membership handoff — TCPC Field Hub" },
+      { title: "Membership Handoff — Membership Hub" },
       {
         name: "description",
         content:
           "Show the customer the membership QR code, then watch the signup move to Ready for Card.",
       },
-      { property: "og:title", content: "Membership handoff — TCPC Field Hub" },
+      { property: "og:title", content: "Membership Handoff — Membership Hub" },
       {
         property: "og:description",
         content: "Hand the customer their signup link and track it to card activation.",

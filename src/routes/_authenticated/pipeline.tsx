@@ -13,13 +13,13 @@ import { normalizeEmail, TIER_AUDIENCES, type Tier } from "@/lib/audience";
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
     meta: [
-      { title: "Membership pipeline — TCPC Field Hub" },
+      { title: "Membership Pipeline — Membership Hub" },
       {
         name: "description",
         content:
           "Track every contact from lead to free member to paid VIP, Marketplace and Marketplace+ membership.",
       },
-      { property: "og:title", content: "Membership pipeline — TCPC Field Hub" },
+      { property: "og:title", content: "Membership Pipeline — Membership Hub" },
       {
         property: "og:description",
         content: "Convert free members to paid: leads, free, VIP, Marketplace and Marketplace+.",
@@ -249,7 +249,7 @@ function PipelinePage() {
       ) : null}
 
       <SectionLabel>{loading ? "Loading…" : "By membership tier"}</SectionLabel>
-      <div className="-mx-5 overflow-x-auto px-5 pb-3 sm:-mx-7 sm:px-7">
+      <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-3 [scrollbar-gutter:stable]">
         <div className="grid min-w-[1020px] grid-cols-5 gap-3">
           {columns.map((column) => (
             <section key={column.key} aria-labelledby={`tier-${column.key}`}>

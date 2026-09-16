@@ -14,13 +14,13 @@ import { dubStatus, ensureBoothLink, ensureSellerLink, dubLinkStats } from "@/li
 export const Route = createFileRoute("/_authenticated/dub")({
   head: () => ({
     meta: [
-      { title: "Dub attribution — TCPC Field Hub" },
+      { title: "Dub Attribution — Membership Hub" },
       {
         name: "description",
         content:
           "Configure the pooled Orlando booth link, per-seller Dub links, and which booth accounts earn commission.",
       },
-      { property: "og:title", content: "Dub attribution — TCPC Field Hub" },
+      { property: "og:title", content: "Dub Attribution — Membership Hub" },
       {
         property: "og:description",
         content: "Pooled booth link, seller links, and owner exclusions for TCPC commissions.",
