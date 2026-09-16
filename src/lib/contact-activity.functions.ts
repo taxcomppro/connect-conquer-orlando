@@ -7,6 +7,7 @@ export type ActivityKind = "email" | "sms" | "lead" | "signup" | "membership";
 export type ActivityEntry = {
   id: string;
   kind: ActivityKind;
+  direction?: "inbound" | "outbound";
   title: string;
   detail: string | null;
   status: string | null;
