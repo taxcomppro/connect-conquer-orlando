@@ -94,6 +94,7 @@ export const getContactActivity = createServerFn({ method: "POST" })
               userId: found.userId,
               email: found.email,
               name: found.name,
+              phone: found.phone ?? null,
               tier: found.tier,
               subscriptionStatus: found.subscriptionStatus,
               subscriptionPlan: found.subscriptionPlan,
@@ -207,7 +208,7 @@ export const getContactActivity = createServerFn({ method: "POST" })
 
       // Texts — sent by staff (matched by lead) and replies (matched by phone).
       {
-        const phone = (lead?.["phone"] ?? "").trim();
+        const phone = ((lead?.["phone"] ?? member?.phone ?? "") as string).trim();
         const seen = new Set<string>();
         const batches: Array<Record<string, any>[]> = [];
         if (lead) {
@@ -280,7 +281,7 @@ export const getContactActivity = createServerFn({ method: "POST" })
           [lead?.["first_name"], lead?.["last_name"]].filter(Boolean).join(" ").trim() ||
           email ||
           "Contact",
-        phone: lead?.["phone"] ?? null,
+        phone: lead?.["phone"] ?? member?.phone ?? null,
         company: lead?.["company"] ?? null,
         title: lead?.["title"] ?? null,
         leadId: lead?.["id"] ?? null,
