@@ -26,7 +26,9 @@ export const sendBulkSms = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {
       leadIds?: string[] | undefined;
-      phoneContacts?: Array<{ name: string; phone: string; email?: string | null }> | undefined;
+      phoneContacts?:
+        | Array<{ name: string; phone: string; email?: string | null; leadId?: string | null }>
+        | undefined;
       body: string;
       requireConsent?: boolean | undefined;
       skipAlreadyTexted?: boolean | undefined;
@@ -133,9 +135,28 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       }
     }
 
-    // Site members who have a phone on file but no Field Hub lead record —
-    // text them directly and log against their phone number.
+    // Contacts texted via a phone number from the main-site member record —
+    // either they have no Field Hub lead at all, or their lead has no phone.
+    // When a lead does exist, its texting consent is still honored.
+    const contactLeadIds = data.phoneContacts
+      .map((c) => c.leadId)
+      .filter((id): id is string => Boolean(id));
+    const consentByLead = new Map<string, boolean>();
+    if (contactLeadIds.length > 0) {
+      const { data: contactLeads } = await supabase
+        .from("leads")
+        .select("id, sms_consent")
+        .in("id", contactLeadIds);
+      for (const row of contactLeads ?? []) {
+        consentByLead.set(row.id, Boolean(row.sms_consent));
+      }
+    }
+
     for (const contact of data.phoneContacts) {
+      if (contact.leadId && data.requireConsent && consentByLead.get(contact.leadId) === false) {
+        result.skipped += 1;
+        continue;
+      }
       const name = contact.name?.trim() || "Member";
       const to = normalizePhone(contact.phone);
       const first = name.split(/\s+/)[0] ?? name;
