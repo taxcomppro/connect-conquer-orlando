@@ -74,10 +74,15 @@ export function MessageComposer({
     try {
       const result = await runBulkSms({
         data: {
-          leadIds: textable.filter((c) => c.leadId).map((c) => c.leadId!),
+          // Anyone with a phone on file (from the site member record or the
+          // lead) is texted via that number; leadIds are only used as a
+          // fallback for leads whose phone we haven't seen client-side.
+          leadIds: textable
+            .filter((c) => c.leadId && (c.phone ?? "").replace(/\D/g, "").length < 10)
+            .map((c) => c.leadId!),
           phoneContacts: textable
-            .filter((c) => !c.leadId && c.phone)
-            .map((c) => ({ name: c.name, phone: c.phone!, email: c.email })),
+            .filter((c) => (c.phone ?? "").replace(/\D/g, "").length >= 10)
+            .map((c) => ({ name: c.name, phone: c.phone!, email: c.email, leadId: c.leadId })),
           body: smsBody,
           requireConsent,
         },

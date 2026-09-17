@@ -175,7 +175,7 @@ export const sendBulkSms = createServerFn({ method: "POST" })
           from: process.env["TWILIO_FROM_NUMBER"],
         });
         await supabase.from("sms_messages").insert({
-          lead_id: null,
+          lead_id: contact.leadId ?? null,
           contact_phone: to,
           to_number: sendResult.to,
           from_number: sendResult.from,
@@ -188,7 +188,7 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       } catch (err) {
         const reason = err instanceof Error ? err.message : "Send failed";
         await supabase.from("sms_messages").insert({
-          lead_id: null,
+          lead_id: contact.leadId ?? null,
           contact_phone: to,
           to_number: to,
           from_number: "bulk",
