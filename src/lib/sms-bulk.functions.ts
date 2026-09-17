@@ -25,7 +25,8 @@ export const sendBulkSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: {
-      leadIds: string[];
+      leadIds?: string[] | undefined;
+      phoneContacts?: Array<{ name: string; phone: string; email?: string | null }> | undefined;
       body: string;
       requireConsent?: boolean | undefined;
       skipAlreadyTexted?: boolean | undefined;
@@ -33,9 +34,15 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       const body = input.body.trim();
       if (!body) throw new Error("Write a message first.");
       if (body.length > 1600) throw new Error("Message is too long (max 1600 characters).");
-      if (!input.leadIds?.length) throw new Error("No leads selected.");
+      const phoneContacts = (input.phoneContacts ?? [])
+        .filter((c) => (c.phone ?? "").replace(/\D/g, "").length >= 10)
+        .slice(0, 500);
+      if (!input.leadIds?.length && phoneContacts.length === 0) {
+        throw new Error("No leads selected.");
+      }
       return {
-        leadIds: input.leadIds.slice(0, 500),
+        leadIds: (input.leadIds ?? []).slice(0, 500),
+        phoneContacts,
         body,
         requireConsent: input.requireConsent !== false,
         skipAlreadyTexted: Boolean(input.skipAlreadyTexted),
@@ -114,6 +121,54 @@ export const sendBulkSms = createServerFn({ method: "POST" })
         const reason = err instanceof Error ? err.message : "Send failed";
         await supabase.from("sms_messages").insert({
           lead_id: lead.id,
+          to_number: to,
+          from_number: "bulk",
+          body,
+          status: "failed",
+          error: reason,
+          sent_by: userId,
+        });
+        result.failed += 1;
+        if (result.errors.length < 5) result.errors.push({ name, reason });
+      }
+    }
+
+    // Site members who have a phone on file but no Field Hub lead record —
+    // text them directly and log against their phone number.
+    for (const contact of data.phoneContacts) {
+      const name = contact.name?.trim() || "Member";
+      const to = normalizePhone(contact.phone);
+      const first = name.split(/\s+/)[0] ?? name;
+      const body = renderTemplate(data.body, {
+        lead: { first_name: first, last_name: name.slice(first.length).trim(), company: null },
+        repName: staff?.display_name ?? null,
+        signupLink: "",
+      });
+
+      try {
+        const sendResult = await sendSms({
+          to,
+          body,
+          lovableApiKey: process.env["LOVABLE_API_KEY"] ?? "",
+          twilioApiKey: process.env["TWILIO_API_KEY"] ?? "",
+          from: process.env["TWILIO_FROM_NUMBER"],
+        });
+        await supabase.from("sms_messages").insert({
+          lead_id: null,
+          contact_phone: to,
+          to_number: sendResult.to,
+          from_number: sendResult.from,
+          body: sendResult.body,
+          status: sendResult.status,
+          twilio_sid: sendResult.sid || null,
+          sent_by: userId,
+        });
+        result.sent += 1;
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : "Send failed";
+        await supabase.from("sms_messages").insert({
+          lead_id: null,
+          contact_phone: to,
           to_number: to,
           from_number: "bulk",
           body,

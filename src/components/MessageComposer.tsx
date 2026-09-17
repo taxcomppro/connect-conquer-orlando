@@ -14,6 +14,7 @@ export type ComposeContact = {
   name: string;
   email: string | null;
   leadId: string | null;
+  phone?: string | null;
   company?: string | null;
 };
 
@@ -62,7 +63,9 @@ export function MessageComposer({
     };
   }, [loadTemplates, loadEmailTemplates]);
 
-  const textable = contacts.filter((c) => c.leadId);
+  const textable = contacts.filter(
+    (c) => c.leadId || (c.phone ?? "").replace(/\D/g, "").length >= 10,
+  );
   const emailable = contacts.filter((c) => (c.email ?? "").includes("@"));
 
   async function sendSms() {
@@ -71,7 +74,10 @@ export function MessageComposer({
     try {
       const result = await runBulkSms({
         data: {
-          leadIds: textable.map((c) => c.leadId!),
+          leadIds: textable.filter((c) => c.leadId).map((c) => c.leadId!),
+          phoneContacts: textable
+            .filter((c) => !c.leadId && c.phone)
+            .map((c) => ({ name: c.name, phone: c.phone!, email: c.email })),
           body: smsBody,
           requireConsent,
         },
@@ -193,8 +199,8 @@ export function MessageComposer({
             <span>Only text contacts who gave texting consent.</span>
           </label>
           <p className="mt-2 text-xs text-muted-foreground">
-            {textable.length} of {contacts.length} selected have a Membership Hub lead record and can be
-            texted · {smsBody.length}/1600 characters.
+            {textable.length} of {contacts.length} selected have a phone number and can be texted
+            · {smsBody.length}/1600 characters.
           </p>
           <Button
             className="mt-4 h-11 w-full"

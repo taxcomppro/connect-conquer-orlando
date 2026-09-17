@@ -5,6 +5,7 @@ export type MemberRow = {
   userId: string;
   email: string;
   name: string;
+  phone: string | null;
   tier: "FREE" | "VIP" | "MARKETPLACE" | "MARKETPLACE_PLUS";
   subscriptionStatus: string | null;
   subscriptionPlan: string | null;
@@ -23,6 +24,7 @@ export const listMembers = createServerFn({ method: "POST" })
           userId: m.userId,
           email: m.email,
           name: m.name,
+          phone: m.phone ?? null,
           tier: m.tier,
           subscriptionStatus: m.subscriptionStatus,
           subscriptionPlan: m.subscriptionPlan,
@@ -59,6 +61,7 @@ export const listUnactivatedSellers = createServerFn({ method: "POST" })
           userId: m.userId,
           email: m.email,
           name: m.name,
+          phone: m.phone ?? null,
           tier: m.tier,
           subscriptionStatus: m.subscriptionStatus,
           subscriptionPlan: m.subscriptionPlan,

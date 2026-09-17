@@ -176,6 +176,7 @@ function ContactActivityPage() {
               name: profile.name,
               email: profile.email || null,
               leadId: profile.leadId,
+              phone: profile.phone,
             },
           ]}
           onClose={() => setComposerOpen(false)}

@@ -79,6 +79,7 @@ export type SiteMember = {
   userId: string;
   email: string;
   name: string;
+  phone: string | null;
   tier: "FREE" | "VIP" | "MARKETPLACE" | "MARKETPLACE_PLUS";
   stripeCustomerId: string | null;
   subscriptionStatus: string | null;
@@ -89,7 +90,7 @@ export type SiteMember = {
 };
 
 const MEMBER_COLUMNS = `
-  u.id as "userId", u.email, u.name, u.tier, u."stripeCustomerId",
+  u.id as "userId", u.email, u.name, u.phone, u.tier, u."stripeCustomerId",
   u."createdAt" as "createdAt",
   s.status as "subscriptionStatus", s.plan as "subscriptionPlan",
   s."currentPeriodEnd", s."updatedAt" as "subscriptionUpdatedAt"
