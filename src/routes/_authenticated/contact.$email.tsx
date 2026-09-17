@@ -10,6 +10,8 @@ import {
   type ActivityEntry,
   type ContactProfile,
 } from "@/lib/contact-activity.functions";
+import { looksLikeHtml, sanitizeEmailHtml } from "@/lib/html-message";
+
 
 export const Route = createFileRoute("/_authenticated/contact/$email")({
   head: () => ({
@@ -215,10 +217,19 @@ function ContactActivityPage() {
               </div>
               <div className="mt-2 text-sm font-medium">{entry.title}</div>
               {entry.detail ? (
-                <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">
-                  {entry.detail}
-                </p>
+                entry.kind === "email" && looksLikeHtml(entry.detail) ? (
+                  <div
+                    className="email-body mt-2 max-h-80 overflow-y-auto rounded-lg border border-border bg-background/60 p-3 text-sm"
+                    // Sanitized above: scripts, styles, iframes and inline handlers removed.
+                    dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(entry.detail) }}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">
+                    {entry.detail}
+                  </p>
+                )
               ) : null}
+
               {entry.status ? (
                 <div className="mt-2 font-mono text-xs text-muted-foreground">{entry.status}</div>
               ) : null}

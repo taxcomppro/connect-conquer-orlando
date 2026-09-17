@@ -155,3 +155,9 @@
   text-transform: uppercase;
   color: var(--color-muted-foreground);
 }
+
+/* Rendered HTML email bodies inside the CRM thread — keep tables and images
+   inside the card instead of blowing out the page width. */
+.email-body img { max-width: 100%; height: auto; }
+.email-body table { width: 100% !important; max-width: 100% !important; }
+.email-body a { text-decoration: underline; }

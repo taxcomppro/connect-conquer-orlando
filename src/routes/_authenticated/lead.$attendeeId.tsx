@@ -36,6 +36,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { looksLikeHtml, sanitizeEmailHtml } from "@/lib/html-message";
+
 
 export const Route = createFileRoute("/_authenticated/lead/$attendeeId")({
   head: () => ({
@@ -777,7 +779,16 @@ function LeadPage() {
                   </span>
                 </div>
                 {entry.subject ? <p className="mt-2 font-medium">{entry.subject}</p> : null}
-                <p className="mt-1 whitespace-pre-wrap">{entry.body}</p>
+                {entry.channel === "email" && looksLikeHtml(entry.body) ? (
+                  <div
+                    className="email-body mt-2 max-h-80 overflow-y-auto rounded-lg border border-border bg-background/60 p-3 text-sm"
+                    // Sanitized: scripts, styles, iframes and inline handlers removed.
+                    dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(entry.body) }}
+                  />
+                ) : (
+                  <p className="mt-1 whitespace-pre-wrap">{entry.body}</p>
+                )}
+
                 <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
                   <span className="capitalize">{entry.status}</span>
                   <span className="truncate">{entry.target}</span>

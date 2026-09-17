@@ -4,32 +4,47 @@ import crypto from "node:crypto";
 /**
  * Receives inbound SMS replies from Twilio and logs them into the
  * sms_messages thread as direction: "inbound", so replies show up
- * alongside outbound texts on a contact's page instead of only in
- * Twilio's own console.
+ * alongside outbound texts on a contact's page.
  *
  * Configure in Twilio Console: Phone Numbers → your number →
  * Messaging → "A MESSAGE COMES IN" → this URL, HTTP POST.
  *
- * Requires TWILIO_AUTH_TOKEN (the Account Auth Token from the Twilio
- * Console dashboard — not the API Key used for sending) to verify
- * the request actually came from Twilio.
+ * Signature note: Twilio signs the exact URL configured in the console.
+ * Behind Cloudflare + Vercel the incoming Host header can differ from
+ * that, so every plausible URL is checked and a failure logs enough
+ * detail (never the token) to spot a misconfiguration.
  *
  * POST /api/public/webhooks/twilio-inbound
  */
 
-function verifyTwilioSignature(url: string, params: Record<string, string>, signature: string | null): boolean {
-  const authToken = process.env["TWILIO_AUTH_TOKEN"];
-  if (!authToken || !signature) return false;
+const PATH = "/api/public/webhooks/twilio-inbound";
 
-  const sortedKeys = Object.keys(params).sort();
+function signatureFor(authToken: string, url: string, params: Record<string, string>): string {
+  const sorted = Object.keys(params).sort();
   let data = url;
-  for (const key of sortedKeys) data += key + params[key];
-
-  const expected = crypto.createHmac("sha1", authToken).update(Buffer.from(data, "utf-8")).digest("base64");
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  for (const key of sorted) data += key + params[key];
+  return crypto.createHmac("sha1", authToken).update(Buffer.from(data, "utf-8")).digest("base64");
 }
 
-const EMPTY_TWIML = `<?xml version="1.0" encoding="UTF-8"?><Response></Response>`;
+function candidateUrls(request: Request): string[] {
+  const headerHosts = [
+    request.headers.get("x-forwarded-host"),
+    request.headers.get("host"),
+    "fieldhub.taxcomppro.com",
+  ].filter((host): host is string => !!host);
+
+  const urls = new Set<string>();
+  try {
+    urls.add(new URL(request.url).toString());
+  } catch {
+    // ignore unparsable request URLs
+  }
+  for (const host of headerHosts) {
+    urls.add(`https://${host}${PATH}`);
+    urls.add(`http://${host}${PATH}`);
+  }
+  return [...urls];
+}
 
 export const Route = createFileRoute("/api/public/webhooks/twilio-inbound")({
   server: {
@@ -38,9 +53,31 @@ export const Route = createFileRoute("/api/public/webhooks/twilio-inbound")({
         const rawBody = await request.text();
         const params = Object.fromEntries(new URLSearchParams(rawBody));
         const signature = request.headers.get("x-twilio-signature");
-        const url = `https://${request.headers.get("host")}/api/public/webhooks/twilio-inbound`;
+        const authToken = process.env["TWILIO_AUTH_TOKEN"];
 
-        if (!verifyTwilioSignature(url, params, signature)) {
+        let verified = false;
+        if (authToken && signature) {
+          for (const url of candidateUrls(request)) {
+            const expected = signatureFor(authToken, url, params);
+            if (
+              expected.length === signature.length &&
+              crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+            ) {
+              verified = true;
+              break;
+            }
+          }
+        }
+
+        if (!verified) {
+          console.error("[twilio-inbound] signature check failed", {
+            hasToken: !!authToken,
+            hasSignature: !!signature,
+            host: request.headers.get("host"),
+            forwardedHost: request.headers.get("x-forwarded-host"),
+            tried: candidateUrls(request),
+            from: params["From"] ?? null,
+          });
           return new Response("Invalid signature", { status: 403 });
         }
 
@@ -51,18 +88,24 @@ export const Route = createFileRoute("/api/public/webhooks/twilio-inbound")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Best-effort match to an existing lead by phone number, so
-        // the reply threads onto their existing record when we have
-        // one. Not finding a match still logs the message — it just
-        // has no lead_id, same as any other site-only contact.
-        const { data: lead } = await supabaseAdmin
-          .from("leads")
-          .select("id")
-          .eq("phone", from)
-          .maybeSingle();
+        // Best-effort match to an existing lead by phone, comparing the last
+        // ten digits so formatting differences ("(409) 998-4343") still match.
+        const digits = from.replace(/\D/g, "").slice(-10);
+        let leadId: string | null = null;
+        if (digits) {
+          const { data: candidates } = await supabaseAdmin
+            .from("leads")
+            .select("id, phone")
+            .not("phone", "is", null)
+            .limit(5000);
+          leadId =
+            (candidates ?? []).find(
+              (lead) => (lead.phone ?? "").replace(/\D/g, "").slice(-10) === digits,
+            )?.id ?? null;
+        }
 
-        await supabaseAdmin.from("sms_messages").insert({
-          lead_id: lead?.id ?? null,
+        const { error } = await supabaseAdmin.from("sms_messages").insert({
+          lead_id: leadId,
           contact_phone: from,
           to_number: to,
           from_number: from,
@@ -71,8 +114,9 @@ export const Route = createFileRoute("/api/public/webhooks/twilio-inbound")({
           status: "received",
           twilio_sid: messageSid,
         });
+        if (error) console.error("[twilio-inbound] insert failed:", error);
 
-        return new Response(EMPTY_TWIML, {
+        return new Response(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`, {
           status: 200,
           headers: { "Content-Type": "text/xml" },
         });
