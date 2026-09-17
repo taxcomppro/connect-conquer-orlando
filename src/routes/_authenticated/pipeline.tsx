@@ -131,7 +131,7 @@ function PipelinePage() {
             status: m.subscriptionStatus,
             attendeeId: lead?.attendee_id ?? null,
             leadId: lead?.id ?? null,
-            phone: lead?.phone ?? null,
+            phone: m.phone ?? lead?.phone ?? null,
           };
         });
 
@@ -161,6 +161,7 @@ function PipelinePage() {
           name: card.name,
           email: card.email,
           leadId: card.leadId,
+          phone: card.phone,
         })),
     [allCards, selected],
   );

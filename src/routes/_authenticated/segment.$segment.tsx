@@ -147,7 +147,7 @@ function SegmentPage() {
         status: m.subscriptionStatus,
         attendeeId: lead?.attendee_id ?? null,
         leadId: lead?.id ?? null,
-        phone: lead?.phone ?? null,
+        phone: m.phone ?? lead?.phone ?? null,
       };
     };
 
@@ -193,7 +193,13 @@ function SegmentPage() {
     () =>
       cards
         .filter((card) => selected[card.id])
-        .map((card) => ({ id: card.id, name: card.name, email: card.email, leadId: card.leadId })),
+        .map((card) => ({
+          id: card.id,
+          name: card.name,
+          email: card.email,
+          leadId: card.leadId,
+          phone: card.phone,
+        })),
     [cards, selected],
   );
 
