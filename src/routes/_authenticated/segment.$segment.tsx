@@ -90,6 +90,7 @@ type Card = {
   status: string | null;
   attendeeId: string | null;
   leadId: string | null;
+  phone: string | null;
 };
 
 function SegmentPage() {
@@ -146,6 +147,7 @@ function SegmentPage() {
         status: m.subscriptionStatus,
         attendeeId: lead?.attendee_id ?? null,
         leadId: lead?.id ?? null,
+        phone: lead?.phone ?? null,
       };
     };
 
@@ -176,8 +178,13 @@ function SegmentPage() {
 
     const q = query.trim().toLowerCase();
     if (!q) return list;
-    return list.filter((card) =>
-      [card.name, card.email].filter(Boolean).some((v) => String(v).toLowerCase().includes(q)),
+    const digits = query.replace(/\D/g, "");
+    return list.filter(
+      (card) =>
+        (digits.length >= 3 && (card.phone ?? "").replace(/\D/g, "").includes(digits)) ||
+        [card.name, card.email, card.phone]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q)),
     );
   }, [leads, members, query, segmentKey]);
 
@@ -218,7 +225,7 @@ function SegmentPage() {
         className="mt-5"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search name or email…"
+        placeholder="Search name, email or phone…"
       />
 
       <div className="mt-4 flex flex-wrap items-center gap-2">

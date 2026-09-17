@@ -57,6 +57,7 @@ type Card = {
   status: string | null;
   attendeeId: string | null;
   leadId: string | null;
+  phone: string | null;
 };
 
 function PipelinePage() {
@@ -114,6 +115,7 @@ function PipelinePage() {
         status: null,
         attendeeId: lead.attendee_id,
         leadId: lead.id,
+        phone: lead.phone,
       }));
 
     const byTier = (tier: Tier): Card[] =>
@@ -129,12 +131,18 @@ function PipelinePage() {
             status: m.subscriptionStatus,
             attendeeId: lead?.attendee_id ?? null,
             leadId: lead?.id ?? null,
+            phone: lead?.phone ?? null,
           };
         });
 
     const q = query.trim().toLowerCase();
+    const digits = query.replace(/\D/g, "");
     const match = (card: Card) =>
-      !q || [card.name, card.email].filter(Boolean).some((v) => String(v).toLowerCase().includes(q));
+      !q ||
+      (digits.length >= 3 && (card.phone ?? "").replace(/\D/g, "").includes(digits)) ||
+      [card.name, card.email, card.phone]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q));
 
     return TIER_COLUMNS.map((column) => ({
       ...column,
@@ -210,7 +218,7 @@ function PipelinePage() {
         className="mt-5"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search name or email…"
+        placeholder="Search name, email or phone…"
       />
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
