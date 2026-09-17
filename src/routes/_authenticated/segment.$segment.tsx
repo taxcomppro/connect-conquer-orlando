@@ -165,6 +165,7 @@ function SegmentPage() {
           status: null,
           attendeeId: lead.attendee_id,
           leadId: lead.id,
+          phone: lead.phone,
         }));
     } else if (segmentKey === "free") {
       list = members.filter((m) => m.tier === "FREE").map(memberCard);
