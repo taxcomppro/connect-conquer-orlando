@@ -116,7 +116,7 @@ function FunnelPage() {
     },
   ];
 
-  const top = stages[0].count || 1;
+  const top = (stages[0]?.count ?? 0) || 1;
 
   return (
     <FieldShell eyebrowRight="Funnel" back={{ to: "/admin", label: "Back to Admin" }}>
@@ -130,7 +130,7 @@ function FunnelPage() {
       <div className="space-y-3">
         {stages.map((stage, index) => {
           const width = Math.max(6, Math.round((stage.count / top) * 100));
-          const prev = index > 0 ? stages[index - 1].count : null;
+          const prev = index > 0 ? (stages[index - 1]?.count ?? 0) : null;
           const body = (
             <>
               <div className="flex items-baseline justify-between gap-3">
