@@ -12,8 +12,8 @@ import { checkCronAuth, runSiteConversionSync } from "@/lib/site-conversions.ser
 export const Route = createFileRoute("/api/internal/sync-site-conversions")({
   server: {
     handlers: {
-      GET: async ({ request }) => checkCronAuth(request) ?? (await runSiteConversionSync()),
-      POST: async ({ request }) => checkCronAuth(request) ?? (await runSiteConversionSync()),
+      GET: async ({ request }) => (await checkCronAuth(request)) ?? (await runSiteConversionSync()),
+      POST: async ({ request }) => (await checkCronAuth(request)) ?? (await runSiteConversionSync()),
     },
   },
 });

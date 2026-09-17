@@ -87,14 +87,25 @@ export async function runSiteConversionSync(): Promise<Response> {
   return Response.json({ ok: true, checked: members.length, updated, results });
 }
 
-/** Shared-secret gate for the scheduled sync endpoints. */
-export function checkCronAuth(request: Request): Response | null {
-  const secret = process.env["CRON_SECRET"];
-  if (!secret) {
+/**
+ * Gate for the scheduled endpoints.
+ *
+ * Accepts either the platform's own cron invocation (Vercel sets the
+ * x-vercel-cron header on scheduled requests) or a Bearer secret, read
+ * through readEnv so it works whichever runtime serves the request.
+ */
+export async function checkCronAuth(request: Request): Promise<Response | null> {
+  if (request.headers.get("x-vercel-cron")) return null;
+
+  const { readEnv } = await import("@/lib/env.server");
+  const secrets = [await readEnv("CRON_SECRET"), await readEnv("LOVABLE_CRON_SECRET")].filter(
+    Boolean,
+  );
+  if (!secrets.length) {
     return Response.json({ error: "cron_not_configured" }, { status: 500 });
   }
   const header = request.headers.get("authorization") ?? "";
-  if (header !== `Bearer ${secret}`) {
+  if (!secrets.some((secret) => header === `Bearer ${secret}`)) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   return null;
