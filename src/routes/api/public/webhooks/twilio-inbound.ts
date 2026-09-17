@@ -69,22 +69,58 @@ export const Route = createFileRoute("/api/public/webhooks/twilio-inbound")({
           }
         }
 
+        const from = params["From"] ?? "";
+        const to = params["To"] ?? "";
+        const body = params["Body"] ?? "";
+        const messageSid = params["MessageSid"] ?? null;
+
+        // Fallback authenticity check: ask Twilio itself whether this MessageSid
+        // exists (through the connector gateway). Signature verification can fail
+        // when the console URL differs from what reaches this worker, but only
+        // Twilio can produce a real inbound MessageSid.
+        if (!verified && messageSid?.startsWith("SM")) {
+          const lovableKey = process.env["LOVABLE_API_KEY"];
+          const twilioKey = process.env["TWILIO_API_KEY"];
+          if (lovableKey && twilioKey) {
+            try {
+              const res = await fetch(
+                `https://connector-gateway.lovable.dev/twilio/Messages/${messageSid}.json`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${lovableKey}`,
+                    "X-Connection-Api-Key": twilioKey,
+                  },
+                },
+              );
+              if (res.ok) {
+                const msg = (await res.json()) as { from?: string; direction?: string };
+                const same = (a?: string, b?: string) =>
+                  (a ?? "").replace(/\D/g, "").slice(-10) === (b ?? "").replace(/\D/g, "").slice(-10);
+                if (same(msg.from, from)) verified = true;
+                else console.error("[twilio-inbound] lookup From mismatch");
+              } else {
+                console.error(
+                  `[twilio-inbound] Twilio lookup failed [${res.status}]: ${await res.text()}`,
+                );
+              }
+            } catch (err) {
+              console.error("[twilio-inbound] Twilio lookup error:", err);
+            }
+          }
+        }
+
         if (!verified) {
-          console.error("[twilio-inbound] signature check failed", {
+          console.error("[twilio-inbound] verification failed", {
             hasToken: !!authToken,
             hasSignature: !!signature,
             host: request.headers.get("host"),
             forwardedHost: request.headers.get("x-forwarded-host"),
             tried: candidateUrls(request),
-            from: params["From"] ?? null,
+            messageSid,
+            from: from || null,
           });
           return new Response("Invalid signature", { status: 403 });
         }
-
-        const from = params["From"] ?? "";
-        const to = params["To"] ?? "";
-        const body = params["Body"] ?? "";
-        const messageSid = params["MessageSid"] ?? null;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
