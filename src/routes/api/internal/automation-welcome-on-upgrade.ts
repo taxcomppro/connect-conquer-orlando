@@ -109,8 +109,8 @@ async function run(): Promise<Response> {
 export const Route = createFileRoute("/api/internal/automation-welcome-on-upgrade")({
   server: {
     handlers: {
-      GET: async ({ request }) => checkCronAuth(request) ?? (await run()),
-      POST: async ({ request }) => checkCronAuth(request) ?? (await run()),
+      GET: async ({ request }) => (await checkCronAuth(request)) ?? (await run()),
+      POST: async ({ request }) => (await checkCronAuth(request)) ?? (await run()),
     },
   },
 });

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/public/env-check")({
       GET: async () => {
         const presence: Record<string, boolean> = {};
         for (const name of EXPECTED) {
-          presence[name] = Boolean(readEnv(name));
+          presence[name] = Boolean(await readEnv(name));
         }
         return Response.json({ ok: true, presence });
       },
