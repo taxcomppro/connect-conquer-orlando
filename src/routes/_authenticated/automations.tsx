@@ -18,6 +18,11 @@ import {
   type TriggerEvent,
 } from "@/lib/sms-triggers.functions";
 import { OUTCOMES, OUTCOME_LABEL } from "@/lib/leads";
+import {
+  runAutomationNow,
+  AUTOMATION_RULES,
+  type AutomationRuleKey,
+} from "@/lib/automation-run.functions";
 
 export const Route = createFileRoute("/_authenticated/automations")({
   head: () => ({
@@ -165,6 +170,8 @@ function AutomationsPage() {
         accent="text rules"
         lede="Pick a moment in the booth flow and Membership Hub sends the matching text on its own — once per lead, from the booth number."
       />
+
+      <EmailAutomationRunner />
 
       <Panel className="mt-6">
         <SectionLabel>New rule</SectionLabel>
