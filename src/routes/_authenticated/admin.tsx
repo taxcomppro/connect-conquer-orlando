@@ -52,6 +52,19 @@ function AdminPanel() {
           <SectionLabel>Booth controls</SectionLabel>
           <div className="grid gap-3 sm:grid-cols-2">
             <Link
+              to="/funnel"
+              className="rounded-2xl border border-go/40 bg-go/10 p-5 transition-transform hover:-translate-y-0.5"
+            >
+              <div className="text-2xl">📈</div>
+              <div className="mt-3 font-display text-xl">Funnel Overview</div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                How many contacts sit in each stage — captured, nudged, free account, upgrade offer,
+                paid — plus what the automations have sent.
+              </p>
+              <div className="mt-4 text-sm text-go">View funnel →</div>
+            </Link>
+
+            <Link
               to="/automations"
               className="rounded-2xl border border-signal-line bg-signal-soft p-5 transition-transform hover:-translate-y-0.5"
             >

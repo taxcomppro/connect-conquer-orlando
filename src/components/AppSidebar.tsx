@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
+  Filter,
   LayoutDashboard,
   Inbox,
   Megaphone,
@@ -28,6 +29,7 @@ import {
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
+  { label: "Funnel", to: "/funnel", icon: Filter },
   { label: "Inbox", to: "/inbox", icon: Inbox },
   { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
