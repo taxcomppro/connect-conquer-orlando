@@ -355,3 +355,59 @@ function AutomationsPage() {
     </FieldShell>
   );
 }
+
+/** Funnel email jobs: shows what each one does and lets staff run it now. */
+function EmailAutomationRunner() {
+  const runNow = useServerFn(runAutomationNow);
+  const [running, setRunning] = useState<AutomationRuleKey | null>(null);
+  const [results, setResults] = useState<Record<string, string>>({});
+
+  async function trigger(rule: AutomationRuleKey) {
+    setRunning(rule);
+    try {
+      const result = await runNow({ data: { rule } });
+      const summary = result.ok
+        ? `${result.sent} sent · ${result.checked} checked${result.detail ? ` · ${result.detail}` : ""}`
+        : `Didn't run: ${result.detail ?? result.error ?? "unknown problem"}`;
+      setResults((prev) => ({ ...prev, [rule]: summary }));
+      if (result.ok) toast.success(`Ran: ${summary}`);
+      else toast.error(summary);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Couldn't run that automation.";
+      setResults((prev) => ({ ...prev, [rule]: message }));
+      toast.error(message);
+    } finally {
+      setRunning(null);
+    }
+  }
+
+  return (
+    <Panel className="mt-6">
+      <SectionLabel>Funnel emails</SectionLabel>
+      <p className="mt-2 text-sm text-muted-foreground">
+        These run on their own schedule. Use Run now to send the next batch immediately and see
+        exactly what happened.
+      </p>
+      <ul className="mt-4 grid gap-3">
+        {AUTOMATION_RULES.map((rule) => (
+          <li key={rule.key} className="rounded-lg border border-border bg-panel px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="font-medium">{rule.label}</p>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={running !== null}
+                onClick={() => void trigger(rule.key)}
+              >
+                {running === rule.key ? "Running…" : "Run now"}
+              </Button>
+            </div>
+            {results[rule.key] ? (
+              <p className="mt-2 text-sm text-muted-foreground">{results[rule.key]}</p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
