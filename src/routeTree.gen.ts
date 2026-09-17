@@ -21,6 +21,7 @@ import { Route as AuthenticatedBroadcastRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDubRouteImport } from './routes/_authenticated/dub'
 import { Route as AuthenticatedEventArchiveRouteImport } from './routes/_authenticated/event-archive'
+import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
@@ -104,6 +105,11 @@ const AuthenticatedEventArchiveRoute =
     path: '/event-archive',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/dub': typeof AuthenticatedDubRoute
   '/event-archive': typeof AuthenticatedEventArchiveRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -269,6 +276,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/dub': typeof AuthenticatedDubRoute
   '/event-archive': typeof AuthenticatedEventArchiveRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/scan': typeof AuthenticatedScanRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/dub': typeof AuthenticatedDubRoute
   '/_authenticated/event-archive': typeof AuthenticatedEventArchiveRoute
+  '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
@@ -341,6 +350,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dub'
     | '/event-archive'
+    | '/inbox'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -375,6 +385,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dub'
     | '/event-archive'
+    | '/inbox'
     | '/leads'
     | '/pipeline'
     | '/scan'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/dub'
     | '/_authenticated/event-archive'
+    | '/_authenticated/inbox'
     | '/_authenticated/leads'
     | '/_authenticated/pipeline'
     | '/_authenticated/scan'
@@ -538,6 +550,13 @@ declare module '@tanstack/react-router' {
       path: '/event-archive'
       fullPath: '/event-archive'
       preLoaderRoute: typeof AuthenticatedEventArchiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inbox': {
+      id: '/_authenticated/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof AuthenticatedInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leads': {
@@ -698,6 +717,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDubRoute: typeof AuthenticatedDubRoute
   AuthenticatedEventArchiveRoute: typeof AuthenticatedEventArchiveRoute
+  AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
@@ -716,6 +736,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDubRoute: AuthenticatedDubRoute,
   AuthenticatedEventArchiveRoute: AuthenticatedEventArchiveRoute,
+  AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,

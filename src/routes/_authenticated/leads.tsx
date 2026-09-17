@@ -90,7 +90,9 @@ function LeadsPage() {
         return false;
       if (["hot", "warm", "cold"].includes(filter) && lead.rating !== filter) return false;
       if (!query) return true;
-      return [lead.first_name, lead.last_name, lead.company, lead.email, lead.attendee_id]
+      const digits = query.replace(/\D/g, "");
+      if (digits.length >= 3 && (lead.phone ?? "").replace(/\D/g, "").includes(digits)) return true;
+      return [lead.first_name, lead.last_name, lead.company, lead.email, lead.phone, lead.attendee_id]
         .filter(Boolean)
         .some((field) => String(field).toLowerCase().includes(query));
     });
@@ -139,7 +141,7 @@ function LeadsPage() {
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search name, firm, email or badge ID"
+          placeholder="Search name, firm, email, phone or badge ID"
           className="h-11"
         />
         <Button variant="outline" onClick={exportCsv} className="h-11 sm:w-40">
