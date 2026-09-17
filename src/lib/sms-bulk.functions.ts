@@ -25,7 +25,8 @@ export const sendBulkSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: {
-      leadIds: string[];
+      leadIds?: string[] | undefined;
+      phoneContacts?: Array<{ name: string; phone: string; email?: string | null }> | undefined;
       body: string;
       requireConsent?: boolean | undefined;
       skipAlreadyTexted?: boolean | undefined;
@@ -33,9 +34,15 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       const body = input.body.trim();
       if (!body) throw new Error("Write a message first.");
       if (body.length > 1600) throw new Error("Message is too long (max 1600 characters).");
-      if (!input.leadIds?.length) throw new Error("No leads selected.");
+      const phoneContacts = (input.phoneContacts ?? [])
+        .filter((c) => (c.phone ?? "").replace(/\D/g, "").length >= 10)
+        .slice(0, 500);
+      if (!input.leadIds?.length && phoneContacts.length === 0) {
+        throw new Error("No leads selected.");
+      }
       return {
-        leadIds: input.leadIds.slice(0, 500),
+        leadIds: (input.leadIds ?? []).slice(0, 500),
+        phoneContacts,
         body,
         requireConsent: input.requireConsent !== false,
         skipAlreadyTexted: Boolean(input.skipAlreadyTexted),
