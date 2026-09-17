@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useInbound } from "@/hooks/useInbound";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -16,6 +17,7 @@ function AuthenticatedLayout() {
   const initialHref = useRef(href);
   const redirected = useRef(false);
   const [displayName, setDisplayName] = useState("");
+  const { unread } = useInbound({ notify: true });
 
   useEffect(() => {
     if (!loading && !session && !redirected.current) {
@@ -56,7 +58,7 @@ function AuthenticatedLayout() {
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar unreadInbox={unread} />
       <SidebarInset className="basis-0 min-w-0 max-w-full flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center border-b border-border bg-background/95 px-4 backdrop-blur md:px-5">
           <SidebarTrigger aria-label="Toggle navigation" />

@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   LayoutDashboard,
+  Inbox,
   Megaphone,
   MessagesSquare,
   ScanLine,
@@ -27,13 +28,14 @@ import {
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Pipeline", to: "/pipeline", icon: BarChart3 },
+  { label: "Inbox", to: "/inbox", icon: Inbox },
   { label: "Leads", to: "/leads", icon: Users },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
   { label: "Automations", to: "/automations", icon: MessagesSquare },
   { label: "Admin", to: "/admin", icon: Settings },
 ] as const;
 
-export function AppSidebar() {
+export function AppSidebar({ unreadInbox = 0 }: { unreadInbox?: number }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { setOpenMobile } = useSidebar();
 
@@ -68,6 +70,11 @@ export function AppSidebar() {
                       <Link to={item.to} onClick={() => setOpenMobile(false)}>
                         <item.icon aria-hidden="true" />
                         <span>{item.label}</span>
+                        {item.to === "/inbox" && unreadInbox > 0 ? (
+                          <span className="ml-auto rounded-full border border-signal-line bg-signal-soft px-1.5 py-0.5 font-mono text-[10px] text-signal group-data-[collapsible=icon]:hidden">
+                            {unreadInbox}
+                          </span>
+                        ) : null}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
