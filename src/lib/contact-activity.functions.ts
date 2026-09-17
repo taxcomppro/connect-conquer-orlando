@@ -206,9 +206,12 @@ export const getContactActivity = createServerFn({ method: "POST" })
         }
       }
 
-      // Texts — sent by staff (matched by lead) and replies (matched by phone).
+      // Texts — sent by staff (matched by lead) and replies (matched by phone,
+      // comparing the last ten digits so formatting differences still match).
       {
-        const phone = ((lead?.["phone"] ?? member?.phone ?? "") as string).trim();
+        const digits = (value: string | null | undefined) =>
+          (value ?? "").replace(/\D/g, "").slice(-10);
+        const phoneKey = digits((lead?.["phone"] ?? member?.phone ?? "") as string);
         const seen = new Set<string>();
         const batches: Array<Record<string, any>[]> = [];
         if (lead) {
@@ -219,13 +222,20 @@ export const getContactActivity = createServerFn({ method: "POST" })
             .order("sent_at", { ascending: false });
           batches.push(sms ?? []);
         }
-        if (phone) {
-          const { data: replies } = await supabase
+        if (phoneKey) {
+          const { data: recent } = await supabase
             .from("sms_messages")
             .select("*")
-            .eq("contact_phone", phone)
-            .order("sent_at", { ascending: false });
-          batches.push(replies ?? []);
+            .order("sent_at", { ascending: false })
+            .limit(2000);
+          batches.push(
+            (recent ?? []).filter(
+              (message) =>
+                digits(message["contact_phone"]) === phoneKey ||
+                digits(message["to_number"]) === phoneKey ||
+                digits(message["from_number"]) === phoneKey,
+            ),
+          );
         }
         for (const batch of batches) {
           for (const message of batch) {
@@ -247,6 +257,7 @@ export const getContactActivity = createServerFn({ method: "POST" })
           }
         }
       }
+
 
       // Emails.
       if (email) {
