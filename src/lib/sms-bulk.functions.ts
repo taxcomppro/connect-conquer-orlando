@@ -133,5 +133,53 @@ export const sendBulkSms = createServerFn({ method: "POST" })
       }
     }
 
+    // Site members who have a phone on file but no Field Hub lead record —
+    // text them directly and log against their phone number.
+    for (const contact of data.phoneContacts) {
+      const name = contact.name?.trim() || "Member";
+      const to = normalizePhone(contact.phone);
+      const first = name.split(/\s+/)[0] ?? name;
+      const body = renderTemplate(data.body, {
+        lead: { first_name: first, last_name: name.slice(first.length).trim(), company: null },
+        repName: staff?.display_name ?? null,
+        signupLink: "",
+      });
+
+      try {
+        const sendResult = await sendSms({
+          to,
+          body,
+          lovableApiKey: process.env["LOVABLE_API_KEY"] ?? "",
+          twilioApiKey: process.env["TWILIO_API_KEY"] ?? "",
+          from: process.env["TWILIO_FROM_NUMBER"],
+        });
+        await supabase.from("sms_messages").insert({
+          lead_id: null,
+          contact_phone: to,
+          to_number: sendResult.to,
+          from_number: sendResult.from,
+          body: sendResult.body,
+          status: sendResult.status,
+          twilio_sid: sendResult.sid || null,
+          sent_by: userId,
+        });
+        result.sent += 1;
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : "Send failed";
+        await supabase.from("sms_messages").insert({
+          lead_id: null,
+          contact_phone: to,
+          to_number: to,
+          from_number: "bulk",
+          body,
+          status: "failed",
+          error: reason,
+          sent_by: userId,
+        });
+        result.failed += 1;
+        if (result.errors.length < 5) result.errors.push({ name, reason });
+      }
+    }
+
     return result;
   });
