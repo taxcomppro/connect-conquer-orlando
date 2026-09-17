@@ -27,7 +27,7 @@ export function useInbound(options: { notify?: boolean } = {}) {
 
   const refresh = useCallback(async () => {
     try {
-      const result = await fetchInbound({ data: {} });
+      const result = await fetchInbound();
       setItems(result.items);
 
       if (options.notify) {

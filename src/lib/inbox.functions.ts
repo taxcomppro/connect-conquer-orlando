@@ -45,15 +45,24 @@ export const listInbound = createServerFn({ method: "POST" })
       ),
     ];
 
+    type LeadRow = {
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      email: string | null;
+      phone: string | null;
+      attendee_id: string;
+    };
+
     const { data: leads } = leadIds.length
       ? await supabase
           .from("leads")
           .select("id, first_name, last_name, email, phone, attendee_id")
           .in("id", leadIds)
-      : { data: [] };
+      : { data: [] as LeadRow[] };
 
     const leadById = new Map((leads ?? []).map((lead) => [lead.id, lead]));
-    const phoneIndex = new Map<string, (typeof leads)[number]>();
+    const phoneIndex = new Map<string, LeadRow>();
     for (const lead of leads ?? []) {
       const key = digitsOnly(lead.phone).slice(-10);
       if (key && !phoneIndex.has(key)) phoneIndex.set(key, lead);
