@@ -79,21 +79,22 @@ function BroadcastPage() {
     if (!user) return;
     let active = true;
     void (async () => {
-      const [{ data, error }, tpl, memberResult, unlistedResult] = await Promise.all([
+      const [{ data, error }, tpl, memberResult] = await Promise.all([
         supabase.from("leads").select("*").neq("outcome", "archived").order("scanned_at", { ascending: false }),
         loadTemplates().catch(() => ({ templates: [] as SmsTemplate[] })),
         fetchMembersSafe(),
-        fetchUnlistedSafe(),
       ]);
       if (!active) return;
       if (error) toast.error("Couldn't load leads.");
       setLeads(data ?? []);
       setTemplates((tpl.templates ?? []) as SmsTemplate[]);
       setMembers(memberResult.members ?? []);
+      setLoading(false);
+      const unlistedResult = await fetchUnlistedSafe();
+      if (!active) return;
       setUnlistedEmails(
         new Set(unlistedResult.map((m) => normalizeEmail(m.email)).filter(Boolean)),
       );
-      setLoading(false);
     })();
     return () => {
       active = false;

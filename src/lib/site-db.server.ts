@@ -15,7 +15,7 @@ import { Pool } from "pg";
 
 let _pool: Pool | undefined;
 
-const CONNECTION_TIMEOUT_MS = 8_000;
+const CONNECTION_TIMEOUT_MS = 12_000;
 const MEMBER_CACHE_MS = 30_000;
 let memberCache: { members: SiteMember[]; loadedAt: number } | undefined;
 let memberRequest: Promise<SiteMember[]> | undefined;

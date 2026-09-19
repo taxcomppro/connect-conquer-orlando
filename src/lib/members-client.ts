@@ -9,7 +9,9 @@ export interface MembersResult {
   error: string | null;
 }
 
-const MEMBER_FETCH_TIMEOUT_MS = 20_000;
+// The database connection retries once, so this must outlast two 12-second
+// connection attempts instead of hiding a successful retry from the page.
+const MEMBER_FETCH_TIMEOUT_MS = 30_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: () => T): Promise<T> {
   return Promise.race([
