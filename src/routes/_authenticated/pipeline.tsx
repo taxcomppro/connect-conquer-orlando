@@ -84,10 +84,14 @@ function PipelinePage() {
           setLeads(leadResult.data ?? []);
           setLoading(false);
         });
-      const [memberResult, unlisted] = await Promise.all([fetchMembersSafe(), fetchUnlistedSafe()]);
+      // Load the core tier board first. The optional marketplace-listing audience
+      // uses a separate query and must never delay or hide all member columns.
+      const memberResult = await fetchMembersSafe();
       if (!active) return;
       setMembers(memberResult.members);
       setMemberError(memberResult.error);
+      const unlisted = await fetchUnlistedSafe();
+      if (!active) return;
       setUnlistedEmails(new Set(unlisted.map((m) => normalizeEmail(m.email)).filter(Boolean)));
     })();
     return () => {

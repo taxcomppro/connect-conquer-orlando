@@ -48,12 +48,22 @@ function pool(): Pool {
 }
 
 async function resetPool(failedPool: Pool) {
-  if (_pool === failedPool) _pool = undefined;
+  // Another concurrent query may already have detached and closed this pool.
+  // Only the caller that detaches it should attempt to close it.
+  if (_pool !== failedPool) return;
+  _pool = undefined;
   try {
     await failedPool.end();
   } catch (error) {
     console.error("[site-db] failed to close unhealthy pool:", error);
   }
+}
+
+function isConnectionFailure(error: unknown): boolean {
+  if (!(error instanceof Error)) return true;
+  const code = "code" in error ? String(error.code) : "";
+  if (code === "42501") return false;
+  return /connect|connection|timeout|terminated|closed|socket|econn/i.test(error.message);
 }
 
 /** Runs a read and retries once with a fresh pool after a connection failure. */
@@ -68,6 +78,7 @@ async function queryWithRetry<T>(label: string, text: string, values: unknown[] 
     } catch (error) {
       lastError = error;
       console.error(`[site-db] ${label} attempt ${attempt} failed:`, error);
+      if (!isConnectionFailure(error)) throw error;
       await resetPool(activePool);
     }
   }
