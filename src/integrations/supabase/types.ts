@@ -244,6 +244,50 @@ export type Database = {
           },
         ]
       }
+      email_events: {
+        Row: {
+          contact_email: string
+          created_at: string
+          email_message_id: string | null
+          event_type: string
+          id: string
+          link_url: string | null
+          occurred_at: string
+          provider_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          contact_email: string
+          created_at?: string
+          email_message_id?: string | null
+          event_type: string
+          id?: string
+          link_url?: string | null
+          occurred_at?: string
+          provider_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          contact_email?: string
+          created_at?: string
+          email_message_id?: string | null
+          event_type?: string
+          id?: string
+          link_url?: string | null
+          occurred_at?: string
+          provider_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_email_message_id_fkey"
+            columns: ["email_message_id"]
+            isOneToOne: false
+            referencedRelation: "email_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_messages: {
         Row: {
           body: string
