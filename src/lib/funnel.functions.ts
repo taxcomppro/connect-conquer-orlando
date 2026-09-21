@@ -52,7 +52,17 @@ export const getFunnelStats = createServerFn({ method: "POST" })
         .select("id", { count: "exact", head: true })
         .eq("direction", "inbound")
         .gte("sent_at", since),
+      supabase
+        .from("email_events")
+        .select("contact_email, event_type")
+        .in("event_type", ["opened", "clicked"])
+        .gte("occurred_at", since),
     ]);
+
+    const opens = (engagement7.data ?? []).filter((row) => row.event_type === "opened");
+    const clicks = (engagement7.data ?? []).filter((row) => row.event_type === "clicked");
+    const openedPeople = new Set(opens.map((row) => row.contact_email.toLowerCase()));
+    const clickedPeople = new Set(clicks.map((row) => row.contact_email.toLowerCase()));
 
     const leadRows = leads.data ?? [];
     const ruleCounts: Record<string, number> = {};
@@ -73,5 +83,9 @@ export const getFunnelStats = createServerFn({ method: "POST" })
       emailsSent7: emails7.count ?? 0,
       smsSent7: sms7.count ?? 0,
       repliesIn7: replies7.count ?? 0,
+      emailOpens7: opens.length,
+      emailClicks7: clicks.length,
+      openedPeople7: openedPeople.size,
+      clickedPeople7: clickedPeople.size,
     };
   });
