@@ -283,6 +283,28 @@ export const getContactActivity = createServerFn({ method: "POST" })
         }
       }
 
+      // Email opens and clicks reported back by the email provider.
+      if (email) {
+        const { data: events } = await supabase
+          .from("email_events")
+          .select("*")
+          .ilike("contact_email", email)
+          .in("event_type", ["opened", "clicked"])
+          .order("occurred_at", { ascending: false });
+        for (const event of events ?? []) {
+          timeline.push({
+            id: `email-event:${event.id}`,
+            kind: "email",
+            direction: "inbound",
+            title: event.event_type === "clicked" ? "Clicked a link in an email" : "Opened an email",
+            detail: event.link_url ?? null,
+            status: event.event_type,
+            error: null,
+            at: event.occurred_at,
+          });
+        }
+      }
+
       timeline.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
 
       const profile: ContactProfile = {
