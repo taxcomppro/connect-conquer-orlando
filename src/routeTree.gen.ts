@@ -41,6 +41,7 @@ import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 import { Route as ApiPublicSyncSiteConversionsRouteImport } from './routes/api/public/sync-site-conversions'
 import { Route as ApiPublicWebhooksMembershipRouteImport } from './routes/api/public/webhooks/membership'
+import { Route as ApiPublicWebhooksResendEventsRouteImport } from './routes/api/public/webhooks/resend-events'
 import { Route as ApiPublicWebhooksResendInboundRouteImport } from './routes/api/public/webhooks/resend-inbound'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicWebhooksTwilioInboundRouteImport } from './routes/api/public/webhooks/twilio-inbound'
@@ -217,6 +218,12 @@ const ApiPublicWebhooksMembershipRoute =
     path: '/api/public/webhooks/membership',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksResendEventsRoute =
+  ApiPublicWebhooksResendEventsRouteImport.update({
+    id: '/api/public/webhooks/resend-events',
+    path: '/api/public/webhooks/resend-events',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWebhooksResendInboundRoute =
   ApiPublicWebhooksResendInboundRouteImport.update({
     id: '/api/public/webhooks/resend-inbound',
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
+  '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/api/public/webhooks/twilio-inbound': typeof ApiPublicWebhooksTwilioInboundRoute
@@ -303,6 +311,7 @@ export interface FileRoutesByTo {
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
+  '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/api/public/webhooks/twilio-inbound': typeof ApiPublicWebhooksTwilioInboundRoute
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
+  '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/api/public/webhooks/twilio-inbound': typeof ApiPublicWebhooksTwilioInboundRoute
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
+    | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
     | '/api/public/webhooks/stripe'
     | '/api/public/webhooks/twilio-inbound'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
+    | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
     | '/api/public/webhooks/stripe'
     | '/api/public/webhooks/twilio-inbound'
@@ -452,6 +464,7 @@ export interface FileRouteTypes {
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
     | '/api/public/webhooks/membership'
+    | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
     | '/api/public/webhooks/stripe'
     | '/api/public/webhooks/twilio-inbound'
@@ -473,6 +486,7 @@ export interface RootRouteChildren {
   ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
   ApiPublicSyncSiteConversionsRoute: typeof ApiPublicSyncSiteConversionsRoute
   ApiPublicWebhooksMembershipRoute: typeof ApiPublicWebhooksMembershipRoute
+  ApiPublicWebhooksResendEventsRoute: typeof ApiPublicWebhooksResendEventsRoute
   ApiPublicWebhooksResendInboundRoute: typeof ApiPublicWebhooksResendInboundRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
   ApiPublicWebhooksTwilioInboundRoute: typeof ApiPublicWebhooksTwilioInboundRoute
@@ -704,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksMembershipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/resend-events': {
+      id: '/api/public/webhooks/resend-events'
+      path: '/api/public/webhooks/resend-events'
+      fullPath: '/api/public/webhooks/resend-events'
+      preLoaderRoute: typeof ApiPublicWebhooksResendEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/resend-inbound': {
       id: '/api/public/webhooks/resend-inbound'
       path: '/api/public/webhooks/resend-inbound'
@@ -790,6 +811,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
   ApiPublicSyncSiteConversionsRoute: ApiPublicSyncSiteConversionsRoute,
   ApiPublicWebhooksMembershipRoute: ApiPublicWebhooksMembershipRoute,
+  ApiPublicWebhooksResendEventsRoute: ApiPublicWebhooksResendEventsRoute,
   ApiPublicWebhooksResendInboundRoute: ApiPublicWebhooksResendInboundRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
   ApiPublicWebhooksTwilioInboundRoute: ApiPublicWebhooksTwilioInboundRoute,

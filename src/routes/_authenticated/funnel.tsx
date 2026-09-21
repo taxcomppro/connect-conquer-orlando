@@ -197,6 +197,26 @@ function FunnelPage() {
         </Panel>
       </div>
 
+      <SectionLabel>Email engagement, last 7 days</SectionLabel>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Panel>
+          <div className="eyebrow">Opened</div>
+          <div className="mt-1 font-mono text-2xl">{funnel?.openedPeople7 ?? 0}</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            people · {funnel?.emailOpens7 ?? 0} total opens ·{" "}
+            {pct(funnel?.openedPeople7 ?? 0, funnel?.emailsSent7 ?? 0)} of sends
+          </p>
+        </Panel>
+        <Panel>
+          <div className="eyebrow">Clicked a link</div>
+          <div className="mt-1 font-mono text-2xl">{funnel?.clickedPeople7 ?? 0}</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            people · {funnel?.emailClicks7 ?? 0} total clicks ·{" "}
+            {pct(funnel?.clickedPeople7 ?? 0, funnel?.emailsSent7 ?? 0)} of sends
+          </p>
+        </Panel>
+      </div>
+
       {memberError ? (
         <p className="mt-4 text-xs text-muted-foreground">
           Membership records are unavailable right now, so the free and paid stages show zero.
