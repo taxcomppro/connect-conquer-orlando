@@ -37,6 +37,15 @@ export const Route = createFileRoute("/api/public/webhooks/resend-inbound")({
 
         const event = JSON.parse(rawBody);
         if (event.type !== "email.received") {
+          // Delivery/engagement events (opens, clicks) may arrive on this same
+          // webhook when every event type is enabled for it.
+          const { isTrackedResendEvent, recordResendEvent } = await import(
+            "@/lib/resend-events.server"
+          );
+          if (isTrackedResendEvent(event.type)) {
+            const result = await recordResendEvent(event);
+            return Response.json({ ok: true, ...result });
+          }
           return Response.json({ ok: true, skipped: event.type });
         }
 
