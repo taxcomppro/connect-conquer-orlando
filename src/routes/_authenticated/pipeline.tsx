@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MessageComposer, type ComposeContact } from "@/components/MessageComposer";
 import { leadName, type Lead } from "@/lib/leads";
 import type { MemberRow } from "@/lib/members.functions";
-import { fetchMembersSafe, fetchUnlistedSafe } from "@/lib/members-client";
+import { cachedMembers, fetchMembersSafe, fetchUnlistedSafe } from "@/lib/members-client";
 import { normalizeEmail, TIER_AUDIENCES, UNLISTED_AUDIENCE, type Tier } from "@/lib/audience";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
@@ -50,6 +50,15 @@ const TIER_COLUMNS: { key: "lead" | Tier; label: string; tone: string; paid: boo
   },
 ];
 
+// Only the columns the board renders or searches — a full row per lead is a
+// much larger payload for no visible benefit.
+const LEAD_COLUMNS = "id,attendee_id,first_name,last_name,email,phone,outcome,scanned_at";
+
+type LeadCard = Pick<
+  Lead,
+  "id" | "attendee_id" | "first_name" | "last_name" | "email" | "phone" | "outcome" | "scanned_at"
+>;
+
 type Card = {
   id: string;
   name: string;
@@ -61,8 +70,8 @@ type Card = {
 };
 
 function PipelinePage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [leads, setLeads] = useState<LeadCard[]>([]);
+  const [members, setMembers] = useState<MemberRow[]>(() => cachedMembers() ?? []);
   const [memberError, setMemberError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -76,7 +85,7 @@ function PipelinePage() {
       // Leads render as soon as they're back — members fill in (or error) independently.
       void supabase
         .from("leads")
-        .select("*")
+        .select(LEAD_COLUMNS)
         .neq("outcome", "archived")
         .order("scanned_at", { ascending: false })
         .then((leadResult) => {
@@ -101,7 +110,7 @@ function PipelinePage() {
 
   const columns = useMemo(() => {
     const memberEmails = new Set(members.map((m) => normalizeEmail(m.email)).filter(Boolean));
-    const leadByEmail = new Map<string, Lead>();
+    const leadByEmail = new Map<string, LeadCard>();
     for (const lead of leads) {
       const email = normalizeEmail(lead.email);
       if (email && !leadByEmail.has(email)) leadByEmail.set(email, lead);
