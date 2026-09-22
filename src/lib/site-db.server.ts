@@ -74,8 +74,10 @@ async function queryWithRetry<T>(label: string, text: string, values: unknown[] 
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const activePool = pool();
+    const startedAt = Date.now();
     try {
       const { rows } = await activePool.query(text, values);
+      console.log(`[site-db] ${label} ok in ${Date.now() - startedAt}ms (${rows.length} rows)`);
       return rows as T[];
     } catch (error) {
       lastError = error;
