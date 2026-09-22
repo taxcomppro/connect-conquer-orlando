@@ -186,9 +186,16 @@ export async function listAllMembers(): Promise<SiteMember[]> {
       }
       throw error;
     })
-    .finally(() => {
-      memberRequest = undefined;
-    });
+      .finally(() => {
+        memberRequest = undefined;
+      });
+  }
+
+  // Stale cache: hand it back now and let the refresh above finish in the background.
+  if (memberCache) {
+    void memberRequest.catch(() => undefined);
+    return memberCache.members;
+  }
 
   return memberRequest;
 }
