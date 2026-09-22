@@ -12,6 +12,10 @@ export type MemberRow = {
   currentPeriodEnd: string | null;
 };
 
+function isMemberTier(tier: string): tier is MemberRow["tier"] {
+  return tier === "FREE" || tier === "VIP" || tier === "MARKETPLACE" || tier === "MARKETPLACE_PLUS";
+}
+
 /** Staff-only: the full member list from the main site, read-only. */
 export const listMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -69,16 +73,20 @@ export const listMembers = createServerFn({ method: "POST" })
         .order("source_created_at", { ascending: false });
       if (!cacheError && cached && cached.length > 0) {
         return {
-          members: cached.map((m) => ({
-            userId: m.user_id,
-            email: m.email,
-            name: m.name,
-            phone: m.phone,
-            tier: m.tier,
-            subscriptionStatus: m.subscription_status,
-            subscriptionPlan: m.subscription_plan,
-            currentPeriodEnd: m.current_period_end,
-          })),
+          members: cached.flatMap((m) =>
+            isMemberTier(m.tier)
+              ? [{
+                  userId: m.user_id,
+                  email: m.email,
+                  name: m.name,
+                  phone: m.phone,
+                  tier: m.tier,
+                  subscriptionStatus: m.subscription_status,
+                  subscriptionPlan: m.subscription_plan,
+                  currentPeriodEnd: m.current_period_end,
+                }]
+              : [],
+          ),
           error: null,
         };
       }
