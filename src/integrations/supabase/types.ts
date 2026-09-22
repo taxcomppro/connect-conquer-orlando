@@ -704,6 +704,45 @@ export type Database = {
           },
         ]
       }
+      site_members_cache: {
+        Row: {
+          current_period_end: string | null
+          email: string
+          name: string
+          phone: string | null
+          source_created_at: string | null
+          subscription_plan: string | null
+          subscription_status: string | null
+          synced_at: string
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          current_period_end?: string | null
+          email: string
+          name?: string
+          phone?: string | null
+          source_created_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          synced_at?: string
+          tier: string
+          user_id: string
+        }
+        Update: {
+          current_period_end?: string | null
+          email?: string
+          name?: string
+          phone?: string | null
+          source_created_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          synced_at?: string
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sms_messages: {
         Row: {
           body: string
