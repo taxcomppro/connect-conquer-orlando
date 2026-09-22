@@ -25,9 +25,33 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: () => T): Pro
 const TIMEOUT_ERROR =
   "Membership records took too long to respond. Refresh to try again.";
 
+const CACHE_KEY = "fieldhub:members-cache";
+
+/** Members already loaded this session, so revisiting a page paints instantly. */
+export function cachedMembers(): MemberRow[] | null {
+  if (typeof sessionStorage === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as MemberRow[];
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeMembers(members: MemberRow[]) {
+  if (typeof sessionStorage === "undefined" || members.length === 0) return;
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(members));
+  } catch {
+    /* quota or private mode — caching is optional */
+  }
+}
+
 /** Fetch all site members, never hanging the page — resolves with an error string instead. */
 export async function fetchMembersSafe(): Promise<MembersResult> {
-  return withTimeout(
+  const result = await withTimeout(
     listMembers().catch((error: unknown) => ({
       members: [] as MemberRow[],
       error: error instanceof Error ? error.message : "Couldn't load membership records.",
@@ -35,6 +59,14 @@ export async function fetchMembersSafe(): Promise<MembersResult> {
     MEMBER_FETCH_TIMEOUT_MS,
     () => ({ members: [] as MemberRow[], error: TIMEOUT_ERROR }),
   );
+  if (result.members.length > 0) {
+    storeMembers(result.members);
+    return result;
+  }
+  // Fall back to whatever this session already loaded rather than an empty board.
+  const cached = cachedMembers();
+  if (cached) return { members: cached, error: null };
+  return result;
 }
 
 /** Fetch unactivated sellers, silently empty on failure. */
