@@ -110,7 +110,7 @@ function PipelinePage() {
 
   const columns = useMemo(() => {
     const memberEmails = new Set(members.map((m) => normalizeEmail(m.email)).filter(Boolean));
-    const leadByEmail = new Map<string, Lead>();
+    const leadByEmail = new Map<string, LeadCard>();
     for (const lead of leads) {
       const email = normalizeEmail(lead.email);
       if (email && !leadByEmail.has(email)) leadByEmail.set(email, lead);
