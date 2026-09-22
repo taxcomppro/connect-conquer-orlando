@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
+import { supabase } from "@/integrations/supabase/client";
 import { listInbound, type InboundItem } from "@/lib/inbox.functions";
 
 const SEEN_KEY = "fieldhub:inbox-seen-at";
@@ -27,6 +28,12 @@ export function useInbound(options: { notify?: boolean } = {}) {
 
   const refresh = useCallback(async () => {
     try {
+      // Don't poll while signed out (e.g. on /auth) — the call would 401.
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        setItems([]);
+        return;
+      }
       const result = await fetchInbound();
       setItems(result.items);
 
