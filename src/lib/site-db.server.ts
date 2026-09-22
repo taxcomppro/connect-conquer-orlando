@@ -12,6 +12,7 @@
  * main site's own DATABASE_URL, so the two can never be confused.
  */
 import { Pool } from "pg";
+import { setDefaultResultOrder } from "node:dns";
 
 let _pool: Pool | undefined;
 
@@ -32,6 +33,9 @@ function pool(): Pool {
       "SITE_DATABASE_URL is not set — the read-only connection to the main site's database isn't configured yet.",
     );
   }
+  // The pooler currently advertises IPv6 addresses that accept TCP but stall
+  // during the Postgres handshake. Prefer its healthy IPv4 gateways instead.
+  setDefaultResultOrder("ipv4first");
   _pool = new Pool({
     connectionString,
     // A couple of connections per instance: with only one, a second read on the
