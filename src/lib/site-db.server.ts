@@ -16,6 +16,7 @@ import { Pool } from "pg";
 let _pool: Pool | undefined;
 
 const CONNECTION_TIMEOUT_MS = 12_000;
+const HARD_TIMEOUT_MS = 13_000;
 // Members change slowly, so a warm cache is served immediately and refreshed
 // in the background instead of making the board wait for a fresh round-trip.
 const MEMBER_CACHE_MS = 300_000;
@@ -33,9 +34,9 @@ function pool(): Pool {
   }
   _pool = new Pool({
     connectionString,
-    // Serverless instances should hold at most one database connection. A
-    // larger per-instance pool can exhaust the database when Vercel scales.
-    max: 1,
+    // A couple of connections per instance: with only one, a second read on the
+    // same request waits behind the first and can hang past the page's timeout.
+    max: 3,
     ssl: { rejectUnauthorized: false },
     connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
     idleTimeoutMillis: 10_000,
@@ -77,7 +78,17 @@ async function queryWithRetry<T>(label: string, text: string, values: unknown[] 
     const activePool = pool();
     const startedAt = Date.now();
     try {
-      const { rows } = await activePool.query(text, values);
+      // Hard ceiling: pg's own timeouts don't cover waiting for a free client,
+      // so without this a busy pool can hang the request with no log at all.
+      const { rows } = await Promise.race([
+        activePool.query(text, values),
+        new Promise<never>((_, reject) => {
+          setTimeout(
+            () => reject(new Error(`${label} timed out after ${HARD_TIMEOUT_MS}ms`)),
+            HARD_TIMEOUT_MS,
+          );
+        }),
+      ]);
       console.log(`[site-db] ${label} ok in ${Date.now() - startedAt}ms (${rows.length} rows)`);
       return rows as T[];
     } catch (error) {
