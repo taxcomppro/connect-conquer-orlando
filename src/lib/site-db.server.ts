@@ -221,7 +221,11 @@ export async function listAllMemberEmails(): Promise<Set<string>> {
  * nothing listed yet. Used for the activation-nudge audience.
  */
 export async function listUnactivatedSellers(): Promise<SiteMember[]> {
-  return queryWithRetry<SiteMember>(
+  // The read-only role may not be allowed to read listings. Once that's clear,
+  // stop asking on every page load — it only costs time and log noise.
+  if (unlistedUnavailable) return [];
+  try {
+    return await queryWithRetry<SiteMember>(
     "listUnactivatedSellers",
     `select ${MEMBER_COLUMNS}
      from users u
