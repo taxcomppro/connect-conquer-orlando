@@ -11,3 +11,4 @@
 - [x] Fix Pipeline horizontal clipping inside the authenticated sidebar layout
 - [x] Rename current CRM branding to Membership Hub while preserving historical event wording
 - [x] Show the signed-in staff name and reorganize DUB/Scan navigation
+- [x] Restore Pipeline member cards by removing the timed-out subscription-history join
