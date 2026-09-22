@@ -54,6 +54,11 @@ const TIER_COLUMNS: { key: "lead" | Tier; label: string; tone: string; paid: boo
 // much larger payload for no visible benefit.
 const LEAD_COLUMNS = "id,attendee_id,first_name,last_name,email,phone,outcome,scanned_at";
 
+type LeadCard = Pick<
+  Lead,
+  "id" | "attendee_id" | "first_name" | "last_name" | "email" | "phone" | "outcome" | "scanned_at"
+>;
+
 type Card = {
   id: string;
   name: string;
