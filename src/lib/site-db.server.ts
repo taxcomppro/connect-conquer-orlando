@@ -12,8 +12,10 @@
  * main site's own DATABASE_URL, so the two can never be confused.
  */
 import { Pool } from "pg";
+import { lookup } from "node:dns/promises";
 
 let _pool: Pool | undefined;
+let poolRequest: Promise<Pool> | undefined;
 
 const CONNECTION_TIMEOUT_MS = 12_000;
 const HARD_TIMEOUT_MS = 13_000;
@@ -24,31 +26,47 @@ let memberCache: { members: SiteMember[]; loadedAt: number } | undefined;
 let memberRequest: Promise<SiteMember[]> | undefined;
 let unlistedUnavailable = false;
 
-function pool(): Pool {
+async function pool(): Promise<Pool> {
   if (_pool) return _pool;
-  const connectionString = process.env["SITE_DATABASE_URL"];
-  if (!connectionString) {
-    throw new Error(
-      "SITE_DATABASE_URL is not set — the read-only connection to the main site's database isn't configured yet.",
-    );
+  if (!poolRequest) {
+    poolRequest = (async () => {
+      const connectionString = process.env["SITE_DATABASE_URL"];
+      if (!connectionString) {
+        throw new Error(
+          "SITE_DATABASE_URL is not set — the read-only connection to the main site's database isn't configured yet.",
+        );
+      }
+      const url = new URL(connectionString);
+      // This pooler advertises IPv6 gateways that accept TCP but stall during
+      // the Postgres handshake. Resolve and pin a healthy IPv4 gateway.
+      const { address } = await lookup(url.hostname, { family: 4 });
+      const nextPool = new Pool({
+        host: address,
+        port: Number(url.port || 5432),
+        user: decodeURIComponent(url.username),
+        password: decodeURIComponent(url.password),
+        database: decodeURIComponent(url.pathname.slice(1)),
+        // A couple of connections per instance: with only one, a second read on the
+        // same request waits behind the first and can hang past the page's timeout.
+        max: 3,
+        ssl: { rejectUnauthorized: false, servername: url.hostname },
+        connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
+        idleTimeoutMillis: 10_000,
+        query_timeout: CONNECTION_TIMEOUT_MS,
+        statement_timeout: CONNECTION_TIMEOUT_MS,
+        keepAlive: true,
+        allowExitOnIdle: true,
+      });
+      nextPool.on("error", (error) => {
+        console.error("[site-db] idle pool client error:", error);
+      });
+      _pool = nextPool;
+      return nextPool;
+    })().finally(() => {
+      poolRequest = undefined;
+    });
   }
-  _pool = new Pool({
-    connectionString,
-    // A couple of connections per instance: with only one, a second read on the
-    // same request waits behind the first and can hang past the page's timeout.
-    max: 3,
-    ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
-    idleTimeoutMillis: 10_000,
-    query_timeout: CONNECTION_TIMEOUT_MS,
-    statement_timeout: CONNECTION_TIMEOUT_MS,
-    keepAlive: true,
-    allowExitOnIdle: true,
-  });
-  _pool.on("error", (error) => {
-    console.error("[site-db] idle pool client error:", error);
-  });
-  return _pool;
+  return poolRequest;
 }
 
 async function resetPool(failedPool: Pool) {
@@ -75,7 +93,7 @@ async function queryWithRetry<T>(label: string, text: string, values: unknown[] 
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const activePool = pool();
+    const activePool = await pool();
     const startedAt = Date.now();
     try {
       // Hard ceiling: pg's own timeouts don't cover waiting for a free client,
