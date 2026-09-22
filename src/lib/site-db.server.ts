@@ -21,6 +21,7 @@ const CONNECTION_TIMEOUT_MS = 12_000;
 const MEMBER_CACHE_MS = 300_000;
 let memberCache: { members: SiteMember[]; loadedAt: number } | undefined;
 let memberRequest: Promise<SiteMember[]> | undefined;
+let unlistedUnavailable = false;
 
 function pool(): Pool {
   if (_pool) return _pool;
@@ -236,5 +237,16 @@ export async function listUnactivatedSellers(): Promise<SiteMember[]> {
        )
      order by u."createdAt" desc nulls last
      limit 500`,
-  );
+    );
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String(error.code) : "";
+    if (code === "42501") {
+      unlistedUnavailable = true;
+      console.error(
+        "[site-db] the read-only role can't read marketplace_listings — the 'not yet listed' audience is off until it's granted SELECT.",
+      );
+      return [];
+    }
+    throw error;
+  }
 }
