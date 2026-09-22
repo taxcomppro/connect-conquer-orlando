@@ -16,7 +16,9 @@ import { Pool } from "pg";
 let _pool: Pool | undefined;
 
 const CONNECTION_TIMEOUT_MS = 12_000;
-const MEMBER_CACHE_MS = 30_000;
+// Members change slowly, so a warm cache is served immediately and refreshed
+// in the background instead of making the board wait for a fresh round-trip.
+const MEMBER_CACHE_MS = 300_000;
 let memberCache: { members: SiteMember[]; loadedAt: number } | undefined;
 let memberRequest: Promise<SiteMember[]> | undefined;
 
@@ -153,19 +155,26 @@ export async function findRecentUpgrades(sinceIso: string): Promise<SiteMember[]
  * membership-tier pipeline board in Field Hub.
  */
 export async function listAllMembers(): Promise<SiteMember[]> {
-  if (memberCache && Date.now() - memberCache.loadedAt < MEMBER_CACHE_MS) {
-    return memberCache.members;
-  }
-  if (memberRequest) return memberRequest;
+  const fresh = memberCache && Date.now() - memberCache.loadedAt < MEMBER_CACHE_MS;
+  if (memberCache && fresh) return memberCache.members;
 
-  memberRequest = queryWithRetry<SiteMember>(
-    "listAllMembers",
-    `select ${MEMBER_COLUMNS}
-     from users u
-     left join subscriptions s on s."userId" = u.id
-     order by u."createdAt" desc nulls last
-     limit 5000`,
-  )
+  if (!memberRequest) {
+    memberRequest = queryWithRetry<SiteMember>(
+      "listAllMembers",
+      // One row per member: pick only that member's latest subscription instead
+      // of joining every historical row and paying for the duplicates.
+      `select ${MEMBER_COLUMNS}
+       from users u
+       left join lateral (
+         select status, plan, "currentPeriodEnd", "updatedAt"
+         from subscriptions
+         where "userId" = u.id
+         order by "updatedAt" desc nulls last
+         limit 1
+       ) s on true
+       order by u."createdAt" desc nulls last
+       limit 5000`,
+    )
     .then((members) => {
       memberCache = { members, loadedAt: Date.now() };
       return members;
