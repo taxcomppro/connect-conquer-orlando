@@ -70,7 +70,7 @@ type Card = {
 };
 
 function PipelinePage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [leads, setLeads] = useState<LeadCard[]>([]);
   const [members, setMembers] = useState<MemberRow[]>(() => cachedMembers() ?? []);
   const [memberError, setMemberError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
