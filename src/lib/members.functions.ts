@@ -15,10 +15,29 @@ export type MemberRow = {
 /** Staff-only: the full member list from the main site, read-only. */
 export const listMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async (): Promise<{ members: MemberRow[]; error: string | null }> => {
+  .handler(async ({ context }): Promise<{ members: MemberRow[]; error: string | null }> => {
     try {
       const { listAllMembers } = await import("@/lib/site-db.server");
       const members = await listAllMembers();
+      const rows = members.map((m) => ({
+        user_id: m.userId,
+        email: m.email,
+        name: m.name,
+        phone: m.phone ?? null,
+        tier: m.tier,
+        subscription_status: m.subscriptionStatus,
+        subscription_plan: m.subscriptionPlan,
+        current_period_end: m.currentPeriodEnd,
+        source_created_at: m.createdAt,
+        synced_at: new Date().toISOString(),
+      }));
+      if (rows.length > 0) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error: cacheError } = await supabaseAdmin
+          .from("site_members_cache")
+          .upsert(rows, { onConflict: "user_id" });
+        if (cacheError) console.error("[listMembers] failed to refresh local cache:", cacheError);
+      }
       return {
         members: members.map((m) => ({
           userId: m.userId,
@@ -42,10 +61,28 @@ export const listMembers = createServerFn({ method: "POST" })
           : typeof error === "string"
             ? error
             : JSON.stringify(error);
-      return {
-        members: [],
-        error: `Couldn't reach the membership records. ${detail}`,
-      };
+      const { data: cached, error: cacheError } = await context.supabase
+        .from("site_members_cache")
+        .select(
+          "user_id,email,name,phone,tier,subscription_status,subscription_plan,current_period_end",
+        )
+        .order("source_created_at", { ascending: false });
+      if (!cacheError && cached && cached.length > 0) {
+        return {
+          members: cached.map((m) => ({
+            userId: m.user_id,
+            email: m.email,
+            name: m.name,
+            phone: m.phone,
+            tier: m.tier,
+            subscriptionStatus: m.subscription_status,
+            subscriptionPlan: m.subscription_plan,
+            currentPeriodEnd: m.current_period_end,
+          })),
+          error: null,
+        };
+      }
+      return { members: [], error: `Couldn't reach the membership records. ${detail}` };
     }
   });
 
