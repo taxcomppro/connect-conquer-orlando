@@ -123,6 +123,16 @@ const MEMBER_COLUMNS = `
   s."currentPeriodEnd", s."updatedAt" as "subscriptionUpdatedAt"
 `;
 
+// The Pipeline only needs the canonical member record. Pulling each person's
+// subscription history made this read exceed the request deadline on the live
+// database. Keep the same SiteMember shape so callers do not need a second path.
+const MEMBER_LIST_COLUMNS = `
+  u.id as "userId", u.email, u.name, u.phone, u.tier, u."stripeCustomerId",
+  u."createdAt" as "createdAt",
+  null::text as "subscriptionStatus", null::text as "subscriptionPlan",
+  null::timestamptz as "currentPeriodEnd", null::timestamptz as "subscriptionUpdatedAt"
+`;
+
 /**
  * Looks up a TaxCompPro member by email. Read-only; never writes.
  * Use this for one-off lookups (e.g. showing membership status on a
@@ -175,17 +185,10 @@ export async function listAllMembers(): Promise<SiteMember[]> {
   if (!memberRequest) {
     memberRequest = queryWithRetry<SiteMember>(
       "listAllMembers",
-      // One row per member: pick only that member's latest subscription instead
-      // of joining every historical row and paying for the duplicates.
-      `select ${MEMBER_COLUMNS}
+      // Tier and contact details live on users. Subscription history is not
+      // needed to place a card and was the source of the live timeout.
+      `select ${MEMBER_LIST_COLUMNS}
        from users u
-       left join lateral (
-         select status, plan, "currentPeriodEnd", "updatedAt"
-         from subscriptions
-         where "userId" = u.id
-         order by "updatedAt" desc nulls last
-         limit 1
-       ) s on true
        order by u."createdAt" desc nulls last
        limit 5000`,
     )

@@ -10,7 +10,7 @@
  */
 
 export async function runSiteConversionSync(): Promise<Response> {
-  const { findRecentUpgrades } = await import("@/lib/site-db.server");
+  const { findRecentUpgrades, listAllMembers } = await import("@/lib/site-db.server");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   // Look back further than the schedule interval so a slow or delayed
@@ -28,6 +28,32 @@ export async function runSiteConversionSync(): Promise<Response> {
       },
       { status: 502 },
     );
+  }
+
+  // Keep a local read snapshot for the CRM. The Pipeline reads this whenever
+  // the main-site database is slow, so member cards remain available.
+  try {
+    const allMembers = await listAllMembers();
+    if (allMembers.length > 0) {
+      const { error: cacheError } = await supabaseAdmin.from("site_members_cache").upsert(
+        allMembers.map((member) => ({
+          user_id: member.userId,
+          email: member.email,
+          name: member.name,
+          phone: member.phone,
+          tier: member.tier,
+          subscription_status: member.subscriptionStatus,
+          subscription_plan: member.subscriptionPlan,
+          current_period_end: member.currentPeriodEnd,
+          source_created_at: member.createdAt,
+          synced_at: new Date().toISOString(),
+        })),
+        { onConflict: "user_id" },
+      );
+      if (cacheError) console.error("[site-sync] failed to refresh member cache:", cacheError);
+    }
+  } catch (error) {
+    console.error("[site-sync] member cache refresh failed:", error);
   }
 
   let updated = 0;

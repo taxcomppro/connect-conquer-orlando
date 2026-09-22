@@ -8,6 +8,13 @@
       "when": 1790025378145,
       "tag": "0000_create_email_events",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790100039921,
+      "tag": "0001_cache_site_members",
+      "breakpoints": true
     }
   ]
 }
