@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { FieldShell, PageTitle, Panel, SectionLabel } from "@/components/FieldShell";
 import { AmbassadorFields, EMPTY_AMBASSADOR } from "@/components/AmbassadorFields";
 import { Button } from "@/components/ui/button";
+import { MessageComposer } from "@/components/MessageComposer";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -42,6 +43,15 @@ function AmbassadorsPage() {
   const [values, setValues] = useState(EMPTY_AMBASSADOR);
   const [saving, setSaving] = useState(false);
   const [origin, setOrigin] = useState("https://fieldhub.taxcomppro.com");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [composing, setComposing] = useState(false);
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -149,24 +159,83 @@ function AmbassadorsPage() {
         ))}
       </div>
 
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSelected(new Set(visible.map((r) => r.id)))}
+          disabled={visible.length === 0}
+        >
+          Select all ({visible.length})
+        </Button>
+        {selected.size > 0 ? (
+          <>
+            <Button variant="outline" size="sm" onClick={() => setSelected(new Set())}>
+              Clear
+            </Button>
+            <Button size="sm" onClick={() => setComposing(true)}>
+              Message selected ({selected.size})
+            </Button>
+          </>
+        ) : null}
+      </div>
+
+      {composing && selected.size > 0 ? (
+        <MessageComposer
+          contacts={rows
+            .filter((r) => selected.has(r.id))
+            .map((r) => ({
+              id: r.id,
+              name: r.full_name,
+              email: r.email,
+              leadId: null,
+              phone: r.phone,
+              company: r.business,
+            }))}
+          onClose={() => setComposing(false)}
+        />
+      ) : null}
+
       <div className="mt-5 overflow-x-auto pb-2">
         <div className="grid min-w-[1000px] grid-cols-5 gap-3">
           {AMBASSADOR_STAGES.map((stage) => {
             const cards = visible.filter((r) => r.stage === stage.key);
+            const allOn = cards.length > 0 && cards.every((r) => selected.has(r.id));
             return (
               <div key={stage.key} className="rounded-xl border border-border bg-panel/50 p-2">
                 <div className="flex items-center justify-between px-1 pb-2 eyebrow">
-                  <span>{stage.label}</span>
+                  <label className="flex items-center gap-1.5">
+                    <input
+                      type="checkbox"
+                      checked={allOn}
+                      disabled={cards.length === 0}
+                      onChange={() =>
+                        setSelected((prev) => {
+                          const next = new Set(prev);
+                          cards.forEach((r) => (allOn ? next.delete(r.id) : next.add(r.id)));
+                          return next;
+                        })
+                      }
+                    />
+                    {stage.label}
+                  </label>
                   <span>{cards.length}</span>
                 </div>
                 <div className="space-y-2">
                   {loading ? <p className="px-1 text-xs text-muted-foreground">Loading…</p> : null}
                   {cards.map((r) => (
+                    <div key={r.id} className="relative">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${r.full_name}`}
+                        className="absolute right-2 top-2 z-10"
+                        checked={selected.has(r.id)}
+                        onChange={() => toggle(r.id)}
+                      />
                     <Link
-                      key={r.id}
                       to="/ambassadors/$id"
                       params={{ id: r.id }}
-                      className="block rounded-lg border border-border bg-panel p-3 transition-colors hover:border-signal-line"
+                      className="block rounded-lg border border-border bg-panel p-3 pr-8 transition-colors hover:border-signal-line"
                     >
                       <div className="truncate text-sm font-medium">{r.full_name}</div>
                       <div className="truncate text-xs text-muted-foreground">
@@ -187,6 +256,7 @@ function AmbassadorsPage() {
                         </div>
                       ) : null}
                     </Link>
+                    </div>
                   ))}
                 </div>
               </div>

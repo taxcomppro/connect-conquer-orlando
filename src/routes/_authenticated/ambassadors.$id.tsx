@@ -9,6 +9,7 @@ import { AmbassadorFields, EMPTY_AMBASSADOR } from "@/components/AmbassadorField
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageComposer } from "@/components/MessageComposer";
 import { AMBASSADOR_STAGES, STAGE_LABEL, ambassadorInputSchema, type AmbassadorStage } from "@/lib/ambassadors";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -36,6 +37,7 @@ function AmbassadorPage() {
   const [editing, setEditing] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [note, setNote] = useState("");
+  const [composing, setComposing] = useState(false);
 
   const load = useCallback(async () => {
     const [a, n] = await Promise.all([
@@ -111,6 +113,14 @@ function AmbassadorPage() {
   return (
     <FieldShell back={{ to: "/ambassadors", label: "Ambassadors" }} eyebrowRight={STAGE_LABEL[row.stage as AmbassadorStage]}>
       <PageTitle title={row.full_name} lede={[row.business, [row.city, row.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ")} />
+      {composing ? (
+        <MessageComposer
+          contacts={[{ id: row.id, name: row.full_name, email: row.email, leadId: null, phone: row.phone, company: row.business }]}
+          onClose={() => setComposing(false)}
+        />
+      ) : (
+        <Button className="mt-4" onClick={() => setComposing(true)}>Text or email {row.full_name.split(" ")[0]}</Button>
+      )}
 
       <SectionLabel>Stage</SectionLabel>
       <div className="flex flex-wrap gap-2">
