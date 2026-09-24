@@ -11,9 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageComposer } from "@/components/MessageComposer";
 import { AMBASSADOR_STAGES, STAGE_LABEL, ambassadorInputSchema, type AmbassadorStage } from "@/lib/ambassadors";
+import { ensureAmbassadorLink, dubLinkStats } from "@/lib/dub.functions";
 import type { Database } from "@/integrations/supabase/types";
 
-type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"];
+type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"] & { dub_link_key?: string | null };
+type DubStat = { key: string; shortLink: string; clicks: number; leads: number; sales: number };
 type Note = Database["public"]["Tables"]["ambassador_notes"]["Row"];
 
 export const Route = createFileRoute("/_authenticated/ambassadors/$id")({
