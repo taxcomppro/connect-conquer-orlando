@@ -11,11 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageComposer } from "@/components/MessageComposer";
 import { AMBASSADOR_STAGES, STAGE_LABEL, ambassadorInputSchema, type AmbassadorStage } from "@/lib/ambassadors";
-import { ensureAmbassadorLink, dubLinkStats } from "@/lib/dub.functions";
 import type { Database } from "@/integrations/supabase/types";
 
-type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"] & { dub_link_key?: string | null };
-type DubStat = { key: string; shortLink: string; clicks: number; leads: number; sales: number };
+type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"];
 type Note = Database["public"]["Tables"]["ambassador_notes"]["Row"];
 
 export const Route = createFileRoute("/_authenticated/ambassadors/$id")({
@@ -40,9 +38,6 @@ function AmbassadorPage() {
   const [newTag, setNewTag] = useState("");
   const [note, setNote] = useState("");
   const [composing, setComposing] = useState(false);
-  const [dubUrl, setDubUrl] = useState("https://fieldhub.taxcomppro.com/ambassador-apply");
-  const [dubBusy, setDubBusy] = useState(false);
-  const [dubStat, setDubStat] = useState<DubStat | null>(null);
 
   const load = useCallback(async () => {
     const [a, n] = await Promise.all([
@@ -99,38 +94,6 @@ function AmbassadorPage() {
     if (error) { toast.error("Couldn't add note."); return; }
     setNote("");
     void load();
-  }
-
-  const refreshDubStats = useCallback(async (key: string) => {
-    try {
-      const result = await dubLinkStats({ data: { keys: [key] } });
-      setDubStat(result.links[0] ?? null);
-    } catch {
-      /* Dub not connected — leave stats empty */
-    }
-  }, []);
-
-  useEffect(() => {
-    if (row?.dub_link_key) void refreshDubStats(row.dub_link_key);
-  }, [row?.dub_link_key, refreshDubStats]);
-
-  async function createDubLink() {
-    if (!row) return;
-    const suggested =
-      row.dub_link_key ??
-      `amb-${row.full_name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`.slice(0, 60);
-    setDubBusy(true);
-    try {
-      const result = await ensureAmbassadorLink({
-        data: { ambassadorId: row.id, key: suggested, url: dubUrl },
-      });
-      toast.success(result.created ? `Created ${result.shortLink}` : `Linked existing ${result.shortLink}`);
-      void load();
-      void refreshDubStats(result.key);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't reach Dub.");
-    }
-    setDubBusy(false);
   }
 
   if (!row) {
@@ -209,45 +172,6 @@ function AmbassadorPage() {
               <Button size="sm" variant="outline" onClick={() => setEditing(true)}>Edit details</Button>
             </div>
           </div>
-        )}
-      </Panel>
-
-      <SectionLabel>Dub tracking link</SectionLabel>
-      <Panel className="space-y-3">
-        {row.dub_link_key ? (
-          <>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-sm text-signal">{row.dub_link_key}</span>
-              {dubStat ? (
-                <span className="text-sm text-muted-foreground">
-                  {dubStat.clicks} clicks · {dubStat.leads} leads · {dubStat.sales} sales
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground">No Dub stats yet</span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => void createDubLink()} disabled={dubBusy}>
-                {dubBusy ? "Working…" : "Re-verify link"}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => row.dub_link_key && void refreshDubStats(row.dub_link_key)}>
-                Refresh stats
-              </Button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Create a personal Dub link for this ambassador to track the clicks, leads and sales they drive.
-            </p>
-            <div className="space-y-2">
-              <span className="eyebrow">Destination URL</span>
-              <Input value={dubUrl} onChange={(e) => setDubUrl(e.target.value)} />
-            </div>
-            <Button onClick={() => void createDubLink()} disabled={dubBusy || !dubUrl.trim()}>
-              {dubBusy ? "Working…" : "Create tracking link"}
-            </Button>
-          </>
         )}
       </Panel>
 
