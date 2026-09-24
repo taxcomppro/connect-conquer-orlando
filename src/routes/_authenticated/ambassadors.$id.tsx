@@ -73,7 +73,7 @@ function AmbassadorPage() {
 
   async function saveDetails() {
     const parsed = ambassadorInputSchema.safeParse(values);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Check the form.");
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form."); return; }
     await update({ ...parsed.data, email: parsed.data.email.toLowerCase() });
     setEditing(false);
     toast.success("Saved.");
@@ -89,7 +89,7 @@ function AmbassadorPage() {
       author_id: user.id,
       author_name: profile?.display_name ?? user.email ?? null,
     });
-    if (error) return toast.error("Couldn't add note.");
+    if (error) { toast.error("Couldn't add note."); return; }
     setNote("");
     void load();
   }
