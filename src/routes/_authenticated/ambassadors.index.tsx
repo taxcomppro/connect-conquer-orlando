@@ -17,9 +17,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AMBASSADOR_STAGES, ambassadorInputSchema } from "@/lib/ambassadors";
+import { dubLinkStats } from "@/lib/dub.functions";
 import type { Database } from "@/integrations/supabase/types";
 
-type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"];
+type Ambassador = Database["public"]["Tables"]["ambassadors"]["Row"] & { dub_link_key?: string | null };
+type DubStat = { key: string; clicks: number; leads: number; sales: number };
 
 export const Route = createFileRoute("/_authenticated/ambassadors/")({
   head: () => ({
@@ -45,6 +47,7 @@ function AmbassadorsPage() {
   const [origin, setOrigin] = useState("https://fieldhub.taxcomppro.com");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [composing, setComposing] = useState(false);
+  const [dubStats, setDubStats] = useState<Record<string, DubStat>>({});
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
