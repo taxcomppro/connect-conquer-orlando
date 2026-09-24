@@ -40,6 +40,9 @@ function AmbassadorPage() {
   const [newTag, setNewTag] = useState("");
   const [note, setNote] = useState("");
   const [composing, setComposing] = useState(false);
+  const [dubUrl, setDubUrl] = useState("https://fieldhub.taxcomppro.com/ambassador-apply");
+  const [dubBusy, setDubBusy] = useState(false);
+  const [dubStat, setDubStat] = useState<DubStat | null>(null);
 
   const load = useCallback(async () => {
     const [a, n] = await Promise.all([
@@ -96,6 +99,38 @@ function AmbassadorPage() {
     if (error) { toast.error("Couldn't add note."); return; }
     setNote("");
     void load();
+  }
+
+  const refreshDubStats = useCallback(async (key: string) => {
+    try {
+      const result = await dubLinkStats({ data: { keys: [key] } });
+      setDubStat(result.links[0] ?? null);
+    } catch {
+      /* Dub not connected — leave stats empty */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (row?.dub_link_key) void refreshDubStats(row.dub_link_key);
+  }, [row?.dub_link_key, refreshDubStats]);
+
+  async function createDubLink() {
+    if (!row) return;
+    const suggested =
+      row.dub_link_key ??
+      `amb-${row.full_name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`.slice(0, 60);
+    setDubBusy(true);
+    try {
+      const result = await ensureAmbassadorLink({
+        data: { ambassadorId: row.id, key: suggested, url: dubUrl },
+      });
+      toast.success(result.created ? `Created ${result.shortLink}` : `Linked existing ${result.shortLink}`);
+      void load();
+      void refreshDubStats(result.key);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't reach Dub.");
+    }
+    setDubBusy(false);
   }
 
   if (!row) {
