@@ -212,6 +212,45 @@ function AmbassadorPage() {
         )}
       </Panel>
 
+      <SectionLabel>Dub tracking link</SectionLabel>
+      <Panel className="space-y-3">
+        {row.dub_link_key ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-mono text-sm text-signal">{row.dub_link_key}</span>
+              {dubStat ? (
+                <span className="text-sm text-muted-foreground">
+                  {dubStat.clicks} clicks · {dubStat.leads} leads · {dubStat.sales} sales
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground">No Dub stats yet</span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => void createDubLink()} disabled={dubBusy}>
+                {dubBusy ? "Working…" : "Re-verify link"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => row.dub_link_key && void refreshDubStats(row.dub_link_key)}>
+                Refresh stats
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Create a personal Dub link for this ambassador to track the clicks, leads and sales they drive.
+            </p>
+            <div className="space-y-2">
+              <span className="eyebrow">Destination URL</span>
+              <Input value={dubUrl} onChange={(e) => setDubUrl(e.target.value)} />
+            </div>
+            <Button onClick={() => void createDubLink()} disabled={dubBusy || !dubUrl.trim()}>
+              {dubBusy ? "Working…" : "Create tracking link"}
+            </Button>
+          </>
+        )}
+      </Panel>
+
       <SectionLabel>Notes</SectionLabel>
       <Panel>
         <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note…" maxLength={2000} />
