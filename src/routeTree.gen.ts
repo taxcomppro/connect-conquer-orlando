@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AmbassadorApplyRouteImport } from './routes/ambassador-apply'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CardNotFoundRouteImport } from './routes/card-not-found'
 import { Route as HubRouteImport } from './routes/hub'
@@ -30,6 +31,8 @@ import { Route as CTokenRouteImport } from './routes/c.$token'
 import { Route as JoinSessionIdRouteImport } from './routes/join.$sessionId'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as AuthenticatedActivateSessionIdRouteImport } from './routes/_authenticated/activate.$sessionId'
+import { Route as AuthenticatedAmbassadorsIndexRouteImport } from './routes/_authenticated/ambassadors.index'
+import { Route as AuthenticatedAmbassadorsIdRouteImport } from './routes/_authenticated/ambassadors.$id'
 import { Route as AuthenticatedContactEmailRouteImport } from './routes/_authenticated/contact.$email'
 import { Route as AuthenticatedLeadAttendeeIdRouteImport } from './routes/_authenticated/lead.$attendeeId'
 import { Route as AuthenticatedSegmentSegmentRouteImport } from './routes/_authenticated/segment.$segment'
@@ -38,6 +41,7 @@ import { Route as ApiInternalAutomationLeadSignupNudgeRouteImport } from './rout
 import { Route as ApiInternalAutomationUpgradeFollowupRouteImport } from './routes/api/internal/automation-upgrade-followup'
 import { Route as ApiInternalAutomationWelcomeOnUpgradeRouteImport } from './routes/api/internal/automation-welcome-on-upgrade'
 import { Route as ApiInternalSyncSiteConversionsRouteImport } from './routes/api/internal/sync-site-conversions'
+import { Route as ApiPublicAmbassadorSignupRouteImport } from './routes/api/public/ambassador-signup'
 import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 import { Route as ApiPublicSyncSiteConversionsRouteImport } from './routes/api/public/sync-site-conversions'
 import { Route as ApiPublicWebhooksMembershipRouteImport } from './routes/api/public/webhooks/membership'
@@ -53,6 +57,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AmbassadorApplyRoute = AmbassadorApplyRouteImport.update({
+  id: '/ambassador-apply',
+  path: '/ambassador-apply',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -153,6 +162,18 @@ const AuthenticatedActivateSessionIdRoute =
     path: '/activate/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAmbassadorsIndexRoute =
+  AuthenticatedAmbassadorsIndexRouteImport.update({
+    id: '/ambassadors/',
+    path: '/ambassadors/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAmbassadorsIdRoute =
+  AuthenticatedAmbassadorsIdRouteImport.update({
+    id: '/ambassadors/$id',
+    path: '/ambassadors/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContactEmailRoute =
   AuthenticatedContactEmailRouteImport.update({
     id: '/contact/$email',
@@ -201,6 +222,12 @@ const ApiInternalSyncSiteConversionsRoute =
     path: '/api/internal/sync-site-conversions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAmbassadorSignupRoute =
+  ApiPublicAmbassadorSignupRouteImport.update({
+    id: '/api/public/ambassador-signup',
+    path: '/api/public/ambassador-signup',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEnvCheckRoute = ApiPublicEnvCheckRouteImport.update({
   id: '/api/public/env-check',
   path: '/api/public/env-check',
@@ -244,6 +271,7 @@ const ApiPublicWebhooksTwilioInboundRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ambassador-apply': typeof AmbassadorApplyRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/hub': typeof HubRoute
@@ -263,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/ambassadors/$id': typeof AuthenticatedAmbassadorsIdRoute
   '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
@@ -271,8 +300,10 @@ export interface FileRoutesByFullPath {
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
+  '/api/public/ambassador-signup': typeof ApiPublicAmbassadorSignupRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
+  '/ambassadors/': typeof AuthenticatedAmbassadorsIndexRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
@@ -281,6 +312,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ambassador-apply': typeof AmbassadorApplyRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/hub': typeof HubRoute
@@ -300,6 +332,7 @@ export interface FileRoutesByTo {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/ambassadors/$id': typeof AuthenticatedAmbassadorsIdRoute
   '/contact/$email': typeof AuthenticatedContactEmailRoute
   '/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
@@ -308,8 +341,10 @@ export interface FileRoutesByTo {
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
+  '/api/public/ambassador-signup': typeof ApiPublicAmbassadorSignupRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
+  '/ambassadors': typeof AuthenticatedAmbassadorsIndexRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
@@ -320,6 +355,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/ambassador-apply': typeof AmbassadorApplyRoute
   '/auth': typeof AuthRoute
   '/card-not-found': typeof CardNotFoundRoute
   '/hub': typeof HubRoute
@@ -339,6 +375,7 @@ export interface FileRoutesById {
   '/join/$sessionId': typeof JoinSessionIdRoute
   '/p/$slug': typeof PSlugRoute
   '/_authenticated/activate/$sessionId': typeof AuthenticatedActivateSessionIdRoute
+  '/_authenticated/ambassadors/$id': typeof AuthenticatedAmbassadorsIdRoute
   '/_authenticated/contact/$email': typeof AuthenticatedContactEmailRoute
   '/_authenticated/lead/$attendeeId': typeof AuthenticatedLeadAttendeeIdRoute
   '/_authenticated/segment/$segment': typeof AuthenticatedSegmentSegmentRoute
@@ -347,8 +384,10 @@ export interface FileRoutesById {
   '/api/internal/automation-upgrade-followup': typeof ApiInternalAutomationUpgradeFollowupRoute
   '/api/internal/automation-welcome-on-upgrade': typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   '/api/internal/sync-site-conversions': typeof ApiInternalSyncSiteConversionsRoute
+  '/api/public/ambassador-signup': typeof ApiPublicAmbassadorSignupRoute
   '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/api/public/sync-site-conversions': typeof ApiPublicSyncSiteConversionsRoute
+  '/_authenticated/ambassadors/': typeof AuthenticatedAmbassadorsIndexRoute
   '/api/public/webhooks/membership': typeof ApiPublicWebhooksMembershipRoute
   '/api/public/webhooks/resend-events': typeof ApiPublicWebhooksResendEventsRoute
   '/api/public/webhooks/resend-inbound': typeof ApiPublicWebhooksResendInboundRoute
@@ -359,6 +398,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ambassador-apply'
     | '/auth'
     | '/card-not-found'
     | '/hub'
@@ -378,6 +418,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/activate/$sessionId'
+    | '/ambassadors/$id'
     | '/contact/$email'
     | '/lead/$attendeeId'
     | '/segment/$segment'
@@ -386,8 +427,10 @@ export interface FileRouteTypes {
     | '/api/internal/automation-upgrade-followup'
     | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
+    | '/api/public/ambassador-signup'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
+    | '/ambassadors/'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
@@ -396,6 +439,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ambassador-apply'
     | '/auth'
     | '/card-not-found'
     | '/hub'
@@ -415,6 +459,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/activate/$sessionId'
+    | '/ambassadors/$id'
     | '/contact/$email'
     | '/lead/$attendeeId'
     | '/segment/$segment'
@@ -423,8 +468,10 @@ export interface FileRouteTypes {
     | '/api/internal/automation-upgrade-followup'
     | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
+    | '/api/public/ambassador-signup'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
+    | '/ambassadors'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
@@ -434,6 +481,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/ambassador-apply'
     | '/auth'
     | '/card-not-found'
     | '/hub'
@@ -453,6 +501,7 @@ export interface FileRouteTypes {
     | '/join/$sessionId'
     | '/p/$slug'
     | '/_authenticated/activate/$sessionId'
+    | '/_authenticated/ambassadors/$id'
     | '/_authenticated/contact/$email'
     | '/_authenticated/lead/$attendeeId'
     | '/_authenticated/segment/$segment'
@@ -461,8 +510,10 @@ export interface FileRouteTypes {
     | '/api/internal/automation-upgrade-followup'
     | '/api/internal/automation-welcome-on-upgrade'
     | '/api/internal/sync-site-conversions'
+    | '/api/public/ambassador-signup'
     | '/api/public/env-check'
     | '/api/public/sync-site-conversions'
+    | '/_authenticated/ambassadors/'
     | '/api/public/webhooks/membership'
     | '/api/public/webhooks/resend-events'
     | '/api/public/webhooks/resend-inbound'
@@ -473,6 +524,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AmbassadorApplyRoute: typeof AmbassadorApplyRoute
   AuthRoute: typeof AuthRoute
   CardNotFoundRoute: typeof CardNotFoundRoute
   HubRoute: typeof HubRoute
@@ -483,6 +535,7 @@ export interface RootRouteChildren {
   ApiInternalAutomationUpgradeFollowupRoute: typeof ApiInternalAutomationUpgradeFollowupRoute
   ApiInternalAutomationWelcomeOnUpgradeRoute: typeof ApiInternalAutomationWelcomeOnUpgradeRoute
   ApiInternalSyncSiteConversionsRoute: typeof ApiInternalSyncSiteConversionsRoute
+  ApiPublicAmbassadorSignupRoute: typeof ApiPublicAmbassadorSignupRoute
   ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
   ApiPublicSyncSiteConversionsRoute: typeof ApiPublicSyncSiteConversionsRoute
   ApiPublicWebhooksMembershipRoute: typeof ApiPublicWebhooksMembershipRoute
@@ -506,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ambassador-apply': {
+      id: '/ambassador-apply'
+      path: '/ambassador-apply'
+      fullPath: '/ambassador-apply'
+      preLoaderRoute: typeof AmbassadorApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -641,6 +701,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivateSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ambassadors/': {
+      id: '/_authenticated/ambassadors/'
+      path: '/ambassadors'
+      fullPath: '/ambassadors/'
+      preLoaderRoute: typeof AuthenticatedAmbassadorsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ambassadors/$id': {
+      id: '/_authenticated/ambassadors/$id'
+      path: '/ambassadors/$id'
+      fullPath: '/ambassadors/$id'
+      preLoaderRoute: typeof AuthenticatedAmbassadorsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contact/$email': {
       id: '/_authenticated/contact/$email'
       path: '/contact/$email'
@@ -695,6 +769,13 @@ declare module '@tanstack/react-router' {
       path: '/api/internal/sync-site-conversions'
       fullPath: '/api/internal/sync-site-conversions'
       preLoaderRoute: typeof ApiInternalSyncSiteConversionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ambassador-signup': {
+      id: '/api/public/ambassador-signup'
+      path: '/api/public/ambassador-signup'
+      fullPath: '/api/public/ambassador-signup'
+      preLoaderRoute: typeof ApiPublicAmbassadorSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/env-check': {
@@ -763,10 +844,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedActivateSessionIdRoute: typeof AuthenticatedActivateSessionIdRoute
+  AuthenticatedAmbassadorsIdRoute: typeof AuthenticatedAmbassadorsIdRoute
   AuthenticatedContactEmailRoute: typeof AuthenticatedContactEmailRoute
   AuthenticatedLeadAttendeeIdRoute: typeof AuthenticatedLeadAttendeeIdRoute
   AuthenticatedSegmentSegmentRoute: typeof AuthenticatedSegmentSegmentRoute
   AuthenticatedSignupSessionIdRoute: typeof AuthenticatedSignupSessionIdRoute
+  AuthenticatedAmbassadorsIndexRoute: typeof AuthenticatedAmbassadorsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -783,10 +866,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedActivateSessionIdRoute: AuthenticatedActivateSessionIdRoute,
+  AuthenticatedAmbassadorsIdRoute: AuthenticatedAmbassadorsIdRoute,
   AuthenticatedContactEmailRoute: AuthenticatedContactEmailRoute,
   AuthenticatedLeadAttendeeIdRoute: AuthenticatedLeadAttendeeIdRoute,
   AuthenticatedSegmentSegmentRoute: AuthenticatedSegmentSegmentRoute,
   AuthenticatedSignupSessionIdRoute: AuthenticatedSignupSessionIdRoute,
+  AuthenticatedAmbassadorsIndexRoute: AuthenticatedAmbassadorsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -795,6 +880,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AmbassadorApplyRoute: AmbassadorApplyRoute,
   AuthRoute: AuthRoute,
   CardNotFoundRoute: CardNotFoundRoute,
   HubRoute: HubRoute,
@@ -808,6 +894,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiInternalAutomationWelcomeOnUpgradeRoute:
     ApiInternalAutomationWelcomeOnUpgradeRoute,
   ApiInternalSyncSiteConversionsRoute: ApiInternalSyncSiteConversionsRoute,
+  ApiPublicAmbassadorSignupRoute: ApiPublicAmbassadorSignupRoute,
   ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
   ApiPublicSyncSiteConversionsRoute: ApiPublicSyncSiteConversionsRoute,
   ApiPublicWebhooksMembershipRoute: ApiPublicWebhooksMembershipRoute,

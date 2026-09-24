@@ -15,6 +15,13 @@
       "when": 1790100039921,
       "tag": "0001_cache_site_members",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790215359700,
+      "tag": "0002_create_ambassadors",
+      "breakpoints": true
     }
   ]
 }

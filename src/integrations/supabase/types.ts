@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      ambassador_notes: {
+        Row: {
+          ambassador_id: string
+          author_id: string | null
+          author_name: string | null
+          body: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          ambassador_id: string
+          author_id?: string | null
+          author_name?: string | null
+          body: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          ambassador_id?: string
+          author_id?: string | null
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambassador_notes_ambassador_id_fkey"
+            columns: ["ambassador_id"]
+            isOneToOne: false
+            referencedRelation: "ambassadors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ambassadors: {
+        Row: {
+          added_by: string | null
+          business: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          facebook: string | null
+          full_name: string
+          id: string
+          instagram: string | null
+          linkedin: string | null
+          phone: string | null
+          source: string
+          stage: string
+          state: string | null
+          tags: string[]
+          tiktok: string | null
+          updated_at: string
+        }
+        Insert: {
+          added_by?: string | null
+          business?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          facebook?: string | null
+          full_name: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          source?: string
+          stage?: string
+          state?: string | null
+          tags?: string[]
+          tiktok?: string | null
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string | null
+          business?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          facebook?: string | null
+          full_name?: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          source?: string
+          stage?: string
+          state?: string | null
+          tags?: string[]
+          tiktok?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       approved_staff_emails: {
         Row: {
           commission_eligible: boolean

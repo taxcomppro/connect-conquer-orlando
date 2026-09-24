@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  Award,
   BarChart3,
   Filter,
   LayoutDashboard,
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { label: "Funnel", to: "/funnel", icon: Filter },
   { label: "Inbox", to: "/inbox", icon: Inbox },
   { label: "Leads", to: "/leads", icon: Users },
+  { label: "Ambassadors", to: "/ambassadors", icon: Award },
   { label: "Broadcast", to: "/broadcast", icon: Megaphone },
   { label: "Automations", to: "/automations", icon: MessagesSquare },
   { label: "Admin", to: "/admin", icon: Settings },
