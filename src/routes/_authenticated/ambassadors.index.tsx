@@ -67,6 +67,15 @@ function AmbassadorsPage() {
     if (error) toast.error("Couldn't load ambassadors.");
     setRows(data ?? []);
     setLoading(false);
+    const keys = (data ?? []).map((r) => r.dub_link_key).filter((k): k is string => Boolean(k));
+    if (keys.length) {
+      try {
+        const result = await dubLinkStats({ data: { keys } });
+        setDubStats(Object.fromEntries(result.links.map((l) => [l.key, l])));
+      } catch {
+        /* Dub not connected — skip stats */
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -247,6 +256,14 @@ function AmbassadorsPage() {
                       {r.city || r.state ? (
                         <div className="truncate text-xs text-muted-foreground">
                           {[r.city, r.state].filter(Boolean).join(", ")}
+                        </div>
+                      ) : null}
+                      {r.dub_link_key ? (
+                        <div className="mt-1 font-mono text-[10px] text-signal">
+                          {r.dub_link_key}
+                          {dubStats[r.dub_link_key]
+                            ? ` · ${dubStats[r.dub_link_key]!.clicks} clicks · ${dubStats[r.dub_link_key]!.leads} leads · ${dubStats[r.dub_link_key]!.sales} sales`
+                            : ""}
                         </div>
                       ) : null}
                       {r.tags.length ? (
