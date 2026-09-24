@@ -67,7 +67,7 @@ function AmbassadorsPage() {
     if (error) toast.error("Couldn't load ambassadors.");
     setRows(data ?? []);
     setLoading(false);
-    const keys = (data ?? []).map((r) => r.dub_link_key).filter((k): k is string => Boolean(k));
+    const keys = ((data ?? []) as Ambassador[]).map((r) => r.dub_link_key).filter((k): k is string => Boolean(k));
     if (keys.length) {
       try {
         const result = await dubLinkStats({ data: { keys } });

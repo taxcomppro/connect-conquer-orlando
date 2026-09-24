@@ -72,7 +72,7 @@ function AmbassadorPage() {
     if (user) void load();
   }, [user, load]);
 
-  async function update(patch: Partial<Ambassador>) {
+  async function update(patch: Database["public"]["Tables"]["ambassadors"]["Update"]) {
     const { error } = await supabase.from("ambassadors").update(patch).eq("id", id);
     if (error) toast.error("Couldn't save.");
     else void load();
