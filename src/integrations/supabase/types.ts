@@ -55,6 +55,7 @@ export type Database = {
           business: string | null
           city: string | null
           created_at: string
+          dub_link_key: string | null
           email: string | null
           facebook: string | null
           full_name: string
@@ -74,6 +75,7 @@ export type Database = {
           business?: string | null
           city?: string | null
           created_at?: string
+          dub_link_key?: string | null
           email?: string | null
           facebook?: string | null
           full_name: string
@@ -93,6 +95,7 @@ export type Database = {
           business?: string | null
           city?: string | null
           created_at?: string
+          dub_link_key?: string | null
           email?: string | null
           facebook?: string | null
           full_name?: string
