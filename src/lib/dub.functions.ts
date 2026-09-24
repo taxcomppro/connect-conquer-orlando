@@ -76,40 +76,6 @@ export const ensureSellerLink = createServerFn({ method: "POST" })
     return { created, shortLink: link.shortLink, key: link.key };
   });
 
-/** Creates a personal tracking link for one brand ambassador. */
-export const ensureAmbassadorLink = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { ambassadorId: string; key: string; url: string; workspaceId?: string | undefined; groupId?: string | undefined }) => {
-    const key = input.key.trim().toLowerCase();
-    if (!/^[a-z0-9-_/]{2,60}$/.test(key)) throw new Error("Use letters, numbers and dashes only.");
-    if (!/^https?:\/\//.test(input.url.trim())) throw new Error("Destination must be a full URL.");
-    return {
-      ambassadorId: input.ambassadorId,
-      key,
-      url: input.url.trim(),
-      workspaceId: input.workspaceId?.trim() || undefined,
-      groupId: input.groupId?.trim() || undefined,
-    };
-  })
-  .handler(async ({ data, context }) => {
-    const { ensureLink } = await import("./dub.server");
-    const { link, created } = await ensureLink({
-      key: data.key,
-      url: data.url,
-      workspaceId: data.workspaceId,
-      groupId: data.groupId,
-      comments: "TCPC brand ambassador link",
-    });
-
-    const { error } = await (context as any).supabase
-      .from("ambassadors")
-      .update({ dub_link_key: link.key })
-      .eq("id", data.ambassadorId);
-    if (error) throw new Error(error.message);
-
-    return { created, shortLink: link.shortLink, key: link.key };
-  });
-
 /** Click / lead / sale counts for the keys Field Hub cares about. */
 export const dubLinkStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
