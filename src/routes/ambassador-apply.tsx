@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Radio, Sparkles, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Radio, Sparkles, Users } from "lucide-react";
 
 import { AmbassadorFields, EMPTY_AMBASSADOR } from "@/components/AmbassadorFields";
 import { Button } from "@/components/ui/button";
@@ -80,13 +80,23 @@ function ApplyPage() {
             <Radio className="size-3.5" /> The Ambassador Experience · Pro Talks
           </div>
           <h1 className="mt-6 max-w-xl font-display text-5xl leading-[1.02] font-medium sm:text-6xl">
-            Your voice can move the{" "}
-            <span className="text-go">tax profession forward.</span>
+            Your expertise{" "}
+            <span className="text-go">belongs in the conversation.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg">
-            Join a trusted circle of professionals helping Tax Compliance Pro connect, educate,
-            and strengthen the tax community.
+            Join a trusted circle of professionals building meaningful connections,
+            sharing expertise, expanding opportunities, and growing together through
+            the Tax Compliance Pro community.
           </p>
+          <a
+            href="https://www.taxcomppro.com"
+            target="_blank"
+            rel="noreferrer"
+            className="group mt-5 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-signal transition-colors hover:text-signal-foreground"
+          >
+            See the product at www.taxcomppro.com
+            <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
 
           <div className="mt-8 grid max-w-lg gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             <div className="flex items-start gap-3 border-l-2 border-signal-line bg-signal-soft p-4">
@@ -94,7 +104,8 @@ function ApplyPage() {
               <div>
                 <p className="text-sm font-semibold">Build community</p>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  Connect tax professionals with people and resources that help them grow.
+                  Bring people together and open doors to new connections, ideas, and
+                  opportunities.
                 </p>
               </div>
             </div>

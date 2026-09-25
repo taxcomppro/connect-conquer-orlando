@@ -20,7 +20,7 @@ export const EMPTY_AMBASSADOR: Values = {
 const FIELDS: { key: keyof Values; label: string; type?: string; half?: boolean; required?: boolean }[] = [
   { key: "full_name", label: "Full name", required: true },
   { key: "email", label: "Email", type: "email", half: true, required: true },
-  { key: "phone", label: "Phone", type: "tel", half: true },
+  { key: "phone", label: "Phone", type: "tel", half: true, required: true },
   { key: "business", label: "Business name" },
   { key: "city", label: "City", half: true },
   { key: "state", label: "State", half: true },

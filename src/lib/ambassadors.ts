@@ -30,7 +30,7 @@ const opt = (max: number) =>
 export const ambassadorInputSchema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(120),
   email: z.string().trim().email("Enter a valid email").max(160),
-  phone: opt(40),
+  phone: z.string().trim().min(1, "Phone number is required").max(40),
   business: opt(160),
   city: opt(80),
   state: opt(40),
