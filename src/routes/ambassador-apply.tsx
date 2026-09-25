@@ -20,7 +20,17 @@ export const Route = createFileRoute("/ambassador-apply")({
         content: "Share your details and our team will reach out about the ambassador program.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      {
+        property: "og:image",
+        content:
+          "https://fieldhub.taxcomppro.com/__l5e/assets-v1/8f7a7cd6-d131-4af6-ae4f-90d1a20ce9d3/ambassador-og.jpg",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:image",
+        content:
+          "https://fieldhub.taxcomppro.com/__l5e/assets-v1/8f7a7cd6-d131-4af6-ae4f-90d1a20ce9d3/ambassador-og.jpg",
+      },
     ],
   }),
   component: ApplyPage,
