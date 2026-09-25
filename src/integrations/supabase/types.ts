@@ -63,6 +63,7 @@ export type Database = {
           instagram: string | null
           linkedin: string | null
           phone: string | null
+          referred_by: string | null
           source: string
           stage: string
           state: string | null
@@ -83,6 +84,7 @@ export type Database = {
           instagram?: string | null
           linkedin?: string | null
           phone?: string | null
+          referred_by?: string | null
           source?: string
           stage?: string
           state?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           instagram?: string | null
           linkedin?: string | null
           phone?: string | null
+          referred_by?: string | null
           source?: string
           stage?: string
           state?: string | null

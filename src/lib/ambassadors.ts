@@ -38,6 +38,7 @@ export const ambassadorInputSchema = z.object({
   facebook: opt(200),
   tiktok: opt(200),
   linkedin: opt(200),
+  referred_by: opt(120),
 });
 
 export type AmbassadorInput = z.input<typeof ambassadorInputSchema>;

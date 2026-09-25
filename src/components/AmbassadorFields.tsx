@@ -15,6 +15,7 @@ export const EMPTY_AMBASSADOR: Values = {
   facebook: "",
   tiktok: "",
   linkedin: "",
+  referred_by: "",
 };
 
 const FIELDS: { key: keyof Values; label: string; type?: string; half?: boolean; required?: boolean }[] = [
