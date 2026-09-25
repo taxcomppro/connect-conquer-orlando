@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Radio, Sparkles, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Radio, Sparkles, Users } from "lucide-react";
 
 import { AmbassadorFields, EMPTY_AMBASSADOR } from "@/components/AmbassadorFields";
 import { Button } from "@/components/ui/button";
