@@ -59,6 +59,7 @@ function AmbassadorPage() {
         facebook: d.facebook ?? "",
         tiktok: d.tiktok ?? "",
         linkedin: d.linkedin ?? "",
+        referred_by: d.referred_by ?? "",
       });
     }
   }, [id]);
@@ -160,6 +161,7 @@ function AmbassadorPage() {
             {([
               ["Email", row.email], ["Phone", row.phone], ["Instagram", row.instagram],
               ["Facebook", row.facebook], ["TikTok", row.tiktok], ["LinkedIn", row.linkedin],
+              ["Referred by", row.referred_by],
               ["Source", row.source === "web_form" ? "Website form" : "Added manually"],
               ["Added", new Date(row.created_at).toLocaleDateString()],
             ] as const).map(([k, v]) => (
