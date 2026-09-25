@@ -84,7 +84,23 @@ function ApplyPage() {
         </div>
       </header>
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-5 pb-16 pt-8 sm:px-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16 lg:pt-16">
+      <div className="relative mx-auto w-full max-w-6xl px-5 pt-10 sm:px-8">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
+          <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-signal-line via-border to-go-line opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_120%)]" />
+          <video
+            className="relative aspect-video w-full"
+            src="https://assets.cdn.filesafe.space/Qp3wj1F0Tcd4205IDKf3/media/6ab6cd687e654f1003ca8597.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+          />
+        </div>
+      </div>
+
+      <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-5 pt-10 pb-16 sm:px-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16">
         <section className="lg:sticky lg:top-10 lg:self-start">
           <div className="inline-flex items-center gap-2 rounded-full border border-go-line bg-go-soft px-3 py-1.5 font-mono text-[10px] uppercase text-go">
             <Radio className="size-3.5" /> The Ambassador Experience · Pro Talks
