@@ -15,6 +15,7 @@ export const EMPTY_AMBASSADOR: Values = {
   facebook: "",
   tiktok: "",
   linkedin: "",
+  referred_by: "",
 };
 
 const FIELDS: { key: keyof Values; label: string; type?: string; half?: boolean; required?: boolean }[] = [
@@ -28,6 +29,7 @@ const FIELDS: { key: keyof Values; label: string; type?: string; half?: boolean;
   { key: "facebook", label: "Facebook", half: true },
   { key: "tiktok", label: "TikTok", half: true },
   { key: "linkedin", label: "LinkedIn", half: true },
+  { key: "referred_by", label: "Referred by (who invited you?)" },
 ];
 
 export function AmbassadorFields({
